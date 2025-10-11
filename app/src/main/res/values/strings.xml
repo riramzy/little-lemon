@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Little Lemon</string>
+    <string name="welcome_screen_title">Welcome to Little Lemon</string>
+    <string name="welcome_screen_content">Fresh Mediterranean flavors delivered right to your door. Experience authentic cuisine made with love.</string>
+    <string name="welcome_screen2_title">Browse Delicious Categories</string>
+    <string name="welcome_screen2_content">Explore our carefully curated menu featuring appetizers, mains, desserts, and daily specials.</string>
+    <string name="welcome_screen3_title">Quick &amp; Easy Ordering</string>
+    <string name="welcome_screen3_content">Order in just a few taps with our streamlined mobile experience and track your delivery in real-time.</string>
+    <string name="welcome_screen4_title">Find Us Nearby</string>
+    <string name="welcome_screen4_content">Locate the nearest Little Lemon restaurant or get delivery straight to your location.</string>
+
+    <string name="hero_section_description">We are a family owned Mediterranean restaurant, focused on traditional recipes served with a modern twist.</string>
+</resources>
