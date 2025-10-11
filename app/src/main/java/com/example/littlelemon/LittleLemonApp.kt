@@ -42,6 +42,7 @@ fun LittleLemonApp() {
     }
 
     NavHost(navController = navController, startDestination = startDestination) {
+        //--- Onboarding ---
         composable("onboarding1") {
             OnboardingWelcomeScreen(
                 onNext = { navController.navigate("onboarding2") },
@@ -70,6 +71,7 @@ fun LittleLemonApp() {
             )
         }
 
+        //--- Auth ---
         composable(Screen.Login.route) {
             LoginScreen(
                 navController = navController,
@@ -84,25 +86,28 @@ fun LittleLemonApp() {
             )
         }
 
+        //--- Home ---
         composable(Screen.Home.route) {
             HomeScreen(
                 appContainer = appContainer,
-                onReserveClicked = { navController.navigate(Screen.ReservationTableDetails.route) },
-                onItemClicked = {
-                    navController.navigate(Screen.Details.route)
-                },
-                onProfileClicked = { navController.navigate(Screen.Profile.route) }
+                navController = navController,
             )
         }
 
+        //--- Details ---
         composable(
             Screen.Details.route,
             arguments = listOf(navArgument("itemId") { type = NavType.IntType })
         ) { backStackEntry ->
-            val itemId = backStackEntry.arguments?.getInt("itemId") ?: 0
-            ItemDetailsScreen()
+            val itemId = backStackEntry.arguments?.getInt("itemId") ?: 1
+            ItemDetailsScreen(
+                itemId = itemId,
+                appContainer = appContainer,
+                navController = navController
+            )
         }
 
+        //--- Profile ---
         composable(Screen.Profile.route) {
             ProfileScreen(
                 navController = navController,
@@ -110,6 +115,7 @@ fun LittleLemonApp() {
             )
         }
 
+        //--- Reservation ---
         composable(Screen.ReservationTableDetails.route) {
             ReservationTableDetailsScreen(
                 onNextClicked = { navController.navigate(Screen.ReservationPayment.route) }

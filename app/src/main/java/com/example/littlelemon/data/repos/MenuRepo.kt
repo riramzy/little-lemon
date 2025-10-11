@@ -10,10 +10,20 @@ import kotlinx.coroutines.flow.Flow
 //Repository class that handles data operations for the menu
 
 class MenuRepo(private val dao: LocalMenuDao) {
-    suspend fun getLocalMenu(): Flow<List<LocalMenuItem>> {
+    fun getLocalMenu(): Flow<List<LocalMenuItem>> {
         return dao.getAllLocalMenuItems()
     }
 
+    suspend fun getItemById(itemId: Int): LocalMenuItem {
+        return dao.getItemById(itemId)
+    }
+
+    suspend fun refreshMenuIfNeeded() {
+        val localCount = dao.getLocalMenuCount()
+        if (localCount == 0) {
+            refreshMenu()
+        }
+    }
     suspend fun refreshMenu() {
         val networkMenu = NetworkClient.fetchMenu()
 

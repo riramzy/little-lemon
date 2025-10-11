@@ -26,7 +26,7 @@ fun LemonSection(
     subTitle: String,
     isCategory: Boolean,
     modifier: Modifier = Modifier,
-    onItemClicked: () -> Unit = {}
+    onItemClicked: (LocalMenuItem) -> Unit = {}
 ) {
     Column(
         modifier = modifier
@@ -64,12 +64,12 @@ fun LemonSection(
                     itemImage = if (isCategory) {
                         categoryImagesMap[item.category.lowercase()] ?: R.drawable.little_lemon_logo
                     } else {
-                        dishesImagesMap[item.title] ?: R.drawable.little_lemon_logo
+                        dishesImagesMap[item.id] ?: R.drawable.little_lemon_logo
                     },
                     modifier = Modifier.padding(
                         end = 15.dp
                     ),
-                    onItemClicked = onItemClicked
+                    onItemClicked = { onItemClicked(item) }
                 )
             }
         }

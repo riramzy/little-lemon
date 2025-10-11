@@ -3,7 +3,6 @@ package com.example.littlelemon.ui.screens.home
 import android.content.res.Configuration
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -13,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -25,28 +25,23 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.littlelemon.R
 import com.example.littlelemon.di.AppContainer
 import com.example.littlelemon.ui.components.HeroCard
 import com.example.littlelemon.ui.components.LemonSection
 import com.example.littlelemon.ui.components.TopAppBar
 import com.example.littlelemon.ui.theme.LittleLemonTheme
+import com.example.littlelemon.utils.Screen
 
 
 @Composable
 fun HomeScreen(
     appContainer: AppContainer,
-    onReserveClicked: () -> Unit = {},
-    onItemClicked: () -> Unit = {},
-    onProfileClicked: () -> Unit = {}
+    navController: NavController,
 ) {
-    val viewModel: HomeVm = viewModel(
-        factory = HomeVmFactory(
-            appContainer.repository
-        )
-    )
-
-    val menuItems by viewModel.menuItems.collectAsState()
+    val viewModel: HomeVm = viewModel(factory = HomeVmFactory(appContainer))
+    val menuItems = viewModel.menuItems.collectAsState().value
 
     Scaffold(
         topBar = {
@@ -56,7 +51,9 @@ fun HomeScreen(
                         vertical = 10.dp,
                         horizontal = 15.dp
                     ),
-                onProfileClicked = onProfileClicked
+                onProfileClicked = {
+                    navController.navigate(Screen.Profile.route)
+                }
             )
         },
         containerColor = if (isSystemInDarkTheme()) {
@@ -122,7 +119,7 @@ fun HomeScreen(
                     descriptionText = stringResource(R.string.hero_section_description),
                     buttonText = "Reserve a table",
                     heroImage = R.drawable.hero_image,
-                    onReserveClicked = onReserveClicked
+                    onReserveClicked = { navController.navigate(Screen.ReservationTableDetails.route) }
                 )
             }
             item {
@@ -131,7 +128,9 @@ fun HomeScreen(
                     title = "SHOP BY CATEGORY",
                     subTitle = "Find what you want quickly",
                     isCategory = true,
-                    onItemClicked = onItemClicked
+                    onItemClicked = {
+
+                    }
                 )
             }
             item {
@@ -141,7 +140,9 @@ fun HomeScreen(
                     subTitle = "What people order the most?",
                     modifier = Modifier.padding(top = 15.dp),
                     isCategory = false,
-                    onItemClicked = onItemClicked
+                    onItemClicked = { item ->
+                        navController.navigate(Screen.Details.createRoute(item.id))
+                    }
                 )
             }
         }
@@ -155,7 +156,8 @@ fun HomeScreenPreview() {
         HomeScreen(
             appContainer = AppContainer(
                 context = LocalContext.current
-            )
+            ),
+            navController = NavController(LocalContext.current)
         )
     }
 }
@@ -167,7 +169,8 @@ fun HomeScreenDarkPreview() {
         HomeScreen(
             appContainer = AppContainer(
                 context = LocalContext.current
-            )
+            ),
+            navController = NavController(LocalContext.current)
         )
     }
 }

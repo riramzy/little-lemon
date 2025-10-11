@@ -28,24 +28,45 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.littlelemon.R
+import com.example.littlelemon.data.local.LocalMenuItem
+import com.example.littlelemon.di.AppContainer
 import com.example.littlelemon.ui.components.TopAppBar
 import com.example.littlelemon.ui.components.YellowLemonButton
 import com.example.littlelemon.ui.theme.LittleLemonTheme
+import com.example.littlelemon.utils.Screen
+import com.example.littlelemon.utils.dishesImagesMap
 
 @Composable
-fun ItemDetailsScreen() {
+fun ItemDetailsScreen(
+    itemId: Int,
+    appContainer: AppContainer,
+    navController: NavController
+) {
+    val detailsVm: DetailsVm = viewModel(factory = DetailsVmFactory(appContainer))
+    val item by detailsVm.menuItem.collectAsState()
+
+    LaunchedEffect(itemId) {
+        detailsVm.loadItem(itemId)
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -54,7 +75,10 @@ fun ItemDetailsScreen() {
                         vertical = 10.dp,
                         horizontal = 15.dp
                     ),
-                isSearchRequired = false
+                isSearchRequired = false,
+                onProfileClicked = {
+                    navController.navigate(Screen.Profile.route)
+                }
             )
         },
         bottomBar = {
@@ -98,7 +122,8 @@ fun ItemDetailsScreen() {
                     modifier = Modifier
                         .padding(
                             horizontal = 15.dp,
-                        )
+                        ),
+                    item = item
                 )
             }
             item {
@@ -127,7 +152,8 @@ fun ItemDetailsScreen() {
 
 @Composable
 fun ItemDetails(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    item: LocalMenuItem?
 ) {
     Card(
         modifier = modifier
@@ -148,7 +174,7 @@ fun ItemDetails(
         shape = RoundedCornerShape(25.dp)
     ) {
         Image(
-            painter = painterResource(id = R.drawable.greek_salad),
+            painter = painterResource(id = dishesImagesMap[item?.id] ?: R.drawable.greek_salad),
             contentDescription = "Greek Salad",
             modifier = Modifier
                 .fillMaxWidth()
@@ -173,7 +199,7 @@ fun ItemDetails(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Greek Salad",
+                text = item?.title ?: "Greek Salad",
                 style = MaterialTheme.typography.titleLarge,
                 fontSize = 25.sp,
                 color = if (isSystemInDarkTheme()) {
@@ -184,7 +210,7 @@ fun ItemDetails(
             )
 
             Text(
-                text = "$12.99",
+                text = item?.price.toString(),
                 style = MaterialTheme.typography.titleLarge,
                 fontSize = 25.sp,
                 color = if (isSystemInDarkTheme()) {
@@ -195,7 +221,7 @@ fun ItemDetails(
             )
         }
         Text(
-            text = "A traditional Greek salad consists of sliced cucumbers, tomatoes, green bell pepper, red onion, olives, and feta cheese.",
+            text = item?.description ?: "The famous greek salad of crispy lettuce, peppers, olives and our",
             style = MaterialTheme.typography.labelSmall,
             modifier = Modifier
                 .padding(
@@ -385,7 +411,11 @@ fun ItemNumberPicker(
 @Composable
 fun ItemDetailsScreenPreview() {
     LittleLemonTheme {
-        ItemDetailsScreen()
+        ItemDetailsScreen(
+            itemId = 1,
+            appContainer = AppContainer(LocalContext.current),
+            navController = NavController(LocalContext.current)
+        )
     }
 }
 
@@ -393,6 +423,10 @@ fun ItemDetailsScreenPreview() {
 @Composable
 fun ItemDetailsScreenDarkPreview() {
     LittleLemonTheme {
-        ItemDetailsScreen()
+        ItemDetailsScreen(
+            itemId = 1,
+            appContainer = AppContainer(LocalContext.current),
+            navController = NavController(LocalContext.current)
+        )
     }
 }

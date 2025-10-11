@@ -55,7 +55,7 @@ fun ItemCard(
                 MaterialTheme.colorScheme.primary
             }
         ),
-        onClick = onItemClicked
+        onClick = { onItemClicked() }
     ) {
         Column {
             AsyncImage(
