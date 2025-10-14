@@ -32,6 +32,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.littlelemon.R
+import com.example.littlelemon.data.preferences.UserPreferences
+import com.example.littlelemon.data.repos.UserRepo
 import com.example.littlelemon.ui.components.GreenLemonButton
 import com.example.littlelemon.ui.components.InputField
 import com.example.littlelemon.ui.theme.LittleLemonTheme
@@ -215,7 +217,11 @@ fun SignUpScreenPreview() {
     LittleLemonTheme {
         SignUpScreen(
             navController = NavController(LocalContext.current),
-            vm = UserVm(LocalContext.current)
+            vm = UserVm(
+                UserRepo(
+                    UserPreferences(LocalContext.current)
+                )
+            )
         )
     }
 }
@@ -226,7 +232,11 @@ fun SignUpScreenDarkPreview() {
     LittleLemonTheme {
         SignUpScreen(
             navController = NavController(LocalContext.current),
-            vm = UserVm(LocalContext.current)
+            vm = UserVm(
+                UserRepo(
+                    UserPreferences(LocalContext.current)
+                )
+            )
         )
     }
 }

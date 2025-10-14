@@ -33,7 +33,9 @@ fun LittleLemonApp() {
     val context = LocalContext.current
     val appContainer by remember { mutableStateOf(AppContainer(context)) }
     val navController = rememberNavController()
+
     val userVm = appContainer.userVm
+    val reservationVm = appContainer.reservationVm
 
     val startDestination = when {
         !userVm.isOnboardingDone() -> Screen.Onboarding.route
@@ -75,14 +77,14 @@ fun LittleLemonApp() {
         composable(Screen.Login.route) {
             LoginScreen(
                 navController = navController,
-                vm = appContainer.userVm
+                vm = userVm
             )
         }
 
         composable(Screen.Register.route) {
             SignUpScreen(
                 navController = navController,
-                vm = appContainer.userVm
+                vm = userVm
             )
         }
 
@@ -111,14 +113,16 @@ fun LittleLemonApp() {
         composable(Screen.Profile.route) {
             ProfileScreen(
                 navController = navController,
-                vm = appContainer.userVm
+                vm = userVm
             )
         }
 
         //--- Reservation ---
         composable(Screen.ReservationTableDetails.route) {
             ReservationTableDetailsScreen(
-                onNextClicked = { navController.navigate(Screen.ReservationPayment.route) }
+                onNextClicked = { navController.navigate(Screen.ReservationPayment.route) },
+                vm = reservationVm
+
             )
         }
 
@@ -130,7 +134,7 @@ fun LittleLemonApp() {
 
         composable(Screen.ReservationTableConfirmation.route) {
             ReservationConfirmationScreen(
-
+                vm = reservationVm
             )
         }
     }

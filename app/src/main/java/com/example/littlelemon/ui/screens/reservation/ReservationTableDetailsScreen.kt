@@ -33,6 +33,7 @@ import com.example.littlelemon.ui.components.LemonTimeSelector
 import com.example.littlelemon.ui.components.TopAppBar
 import com.example.littlelemon.ui.components.YellowLemonButton
 import com.example.littlelemon.ui.theme.LittleLemonTheme
+import java.time.LocalDate
 import java.time.LocalTime
 import java.time.MonthDay
 import java.time.YearMonth
@@ -42,7 +43,8 @@ import java.util.Locale
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ReservationTableDetailsScreen(
-    onNextClicked: () -> Unit = {}
+    onNextClicked: () -> Unit = {},
+    vm: ReservationVm
 ) {
     Scaffold(
         topBar = {
@@ -126,14 +128,16 @@ fun ReservationTableDetailsScreen(
                 DatePicker(
                     modifier = Modifier.padding(
                         horizontal = 15.dp
-                    )
+                    ),
+                    vm = vm
                 )
             }
             item {
                 TimePicker(
                     modifier = Modifier.padding(
                         horizontal = 15.dp
-                    )
+                    ),
+                    vm = vm
                 )
             }
             item {
@@ -184,7 +188,8 @@ fun DetailsHeadline(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DatePicker(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    vm: ReservationVm
 ) {
     val currentMonth = YearMonth.now()
     val currentDay = MonthDay.now().dayOfMonth
@@ -192,6 +197,8 @@ fun DatePicker(
     val monthDays = (currentDay..daysInMonth).map { day ->
         MonthDay.of(currentMonth.month, day)
     }
+
+    val selectedDate = vm.selectedDate.value
 
     Column(
         modifier = modifier
@@ -221,8 +228,13 @@ fun DatePicker(
 
         LazyRow {
             items(monthDays) { day ->
+                var isSelected = selectedDate?.dayOfMonth == day.dayOfMonth
                 LemonDateSelector(
                     day = day,
+                    isSelected = isSelected,
+                    onClick = {
+                        vm.selectedDate.value = LocalDate.of(LocalDate.now().year, day.month, day.dayOfMonth)
+                    },
                     modifier = Modifier.padding(end = 15.dp)
                 )
             }
@@ -233,8 +245,11 @@ fun DatePicker(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TimePicker(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    vm: ReservationVm
 ) {
+    val selectedTime = vm.selectedTime.value
+
     fun generateTimeSlots(openingTime: LocalTime, closingTime: LocalTime, intervalMinutes: Long): List<LocalTime> {
         val timeSlots = mutableListOf<LocalTime>()
         var currentTime = openingTime
@@ -270,8 +285,13 @@ fun TimePicker(
 
         LazyRow {
             items(timeSlots) { time ->
+                var isSelected = selectedTime == time
                 LemonTimeSelector(
                     time = time,
+                    isSelected = isSelected,
+                    onClick = {
+                        vm.selectedTime.value = time
+                    },
                     modifier = Modifier.padding(end = 15.dp)
                 )
             }
@@ -372,7 +392,9 @@ fun NumberOfDinerPicker(
 @Composable
 fun ReservationTableDetailsScreenPreview() {
     LittleLemonTheme {
-        ReservationTableDetailsScreen()
+        ReservationTableDetailsScreen(
+            vm = ReservationVm()
+        )
     }
 }
 
@@ -381,6 +403,8 @@ fun ReservationTableDetailsScreenPreview() {
 @Composable
 fun ReservationTableDetailsScreenDarkPreview() {
     LittleLemonTheme {
-        ReservationTableDetailsScreen()
+        ReservationTableDetailsScreen(
+            vm = ReservationVm()
+        )
     }
 }

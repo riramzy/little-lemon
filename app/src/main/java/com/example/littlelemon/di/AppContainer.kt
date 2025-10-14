@@ -6,6 +6,7 @@ import com.example.littlelemon.data.preferences.UserPreferences
 import com.example.littlelemon.data.repos.MenuRepo
 import com.example.littlelemon.data.repos.UserRepo
 import com.example.littlelemon.ui.screens.home.HomeVm
+import com.example.littlelemon.ui.screens.reservation.ReservationVm
 import com.example.littlelemon.ui.viewmodel.UserVm
 
 class AppContainer(context: Context) {
@@ -15,5 +16,7 @@ class AppContainer(context: Context) {
     private val userPreferences = UserPreferences(context)
     val userRepository = UserRepo(userPreferences)
 
-    val userVm = UserVm(context)
+    val userVm = UserVm(userRepository)
+    val homeVm = HomeVm(repository)
+    val reservationVm = ReservationVm()
 }

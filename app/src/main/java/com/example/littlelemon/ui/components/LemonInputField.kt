@@ -46,6 +46,7 @@ fun InputField(
     value: String = "",
     onValueChange: (String) -> Unit = {},
     isPasswordField: Boolean = false,
+    isReadOnly: Boolean = false
 ) {
     var isClicked by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -77,21 +78,21 @@ fun InputField(
             Text(
                 text = requiredText,
                 style = MaterialTheme.typography.labelLarge,
-                color = if (isClicked) {
-                    if (isSystemInDarkTheme()) {
-                        Color.White.copy(0.3f)
-                    } else {
-                        Color.Black.copy(0.3f)
-                    }
-                } else {
-                    if (isSystemInDarkTheme()) {
+                color = when {
+                    isReadOnly -> if (isSystemInDarkTheme())
+                        Color.White.copy(alpha = 0.3f)
+                    else
+                        Color.Black.copy(alpha = 0.3f)
+                    isClicked -> if (isSystemInDarkTheme())
+                        Color.White.copy(alpha = 0.3f)
+                    else
+                        Color.Black.copy(alpha = 0.3f)
+                    else -> if (isSystemInDarkTheme())
                         Color.White
-                    } else {
+                    else
                         Color.Black
-                    }
                 },
                 modifier = Modifier
-                    //.weight(1f)
                     .padding(start = 6.dp)
             )
 
@@ -110,16 +111,23 @@ fun InputField(
             BasicTextField(
                 value = value,
                 onValueChange = {
-                    onValueChange(it)
-                    isClicked = it.isNotEmpty()
+                    if (!isReadOnly) {
+                        onValueChange(it)
+                        isClicked = it.isNotEmpty()
+                    }
                 },
                 singleLine = true,
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
                     color = if (isSystemInDarkTheme()) Color.White else Color.Black,
                 ),
                 cursorBrush = SolidColor(
-                    if (isSystemInDarkTheme()) Color.White else Color.Black
+                    if (isSystemInDarkTheme()) {
+                        Color.White
+                    } else {
+                        Color.Black
+                    }
                 ),
+                readOnly = isReadOnly,
                 visualTransformation = visualTransformation,
                 keyboardOptions = keyboardOptions,
                 decorationBox = { innerTextField ->
@@ -132,7 +140,7 @@ fun InputField(
                                 else MaterialTheme.colorScheme.tertiaryContainer,
                                 shape = RoundedCornerShape(8.dp)
                             )
-                            .padding(horizontal = 12.dp, vertical = 4.dp),
+                            .padding(horizontal = 12.dp, vertical = 0.dp),
                         contentAlignment = Alignment.CenterStart
                     ) {
                         if (value.isEmpty()) {
@@ -234,7 +242,7 @@ fun SubInputField(
                                 else MaterialTheme.colorScheme.tertiaryContainer,
                                 shape = RoundedCornerShape(8.dp)
                             )
-                            .padding(horizontal = 6.dp, vertical = 4.dp),
+                            .padding(horizontal = 6.dp, vertical = 0.dp),
                         contentAlignment = Alignment.CenterStart
                     ) {
                         if (textValue.isEmpty()) {
@@ -288,6 +296,9 @@ fun InputFieldPreview() {
                 onValueChange = {},
                 isPasswordField = true
             )
+            SubInputField(
+                requiredText = "Ramzy"
+            )
         }
 
     }
@@ -297,13 +308,25 @@ fun InputFieldPreview() {
 @Composable
 fun InputFieldDarkPreview() {
     LittleLemonTheme {
-        Column {
-
+        Column(
+            modifier = Modifier,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            InputField(
+                requiredText = "Ramzy",
+                value = "",
+                onValueChange = {}
+            )
+            InputField(
+                requiredText = "Ramzy",
+                value = "",
+                onValueChange = {},
+                isPasswordField = true
+            )
+            SubInputField(
+                requiredText = "Ramzy"
+            )
         }
-        InputField(
-            requiredText = "Ramzy",
-            value = "",
-            onValueChange = {}
-        )
     }
 }

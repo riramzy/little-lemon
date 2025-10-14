@@ -29,9 +29,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.littlelemon.data.repos.UserRepo
 import com.example.littlelemon.ui.components.GreenLemonButton
 import com.example.littlelemon.ui.components.InputField
 import com.example.littlelemon.ui.components.LemonCutlerySelector
@@ -40,7 +42,10 @@ import com.example.littlelemon.ui.components.YellowLemonButton
 import com.example.littlelemon.ui.theme.LittleLemonTheme
 
 @Composable
-fun ReservationConfirmationScreen() {
+fun ReservationConfirmationScreen(
+    modifier: Modifier = Modifier,
+    vm: ReservationVm
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -144,7 +149,8 @@ fun ReservationConfirmationScreen() {
                 ReservationDetailsCard(
                     modifier = Modifier.padding(
                         horizontal = 15.dp,
-                    )
+                    ),
+                    vm = vm
                 )
             }
             item {
@@ -160,7 +166,8 @@ fun ReservationConfirmationScreen() {
 
 @Composable
 fun ReservationDetailsCard(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    vm: ReservationVm
 ) {
     Card(
         modifier = modifier
@@ -200,7 +207,9 @@ fun ReservationDetailsCard(
                 }
                 item {
                     InputField(
-                        requiredText = "At"
+                        requiredText = "At",
+                        isReadOnly = true,
+                        value = vm.selectedTime.value.toString(),
                     )
                 }
                 item {
@@ -210,12 +219,14 @@ fun ReservationDetailsCard(
                 }
                 item {
                     InputField(
-                        requiredText = "Date"
+                        requiredText = "Date",
+                        isReadOnly = true,
+                        value = vm.selectedDate.value.toString(),
                     )
                 }
                 item {
                     InputField(
-                        requiredText = "Duration"
+                        requiredText = "Duration",
                     )
                 }
                 item {
@@ -310,7 +321,9 @@ fun AdditionalNotes(
 @Composable
 fun ReservationConfirmationScreenPreview() {
     LittleLemonTheme {
-        ReservationConfirmationScreen()
+        ReservationConfirmationScreen(
+            vm = ReservationVm()
+        )
     }
 }
 
@@ -318,6 +331,8 @@ fun ReservationConfirmationScreenPreview() {
 @Composable
 fun ReservationConfirmationScreenDarkPreview() {
     LittleLemonTheme {
-        ReservationConfirmationScreen()
+        ReservationConfirmationScreen(
+            vm = ReservationVm()
+        )
     }
 }

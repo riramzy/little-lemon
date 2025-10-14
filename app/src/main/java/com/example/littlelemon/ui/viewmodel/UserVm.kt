@@ -1,13 +1,11 @@
 package com.example.littlelemon.ui.viewmodel
 
-import android.content.Context
 import android.util.Patterns
-import com.example.littlelemon.data.preferences.UserPreferences
 import com.example.littlelemon.data.repos.UserRepo
 
-class UserVm(context: Context) {
-    private val userRepo = UserRepo(UserPreferences(context))
-
+class UserVm(
+    private val userRepo: UserRepo
+) {
     fun setOnboardingDone(onboardingDone: Boolean) {
         userRepo.setOnboardingDone(onboardingDone)
     }

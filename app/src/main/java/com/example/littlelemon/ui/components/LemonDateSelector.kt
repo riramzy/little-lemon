@@ -37,8 +37,9 @@ import java.util.Locale
 fun LemonDateSelector(
     modifier: Modifier = Modifier,
     day: MonthDay = MonthDay.now(),
+    isSelected: Boolean = false,
+    onClick: () -> Unit = {}
 ) {
-    var isPressed: Boolean by remember { mutableStateOf(false) }
     val fullDate = day.atYear(LocalDate.now().year)
     Card(
         modifier = modifier
@@ -46,26 +47,26 @@ fun LemonDateSelector(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isSystemInDarkTheme()) {
-                if (isPressed) {
+                if (isSelected) {
                     MaterialTheme.colorScheme.secondary
                 } else {
                     MaterialTheme.colorScheme.background
                 }
             } else {
-                if (isPressed) {
+                if (isSelected) {
                     MaterialTheme.colorScheme.secondaryContainer
                 } else {
                     Color.White
                 }
             },
             contentColor = if (isSystemInDarkTheme()) {
-                if (isPressed) {
+                if (isSelected) {
                     MaterialTheme.colorScheme.onTertiary
                 } else {
                     MaterialTheme.colorScheme.secondary
                 }
             } else {
-                if (isPressed) {
+                if (isSelected) {
                     Color.White
                 } else {
                     MaterialTheme.colorScheme.secondaryContainer
@@ -84,7 +85,7 @@ fun LemonDateSelector(
             )
         },
         onClick = {
-            isPressed = !isPressed
+            onClick()
         }
     ) {
         Column(

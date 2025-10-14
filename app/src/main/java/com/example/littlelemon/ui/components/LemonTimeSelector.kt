@@ -36,8 +36,9 @@ import java.time.format.DateTimeFormatter
 fun LemonTimeSelector(
     modifier: Modifier = Modifier,
     time: LocalTime = LocalTime.now(),
+    isSelected: Boolean = false,
+    onClick: () -> Unit = {},
 ) {
-    var isPressed: Boolean by remember { mutableStateOf(false) }
     val timeFormatter = DateTimeFormatter.ofPattern("H:mm")
 
     Card(
@@ -47,26 +48,26 @@ fun LemonTimeSelector(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isSystemInDarkTheme()) {
-                if (isPressed) {
+                if (isSelected) {
                     MaterialTheme.colorScheme.secondary
                 } else {
                     MaterialTheme.colorScheme.background
                 }
             } else {
-                if (isPressed) {
+                if (isSelected) {
                     MaterialTheme.colorScheme.secondaryContainer
                 } else {
                     Color.White
                 }
             },
             contentColor = if (isSystemInDarkTheme()) {
-                if (isPressed) {
+                if (isSelected) {
                     MaterialTheme.colorScheme.onTertiary
                 } else {
                     MaterialTheme.colorScheme.secondary
                 }
             } else {
-                if (isPressed) {
+                if (isSelected) {
                     Color.White
                 } else {
                     MaterialTheme.colorScheme.secondaryContainer
@@ -85,7 +86,7 @@ fun LemonTimeSelector(
             )
         },
         onClick = {
-            isPressed = !isPressed
+            onClick()
         }
     ) {
         Column(

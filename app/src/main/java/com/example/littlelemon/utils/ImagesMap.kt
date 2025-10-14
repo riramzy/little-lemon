@@ -15,3 +15,10 @@ val dishesImagesMap = mapOf(
     3 to R.drawable.grilled_fish,
     4 to R.drawable.pasta,
 )
+
+val navIconsMap = mapOf(
+    "home" to R.drawable.home,
+    "reservation" to R.drawable.reservations,
+    "profile" to R.drawable.profile_icon,
+    "cart" to R.drawable.cart,
+)

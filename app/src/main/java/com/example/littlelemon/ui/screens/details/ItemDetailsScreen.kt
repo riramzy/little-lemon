@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.outlined.RemoveCircle
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,6 +50,7 @@ import androidx.navigation.NavController
 import com.example.littlelemon.R
 import com.example.littlelemon.data.local.LocalMenuItem
 import com.example.littlelemon.di.AppContainer
+import com.example.littlelemon.ui.components.LemonNavigationBar
 import com.example.littlelemon.ui.components.TopAppBar
 import com.example.littlelemon.ui.components.YellowLemonButton
 import com.example.littlelemon.ui.theme.LittleLemonTheme
@@ -81,27 +84,23 @@ fun ItemDetailsScreen(
                 }
             )
         },
-        bottomBar = {
-            YellowLemonButton(
-                text = "Add to cart",
-                modifier = Modifier
-                    .padding(
-                        horizontal = 15.dp,
-                        vertical = 15.dp
-                    )
-                    .fillMaxWidth(),
-                color = if (isSystemInDarkTheme()) {
-                    MaterialTheme.colorScheme.onPrimary
-                } else {
-                    MaterialTheme.colorScheme.primaryContainer
+        floatingActionButton = {
+            LemonNavigationBar(
+                onHomeClicked = {
+                    navController.navigate(Screen.Home.route)
                 },
-                textColor = if (isSystemInDarkTheme()) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                }
+                onReservationClicked = {
+                    navController.navigate(Screen.ReservationTableDetails.route)
+                },
+                onCartClicked = {
+                },
+                onProfileClicked = {
+                    navController.navigate(Screen.Profile.route)
+                },
+                selectedRoute = "currentRoute"
             )
         },
+        floatingActionButtonPosition = FabPosition.Center,
         containerColor = if (isSystemInDarkTheme()) {
             MaterialTheme.colorScheme.background
         } else {
@@ -114,6 +113,9 @@ fun ItemDetailsScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize(),
+            contentPadding = PaddingValues(
+                bottom = innerPadding.calculateBottomPadding() + 90.dp
+            ),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceAround
         ) {
@@ -145,6 +147,27 @@ fun ItemDetailsScreen(
             }
             item {
                 ItemNumberPicker()
+            }
+            item {
+                YellowLemonButton(
+                    text = "Add to cart",
+                    modifier = Modifier
+                        .padding(
+                            horizontal = 15.dp,
+                            vertical = 15.dp
+                        )
+                        .fillMaxWidth(),
+                    color = if (isSystemInDarkTheme()) {
+                        MaterialTheme.colorScheme.onPrimary
+                    } else {
+                        MaterialTheme.colorScheme.primaryContainer
+                    },
+                    textColor = if (isSystemInDarkTheme()) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    }
+                )
             }
         }
     }
