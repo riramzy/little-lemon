@@ -1,8 +1,8 @@
 package com.example.littlelemon.data.repos
 
 import android.util.Log
-import com.example.littlelemon.data.local.LocalMenuDao
-import com.example.littlelemon.data.local.LocalMenuItem
+import com.example.littlelemon.data.local.menu.LocalMenuDao
+import com.example.littlelemon.data.local.menu.LocalMenuItem
 import com.example.littlelemon.data.model.toEntity
 import com.example.littlelemon.data.remote.NetworkClient
 import kotlinx.coroutines.flow.Flow

@@ -1,4 +1,4 @@
-package com.example.littlelemon.data.local
+package com.example.littlelemon.data.local.menu
 
 import androidx.room.Dao
 import androidx.room.Insert

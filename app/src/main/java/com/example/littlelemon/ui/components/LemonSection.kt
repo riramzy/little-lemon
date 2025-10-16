@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.littlelemon.R
-import com.example.littlelemon.data.local.LocalMenuItem
+import com.example.littlelemon.data.local.menu.LocalMenuItem
 import com.example.littlelemon.utils.categoryImagesMap
 import com.example.littlelemon.utils.dishesImagesMap
 import kotlin.text.lowercase

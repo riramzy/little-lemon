@@ -2,7 +2,7 @@ package com.example.littlelemon.ui.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.littlelemon.data.local.LocalMenuItem
+import com.example.littlelemon.data.local.menu.LocalMenuItem
 import com.example.littlelemon.data.repos.MenuRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

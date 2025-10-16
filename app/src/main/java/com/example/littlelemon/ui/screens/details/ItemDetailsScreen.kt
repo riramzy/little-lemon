@@ -48,11 +48,14 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.littlelemon.R
-import com.example.littlelemon.data.local.LocalMenuItem
+import com.example.littlelemon.data.local.menu.LocalMenuItem
+import com.example.littlelemon.data.model.toCartItems
 import com.example.littlelemon.di.AppContainer
 import com.example.littlelemon.ui.components.LemonNavigationBar
 import com.example.littlelemon.ui.components.TopAppBar
 import com.example.littlelemon.ui.components.YellowLemonButton
+import com.example.littlelemon.ui.screens.cart.CartVm
+import com.example.littlelemon.ui.screens.cart.CartVmFactory
 import com.example.littlelemon.ui.theme.LittleLemonTheme
 import com.example.littlelemon.utils.Screen
 import com.example.littlelemon.utils.dishesImagesMap
@@ -64,6 +67,8 @@ fun ItemDetailsScreen(
     navController: NavController
 ) {
     val detailsVm: DetailsVm = viewModel(factory = DetailsVmFactory(appContainer))
+    val cartVm: CartVm = viewModel(factory = CartVmFactory(appContainer))
+
     val item by detailsVm.menuItem.collectAsState()
 
     LaunchedEffect(itemId) {
@@ -93,6 +98,7 @@ fun ItemDetailsScreen(
                     navController.navigate(Screen.ReservationTableDetails.route)
                 },
                 onCartClicked = {
+                    navController.navigate(Screen.Cart.route)
                 },
                 onProfileClicked = {
                     navController.navigate(Screen.Profile.route)
@@ -166,6 +172,10 @@ fun ItemDetailsScreen(
                         MaterialTheme.colorScheme.primary
                     } else {
                         MaterialTheme.colorScheme.onPrimaryContainer
+                    },
+                    onClick = {
+                        cartVm.addToCart(item!!.toCartItems())
+                        navController.navigate(Screen.Cart.route)
                     }
                 )
             }

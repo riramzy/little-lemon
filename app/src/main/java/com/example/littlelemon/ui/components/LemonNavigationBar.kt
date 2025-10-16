@@ -100,7 +100,7 @@ fun LemonNavigationBar(
                     contentDescription = null
                 )
             }
-            val isCartSelected = selectedRoute == Screen.Details.route
+            val isCartSelected = selectedRoute == Screen.Cart.route
             IconButton(
                 onClick = {
                     onCartClicked()

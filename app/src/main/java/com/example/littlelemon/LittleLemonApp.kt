@@ -13,6 +13,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.littlelemon.di.AppContainer
+import com.example.littlelemon.ui.screens.cart.CartScreen
 import com.example.littlelemon.ui.screens.details.ItemDetailsScreen
 import com.example.littlelemon.ui.screens.home.HomeScreen
 import com.example.littlelemon.ui.screens.login.LoginScreen
@@ -36,6 +37,7 @@ fun LittleLemonApp() {
 
     val userVm = appContainer.userVm
     val reservationVm = appContainer.reservationVm
+    val cartVm = appContainer.cartVm
 
     val startDestination = when {
         !userVm.isOnboardingDone() -> Screen.Onboarding.route
@@ -48,19 +50,28 @@ fun LittleLemonApp() {
         composable("onboarding1") {
             OnboardingWelcomeScreen(
                 onNext = { navController.navigate("onboarding2") },
-                onSkip = { navController.navigate("login") }
+                onSkip = {
+                    userVm.setOnboardingDone(true)
+                    navController.navigate("login")
+                }
             )
         }
         composable("onboarding2") {
             OnboardingBrowseScreen(
                 onNext = { navController.navigate("onboarding3") },
-                onSkip = { navController.navigate("login") }
+                onSkip = {
+                    userVm.setOnboardingDone(true)
+                    navController.navigate("login")
+                }
             )
         }
         composable("onboarding3") {
             OnboardingQuickScreen(
                 onNext = { navController.navigate("onboarding4") },
-                onSkip = { navController.navigate("login") }
+                onSkip = {
+                    userVm.setOnboardingDone(true)
+                    navController.navigate("login")
+                }
             )
         }
         composable("onboarding4") {
@@ -69,7 +80,10 @@ fun LittleLemonApp() {
                     userVm.setOnboardingDone(true)
                     navController.navigate("login")
                          },
-                onSkip = { navController.navigate("home") }
+                onSkip = {
+                    userVm.setOnboardingDone(true)
+                    navController.navigate("home")
+                }
             )
         }
 
@@ -135,6 +149,14 @@ fun LittleLemonApp() {
         composable(Screen.ReservationTableConfirmation.route) {
             ReservationConfirmationScreen(
                 vm = reservationVm
+            )
+        }
+
+        //--- Cart ---
+        composable(Screen.Cart.route) {
+            CartScreen(
+                cartVm = cartVm,
+                navController = navController
             )
         }
     }

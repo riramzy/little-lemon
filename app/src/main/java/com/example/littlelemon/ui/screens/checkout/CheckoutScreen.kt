@@ -235,7 +235,11 @@ fun SuggestionsSection(
 
 @Composable
 fun TotalPrice(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    subtotal: Double = 0.00,
+    service: Double = 5.00,
+    delivery: Double = 5.00,
+    isCart: Boolean = false
 ){
     Column(
         modifier = modifier
@@ -256,7 +260,7 @@ fun TotalPrice(
                 textAlign = TextAlign.Start,
             )
             Text(
-                text = "$29.99",
+                text = "$$subtotal",
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.End,
             )
@@ -275,29 +279,31 @@ fun TotalPrice(
                 textAlign = TextAlign.Start,
             )
             Text(
-                text = "$2.00",
+                text = "$$delivery",
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.End,
             )
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 15.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Service",
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Start,
-            )
-            Text(
-                text = "$31.99",
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.End,
-            )
+        if (!isCart) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 15.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Service",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Start,
+                )
+                Text(
+                    text = "$$service",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.End,
+                )
+            }
         }
 
         Row(
@@ -307,16 +313,20 @@ fun TotalPrice(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Total",
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.ExtraBold,
+                text = "Total".uppercase(),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Black,
                 fontSize = 20.sp,
                 textAlign = TextAlign.Start,
             )
             Text(
-                text = "$31.99",
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.ExtraBold,
+                text = if (isCart) {
+                    "$${subtotal + delivery}"
+                } else {
+                    "$${subtotal + delivery + service}"
+                },
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Black,
                 fontSize = 20.sp,
                 textAlign = TextAlign.End,
             )

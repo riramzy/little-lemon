@@ -99,7 +99,7 @@ fun ProfileScreen(
                     navController.navigate(Screen.ReservationTableDetails.route)
                 },
                 onCartClicked = {
-                    navController.navigate(Screen.Details.route)
+                    navController.navigate(Screen.Cart.route)
                 },
                 onProfileClicked = {
                     navController.navigate(Screen.Profile.route)

@@ -10,7 +10,7 @@ class DetailsVmFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(DetailsVm::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return DetailsVm(appContainer.repository) as T
+            return DetailsVm(appContainer.menuRepo) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
