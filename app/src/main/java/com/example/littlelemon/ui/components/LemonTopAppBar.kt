@@ -2,7 +2,6 @@ package com.example.littlelemon.ui.components
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,7 +26,6 @@ import com.example.littlelemon.ui.theme.LittleLemonTheme
 
 @Composable
 fun TopAppBar(
-    onProfileClicked: () -> Unit = {},
     modifier: Modifier = Modifier,
     isSearchRequired: Boolean = true
 ) {
@@ -67,24 +65,6 @@ fun TopAppBar(
                         contentDescription = "Notifications Icon",
                         modifier = Modifier.width(32.dp)
                             .height(32.dp),
-                        colorFilter = if (isSystemInDarkTheme()) {
-                            ColorFilter.tint(MaterialTheme.colorScheme.tertiaryContainer)
-                        } else {
-                            ColorFilter.tint(MaterialTheme.colorScheme.secondaryContainer)
-                        }
-                    )
-                }
-                IconButton(
-                    onClick = { onProfileClicked() }
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.profile_icon),
-                        contentDescription = "Cart Icon",
-                        modifier = Modifier.width(32.dp)
-                            .height(32.dp)
-                            .clickable {
-                                onProfileClicked()
-                            },
                         colorFilter = if (isSystemInDarkTheme()) {
                             ColorFilter.tint(MaterialTheme.colorScheme.tertiaryContainer)
                         } else {

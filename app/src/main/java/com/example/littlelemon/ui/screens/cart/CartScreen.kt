@@ -55,9 +55,6 @@ fun CartScreen(
                         horizontal = 15.dp
                     ),
                 isSearchRequired = false,
-                onProfileClicked = {
-                    navController.navigate(Screen.Profile.route)
-                }
             )
         },
         bottomBar = {

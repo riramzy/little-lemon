@@ -61,9 +61,6 @@ fun HomeScreen(
                         vertical = 10.dp,
                         horizontal = 15.dp
                     ),
-                onProfileClicked = {
-                    navController.navigate(Screen.Profile.route)
-                }
             )
         },
         floatingActionButton = {
