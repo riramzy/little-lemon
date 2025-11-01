@@ -91,7 +91,8 @@ fun LittleLemonApp() {
         composable(Screen.Login.route) {
             LoginScreen(
                 navController = navController,
-                vm = userVm
+                vm = userVm,
+                //loginVm = loginVm
             )
         }
 
@@ -135,14 +136,15 @@ fun LittleLemonApp() {
         composable(Screen.ReservationTableDetails.route) {
             ReservationTableDetailsScreen(
                 onNextClicked = { navController.navigate(Screen.ReservationPayment.route) },
-                vm = reservationVm
-
+                vm = reservationVm,
+                navController = navController
             )
         }
 
         composable(Screen.ReservationPayment.route) {
             ReservationPaymentScreen(
-                onNextClicked = { navController.navigate(Screen.ReservationTableConfirmation.route) }
+                onNextClicked = { navController.navigate(Screen.ReservationTableConfirmation.route) },
+                navController = navController
             )
         }
 

@@ -23,5 +23,4 @@ class AppContainer(context: Context) {
     val homeVm = HomeVm(menuRepo)
     val reservationVm = ReservationVm()
     val cartVm = CartVm(cartRepo)
-
 }

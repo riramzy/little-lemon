@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "319054262665",
+    "project_id": "littlelemon-app",
+    "storage_bucket": "littlelemon-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:319054262665:android:929d41491d0b2e80d17158",
+        "android_client_info": {
+          "package_name": "com.example.littlelemon"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCriwSTP2Kxd4gjeNeQu4c4W8SruGTDcUU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

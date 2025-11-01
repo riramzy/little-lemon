@@ -9,7 +9,7 @@ class CartRepo(private val dao: LocalCartDao) {
         return dao.getAllLocalCartItems()
     }
 
-    suspend fun updateQuantity(itemId: Int, quantity: Int) {
+    fun updateQuantity(itemId: Int, quantity: Int) {
         dao.updateQuantity(itemId, quantity)
     }
 

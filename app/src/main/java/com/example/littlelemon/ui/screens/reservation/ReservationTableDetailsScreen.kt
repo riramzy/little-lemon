@@ -14,25 +14,32 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.littlelemon.ui.components.LemonDateSelector
 import com.example.littlelemon.ui.components.LemonDurationSelector
+import com.example.littlelemon.ui.components.LemonNavigationBar
 import com.example.littlelemon.ui.components.LemonNumberOfDinersSelector
 import com.example.littlelemon.ui.components.LemonTimeSelector
 import com.example.littlelemon.ui.components.TopAppBar
 import com.example.littlelemon.ui.components.YellowLemonButton
 import com.example.littlelemon.ui.theme.LittleLemonTheme
+import com.example.littlelemon.utils.Screen
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.MonthDay
@@ -44,8 +51,12 @@ import java.util.Locale
 @Composable
 fun ReservationTableDetailsScreen(
     onNextClicked: () -> Unit = {},
-    vm: ReservationVm
+    vm: ReservationVm,
+    navController: NavHostController,
 ) {
+    val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
+    val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -57,51 +68,27 @@ fun ReservationTableDetailsScreen(
                 isSearchRequired = false
             )
         },
-        bottomBar = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                LinearProgressIndicator(
-                    progress = { 0.5f },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            start = 15.dp,
-                            end = 15.dp,
-                            top = 15.dp
-                        ),
-                    color = if (isSystemInDarkTheme()) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.primaryContainer
-                           },
-                    trackColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
-                )
-                YellowLemonButton(
-                    text = "Next",
-                    modifier = Modifier
-                        .padding(
-                            horizontal = 15.dp,
-                            vertical = 15.dp
-                        )
-                        .fillMaxWidth(),
-                    color = if (isSystemInDarkTheme()) {
-                        MaterialTheme.colorScheme.onPrimary
-                    } else {
-                        MaterialTheme.colorScheme.primaryContainer
-                    },
-                    textColor = if (isSystemInDarkTheme()) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.onPrimaryContainer
-                    },
-                    onClick = onNextClicked
-                )
-            }
+        floatingActionButton = {
+            LemonNavigationBar(
+                isActionEnabled = true,
+                onActionText = "Next",
+                onActionClicked = onNextClicked,
+                onHomeClicked = {
+                    navController.navigate(Screen.Home.route)
+                },
+                onReservationClicked = {
+                    navController.navigate(Screen.ReservationTableDetails.route)
+                },
+                onCartClicked = {
+                    navController.navigate(Screen.Cart.route)
+                },
+                onProfileClicked = {
+                    navController.navigate(Screen.Profile.route)
+                },
+                selectedRoute = currentRoute
+            )
         },
+        floatingActionButtonPosition = FabPosition.Center,
         containerColor = if (isSystemInDarkTheme()) {
             MaterialTheme.colorScheme.background
         } else {
@@ -154,6 +141,28 @@ fun ReservationTableDetailsScreen(
                     )
                 )
             }
+            /*
+            item {
+                LinearProgressIndicator(
+                    progress = { 0.5f },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            start = 15.dp,
+                            end = 15.dp,
+                            top = 50.dp
+                        ),
+                    color = if (isSystemInDarkTheme()) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.primaryContainer
+                    },
+                    trackColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
+                )
+            }
+
+             */
         }
     }
 }
@@ -393,7 +402,8 @@ fun NumberOfDinerPicker(
 fun ReservationTableDetailsScreenPreview() {
     LittleLemonTheme {
         ReservationTableDetailsScreen(
-            vm = ReservationVm()
+            vm = ReservationVm(),
+            navController = rememberNavController()
         )
     }
 }
@@ -404,7 +414,8 @@ fun ReservationTableDetailsScreenPreview() {
 fun ReservationTableDetailsScreenDarkPreview() {
     LittleLemonTheme {
         ReservationTableDetailsScreen(
-            vm = ReservationVm()
+            vm = ReservationVm(),
+            navController = rememberNavController()
         )
     }
 }
