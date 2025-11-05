@@ -8,6 +8,7 @@ import com.example.littlelemon.data.local.cart.LocalCartDao
 import com.example.littlelemon.data.local.cart.LocalCartItem
 import com.example.littlelemon.data.local.menu.LocalMenuDao
 import com.example.littlelemon.data.local.menu.LocalMenuItem
+import com.example.littlelemon.data.local.search.LocalSearchDao
 
 //Room database instance that builds the database
 
@@ -16,11 +17,12 @@ import com.example.littlelemon.data.local.menu.LocalMenuItem
         LocalMenuItem::class,
         LocalCartItem::class
     ],
-    version = 3
+    version = 7
 )
 abstract class LocalDatabase: RoomDatabase() {
     abstract fun localMenuDao(): LocalMenuDao
     abstract fun localCartDao(): LocalCartDao
+    abstract fun localSearchDao(): LocalSearchDao
 
     companion object {
         @Volatile private var INSTANCE: LocalDatabase? = null
@@ -31,7 +33,9 @@ abstract class LocalDatabase: RoomDatabase() {
                     context.applicationContext,
                     LocalDatabase::class.java,
                     "little_lemon_db"
-                ).build()
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
                 INSTANCE = instance
                 instance
             }

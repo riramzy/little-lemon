@@ -466,7 +466,7 @@ fun ItemNumberPicker(
                 tint = if (isSystemInDarkTheme()) {
                     MaterialTheme.colorScheme.primary
                 } else {
-                    MaterialTheme.colorScheme.onPrimaryContainer
+                    MaterialTheme.colorScheme.primaryContainer
                 }
             )
         }
@@ -489,7 +489,7 @@ fun ItemNumberPicker(
                 tint = if (isSystemInDarkTheme()) {
                     MaterialTheme.colorScheme.primary
                 } else {
-                    MaterialTheme.colorScheme.primary
+                    MaterialTheme.colorScheme.primaryContainer
                 }
             )
         }

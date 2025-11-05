@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,28 +16,71 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.example.littlelemon.data.local.cart.LocalCartItem
+import com.example.littlelemon.di.AppContainer
 import com.example.littlelemon.ui.components.ItemOverview
 import com.example.littlelemon.ui.components.LemonCutlerySelector
+import com.example.littlelemon.ui.components.LemonNavigationBar
 import com.example.littlelemon.ui.components.TopAppBar
 import com.example.littlelemon.ui.components.YellowLemonButton
+import com.example.littlelemon.ui.screens.cart.CartVm
+import com.example.littlelemon.ui.screens.cart.CartVmFactory
 import com.example.littlelemon.ui.screens.details.DeliveryDetails
 import com.example.littlelemon.ui.theme.LittleLemonTheme
+import com.example.littlelemon.utils.Screen
 
 @Composable
-fun CheckoutScreen() {
+fun CheckoutScreen(
+    cartVm: CartVm,
+    navController: NavController
+) {
+    var cartItems = cartVm.cartItems.collectAsState().value
+
+    /*
+    cartItems = listOf(
+        LocalCartItem(
+            id = 1,
+            title = "Greek Salad",
+            price = 12.99,
+            image = "",
+            quantity = 1
+        ),
+        LocalCartItem(
+            id = 2,
+            title = "Bruschetta",
+            price = 12.99,
+            image = "",
+            quantity = 1
+        )
+    )
+
+     */
+
+    val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
+    val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -48,27 +92,29 @@ fun CheckoutScreen() {
                 isSearchRequired = false
             )
         },
-        bottomBar = {
-            YellowLemonButton(
-                text = "Checkout",
-                modifier = Modifier
-                    .padding(
-                        horizontal = 15.dp,
-                        vertical = 15.dp
-                    )
-                    .fillMaxWidth(),
-                color = if (isSystemInDarkTheme()) {
-                    MaterialTheme.colorScheme.onPrimary
-                } else {
-                    MaterialTheme.colorScheme.primaryContainer
+        floatingActionButton = {
+            LemonNavigationBar(
+                isActionEnabled = true,
+                onActionText = "Confirm",
+                onActionClicked = {
+                    navController.navigate(Screen.CartPayment.route)
                 },
-                textColor = if (isSystemInDarkTheme()) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                }
+                onHomeClicked = {
+                    navController.navigate(Screen.Home.route)
+                },
+                onReservationClicked = {
+                    navController.navigate(Screen.ReservationTableDetails.route)
+                },
+                onCartClicked = {
+                    navController.navigate(Screen.Cart.route)
+                },
+                onProfileClicked = {
+                    navController.navigate(Screen.Profile.route)
+                },
+                selectedRoute = currentRoute
             )
         },
+        floatingActionButtonPosition = FabPosition.Center,
         containerColor = if (isSystemInDarkTheme()) {
             MaterialTheme.colorScheme.background
         } else {
@@ -79,54 +125,54 @@ fun CheckoutScreen() {
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            verticalArrangement = Arrangement.SpaceEvenly,
+                .padding(innerPadding)
+                .fillMaxSize(),
+            contentPadding = PaddingValues(
+                bottom = innerPadding.calculateBottomPadding() + 100.dp
+            ),
+            verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
-                DeliveryDetails(
-                    modifier = Modifier
-                        .padding(
-                            horizontal = 15.dp,
-                        )
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    LemonCutlerySelector(
+                        modifier = Modifier
+                            .padding(
+                                horizontal = 15.dp,
+                                vertical = 15.dp
+                            )
+                    )
+                    OrderSummary(
+                        modifier = Modifier
+                            .padding(
+                                horizontal = 15.dp,
+                                vertical = 15.dp
+                            )
+                            .wrapContentHeight(),
+                        cartItems = cartItems
+                    )
+                    SuggestionsSection(
+                        modifier = Modifier
+                            .padding(
+                                horizontal = 15.dp,
+                                vertical = 15.dp
+                            )
+                    )
+                }
             }
             item {
-                LemonCutlerySelector(
-                    modifier = Modifier
-                        .padding(
-                            horizontal = 15.dp,
-                            vertical = 15.dp
-                        )
-                )
-            }
-            item {
-                OrderSummary(
-                    modifier = Modifier
-                        .padding(
-                            horizontal = 15.dp,
-                            vertical = 15.dp
-                        )
-                        .wrapContentHeight()
-                )
-            }
-            item {
-                SuggestionsSection(
-                    modifier = Modifier
-                        .padding(
-                            horizontal = 15.dp,
-                            vertical = 15.dp
-                        )
-                )
-            }
-            item {
+                val subtotal = cartItems.sumOf { it.price * it.quantity }
                 TotalPrice(
+
                     modifier = Modifier
                         .padding(
                             horizontal = 15.dp,
                             vertical = 15.dp
-                        )
+                        ),
+                    isCart = true,
+                    subtotal = subtotal
                 )
             }
         }
@@ -135,14 +181,26 @@ fun CheckoutScreen() {
 
 @Composable
 fun OrderSummary(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    cartItems: List<LocalCartItem> = emptyList()
 ) {
-    val items = listOf(
-        "1 x Greek Salad" to "$12.99",
-        "1 x Bruschetta" to "$5.99",
-        "1 x Pasta" to "$8.99",
-        "1 x Lemon Dessert" to "$5.00",
+    /*
+    val cartItems = listOf(
+        LocalCartItem(
+            id = 1,
+            title = "Greek Salad",
+            price = 12.99,
+            image = "",
+        ),
+        LocalCartItem(
+            id = 2,
+            title = "Bruschetta",
+            price = 12.99,
+            image = "",
+        )
     )
+
+     */
 
     Column(
         modifier = modifier
@@ -173,7 +231,7 @@ fun OrderSummary(
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Center
         ) {
-            items.forEach { (name, price) ->
+            cartItems.forEach { item ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -182,13 +240,13 @@ fun OrderSummary(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = name,
+                        text = "${item.quantity} x ${item.title}",
                         style = MaterialTheme.typography.labelSmall,
                         fontSize = 20.sp,
                         textAlign = TextAlign.Start,
                     )
                     Text(
-                        text = price,
+                        text = "$${item.price}",
                         style = MaterialTheme.typography.labelSmall,
                         fontSize = 20.sp,
                         textAlign = TextAlign.End,
@@ -227,6 +285,7 @@ fun SuggestionsSection(
                     modifier = Modifier
                         .width(295.dp)
                         .height(110.dp)
+                        .padding(end = 10.dp)
                 )
             }
         }
@@ -241,51 +300,29 @@ fun TotalPrice(
     delivery: Double = 5.00,
     isCart: Boolean = false
 ){
-    Column(
-        modifier = modifier
-            .fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSystemInDarkTheme()) {
+                MaterialTheme.colorScheme.onTertiary
+            } else {
+                MaterialTheme.colorScheme.primaryContainer
+
+            },
+            contentColor = if (isSystemInDarkTheme()) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                Color.White
+            }
+        ),
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 15.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+        Column(
+            modifier = modifier
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = "Subtotal",
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Start,
-            )
-            Text(
-                text = "$$subtotal",
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.End,
-            )
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 15.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Delivery",
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Start,
-            )
-            Text(
-                text = "$$delivery",
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.End,
-            )
-        }
-
-        if (!isCart) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -294,42 +331,82 @@ fun TotalPrice(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Service",
+                    text = "Subtotal",
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Start,
                 )
                 Text(
-                    text = "$$service",
+                    text = "$$subtotal",
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.End,
                 )
             }
-        }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Total".uppercase(),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Black,
-                fontSize = 20.sp,
-                textAlign = TextAlign.Start,
-            )
-            Text(
-                text = if (isCart) {
-                    "$${subtotal + delivery}"
-                } else {
-                    "$${subtotal + delivery + service}"
-                },
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Black,
-                fontSize = 20.sp,
-                textAlign = TextAlign.End,
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 15.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Delivery",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Start,
+                )
+                Text(
+                    text = "$$delivery",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.End,
+                )
+            }
+
+            if (!isCart) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 15.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Service",
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Start,
+                    )
+                    Text(
+                        text = "$$service",
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.End,
+                    )
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Total".uppercase(),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Start,
+                )
+                Text(
+                    text = if (isCart) {
+                        "$${subtotal + delivery}"
+                    } else {
+                        "$${subtotal + delivery + service}"
+                    },
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.End,
+                )
+            }
         }
     }
 }
@@ -338,7 +415,10 @@ fun TotalPrice(
 @Composable
 fun CheckoutScreenPreview() {
     LittleLemonTheme {
-        CheckoutScreen()
+        CheckoutScreen(
+            cartVm = viewModel(factory = CartVmFactory(AppContainer(LocalContext.current))),
+            navController = NavController(LocalContext.current)
+        )
     }
 }
 
@@ -346,6 +426,9 @@ fun CheckoutScreenPreview() {
 @Composable
 fun CheckoutScreenDarkPreview() {
     LittleLemonTheme {
-        CheckoutScreen()
+        CheckoutScreen(
+            cartVm = viewModel(factory = CartVmFactory(AppContainer(LocalContext.current))),
+            navController = NavController(LocalContext.current)
+        )
     }
 }

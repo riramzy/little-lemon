@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -44,7 +45,7 @@ fun LemonNavigationBar(
     selectedRoute: String,
     isActionEnabled: Boolean = false,
     onActionClicked: () -> Unit = {},
-    onActionText: String = "Add to Cart"
+    onActionText: String = "Add"
 ) {
     Row(
         modifier = modifier
@@ -66,7 +67,7 @@ fun LemonNavigationBar(
                 contentColor = if (isSystemInDarkTheme()) {
                     MaterialTheme.colorScheme.primary
                 } else {
-                    MaterialTheme.colorScheme.primary
+                    MaterialTheme.colorScheme.primaryContainer
                 }
             )
         ) {
@@ -82,7 +83,13 @@ fun LemonNavigationBar(
                             if (isHomeSelected) {
                                 Modifier
                                     .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primary.copy(0.2f))
+                                    .background(
+                                        if (isSystemInDarkTheme()) {
+                                            MaterialTheme.colorScheme.primary.copy(0.2f)
+                                        } else {
+                                            MaterialTheme.colorScheme.primaryContainer.copy(0.2f)
+                                        }
+                                    )
                             } else {
                                 Modifier
                             }
@@ -92,7 +99,6 @@ fun LemonNavigationBar(
                         painter = painterResource(navIconsMap["home"]!!),
                         modifier = Modifier
                             .size(32.dp),
-
                         contentDescription = null
                     )
                 }
@@ -107,7 +113,13 @@ fun LemonNavigationBar(
                             if (isReservationSelected) {
                                 Modifier
                                     .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primary.copy(0.2f))
+                                    .background(
+                                        if (isSystemInDarkTheme()) {
+                                            MaterialTheme.colorScheme.primary.copy(0.2f)
+                                        } else {
+                                            MaterialTheme.colorScheme.primaryContainer.copy(0.2f)
+                                        }
+                                    )
                             } else {
                                 Modifier
                             }
@@ -131,7 +143,13 @@ fun LemonNavigationBar(
                             if (isCartSelected) {
                                 Modifier
                                     .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primary.copy(0.2f))
+                                    .background(
+                                        if (isSystemInDarkTheme()) {
+                                            MaterialTheme.colorScheme.primary.copy(0.2f)
+                                        } else {
+                                            MaterialTheme.colorScheme.primaryContainer.copy(0.2f)
+                                        }
+                                    )
                             } else {
                                 Modifier
                             }
@@ -155,7 +173,13 @@ fun LemonNavigationBar(
                             if (isProfileSelected) {
                                 Modifier
                                     .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primary.copy(0.2f))
+                                    .background(
+                                        if (isSystemInDarkTheme()) {
+                                            MaterialTheme.colorScheme.primary.copy(0.2f)
+                                        } else {
+                                            MaterialTheme.colorScheme.primaryContainer.copy(0.2f)
+                                        }
+                                    )
                             } else {
                                 Modifier
                             }
@@ -182,12 +206,13 @@ fun LemonNavigationBar(
                     containerColor = if (isSystemInDarkTheme()) {
                         MaterialTheme.colorScheme.primary
                     } else {
-                        MaterialTheme.colorScheme.primary
+                        MaterialTheme.colorScheme.primaryContainer
                     },
                     contentColor = if (isSystemInDarkTheme()) {
                         MaterialTheme.colorScheme.onTertiary
                     } else {
-                        MaterialTheme.colorScheme.tertiaryContainer
+                        //MaterialTheme.colorScheme.tertiaryContainer
+                        Color.White
                     }
                 )
             ) {

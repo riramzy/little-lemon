@@ -38,13 +38,17 @@ import com.example.littlelemon.R
 import com.example.littlelemon.ui.theme.LittleLemonTheme
 
 @Composable
-fun SearchBar() {
-    var textValue by remember { mutableStateOf("") }
+fun SearchBar(
+    modifier: Modifier = Modifier,
+    searchQuery: String = "",
+    onSearchQueryChange: (String) -> Unit = {},
+) {
+    //var textValue by remember { mutableStateOf("") }
     var isClicked by remember { mutableStateOf(false) }
     val requiredText = "Search"
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(50.dp),
         shape = RoundedCornerShape(100.dp),
@@ -92,9 +96,9 @@ fun SearchBar() {
                 horizontalArrangement = Arrangement.Start
             ) {
                 BasicTextField(
-                    value = textValue,
+                    value = searchQuery,
                     onValueChange = {
-                        textValue = it
+                        onSearchQueryChange(it)
                     },
                     singleLine = true,
                     textStyle = MaterialTheme.typography.bodyMedium.copy(
@@ -116,7 +120,7 @@ fun SearchBar() {
                                 .padding(horizontal = 6.dp, vertical = 0.dp),
                             contentAlignment = Alignment.CenterStart
                         ) {
-                            if (textValue.isEmpty()) {
+                            if (searchQuery.isEmpty()) {
                                 Text(
                                     text = requiredText,
                                     style = MaterialTheme.typography.bodyMedium.copy(
@@ -143,7 +147,7 @@ fun SearchBar() {
                     modifier = Modifier
                         .weight(6f)
                 )
-                if (textValue.isNotEmpty()) {
+                if (searchQuery.isNotEmpty()) {
                     Icon(
                         imageVector = Icons.Default.Clear,
                         contentDescription = "Filter Icon",
@@ -153,7 +157,7 @@ fun SearchBar() {
                             .height(24.dp)
                             .weight(1f)
                             .clickable {
-                                textValue = ""
+                                onSearchQueryChange("")
                             },
                         tint = if (isSystemInDarkTheme()) {
                             MaterialTheme.colorScheme.tertiaryContainer

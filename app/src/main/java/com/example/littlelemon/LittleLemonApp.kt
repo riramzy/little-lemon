@@ -14,6 +14,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.littlelemon.di.AppContainer
 import com.example.littlelemon.ui.screens.cart.CartScreen
+import com.example.littlelemon.ui.screens.checkout.CheckoutScreen
 import com.example.littlelemon.ui.screens.details.ItemDetailsScreen
 import com.example.littlelemon.ui.screens.home.HomeScreen
 import com.example.littlelemon.ui.screens.login.LoginScreen
@@ -21,10 +22,11 @@ import com.example.littlelemon.ui.screens.onboarding.OnboardingBrowseScreen
 import com.example.littlelemon.ui.screens.onboarding.OnboardingFindScreen
 import com.example.littlelemon.ui.screens.onboarding.OnboardingQuickScreen
 import com.example.littlelemon.ui.screens.onboarding.OnboardingWelcomeScreen
+import com.example.littlelemon.ui.screens.payment.PaymentScreen
 import com.example.littlelemon.ui.screens.profile.ProfileScreen
 import com.example.littlelemon.ui.screens.reservation.ReservationConfirmationScreen
-import com.example.littlelemon.ui.screens.reservation.ReservationPaymentScreen
 import com.example.littlelemon.ui.screens.reservation.ReservationTableDetailsScreen
+import com.example.littlelemon.ui.screens.search.SearchScreen
 import com.example.littlelemon.ui.screens.signup.SignUpScreen
 import com.example.littlelemon.utils.Screen
 
@@ -141,13 +143,6 @@ fun LittleLemonApp() {
             )
         }
 
-        composable(Screen.ReservationPayment.route) {
-            ReservationPaymentScreen(
-                onNextClicked = { navController.navigate(Screen.ReservationTableConfirmation.route) },
-                navController = navController
-            )
-        }
-
         composable(Screen.ReservationTableConfirmation.route) {
             ReservationConfirmationScreen(
                 vm = reservationVm
@@ -159,6 +154,50 @@ fun LittleLemonApp() {
             CartScreen(
                 cartVm = cartVm,
                 navController = navController
+            )
+        }
+
+        //--- Checkout ---
+        composable(Screen.Checkout.route) {
+            CheckoutScreen(
+                cartVm = cartVm,
+                navController = navController
+            )
+        }
+
+        //--- Payment ---
+        composable(Screen.ReservationPayment.route) {
+            PaymentScreen(
+                navController = navController,
+                onNextClickedReservation = { navController.navigate(Screen.ReservationTableConfirmation.route) },
+                isForReservation = true,
+                isForCart = false,
+            )
+        }
+
+        composable(Screen.CartPayment.route) {
+            PaymentScreen(
+                navController = navController,
+                onNextClickedCart = {  },
+                isForCart = true,
+                isForReservation = false,
+            )
+        }
+
+        //--- Search ---
+        composable(Screen.Search.route) {
+            SearchScreen(
+                navController = navController,
+                isGenreSearch = false,
+                appContainer = appContainer
+            )
+        }
+
+        composable(Screen.GenreSearch.route) {
+            SearchScreen(
+                navController = navController,
+                isGenreSearch = true,
+                appContainer = appContainer
             )
         }
     }

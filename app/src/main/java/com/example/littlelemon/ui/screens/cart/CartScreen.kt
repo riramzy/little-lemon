@@ -34,6 +34,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.littlelemon.R
+import com.example.littlelemon.data.local.cart.LocalCartItem
 import com.example.littlelemon.di.AppContainer
 import com.example.littlelemon.ui.components.LemonCartItem
 import com.example.littlelemon.ui.components.LemonNavigationBar
@@ -48,7 +49,27 @@ fun CartScreen(
     cartVm: CartVm,
     navController: NavController
 ) {
-    val cartItems = cartVm.cartItems.collectAsState().value
+    var cartItems = cartVm.cartItems.collectAsState().value
+
+    /*
+    cartItems = listOf(
+        LocalCartItem(
+            id = 1,
+            title = "Greek Salad",
+            price = 12.99,
+            image = "",
+            quantity = 1
+        ),
+        LocalCartItem(
+            id = 2,
+            title = "Bruschetta",
+            price = 12.99,
+            image = "",
+            quantity = 1
+        )
+    )
+
+     */
     val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
 
@@ -68,7 +89,9 @@ fun CartScreen(
                 LemonNavigationBar(
                     isActionEnabled = true,
                     onActionText = "Checkout",
-                    onActionClicked = {  },
+                    onActionClicked = {
+                        navController.navigate(Screen.Checkout.route)
+                    },
                     onHomeClicked = {
                         navController.navigate(Screen.Home.route)
                     },

@@ -30,15 +30,21 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.littlelemon.R
+import com.example.littlelemon.data.local.menu.LocalMenuItem
 import com.example.littlelemon.ui.theme.LittleLemonTheme
+import com.example.littlelemon.utils.dishesImagesMap
+import kotlin.collections.get
 
 @Composable
 fun ItemOverview(
     modifier: Modifier = Modifier,
+    itemName: String = "Greek Salad",
+    itemDescription: String = "The famous greek salad of crispy lettuce, peppers, olives and our Chicago...",
+    itemPrice: Double = 12.99,
+    itemId: Int = 1,
 ) {
     Card(
         modifier = modifier
-            .padding(8.dp)
             .height(110.dp)
             .width(376.dp),
         colors = CardDefaults.cardColors(
@@ -76,13 +82,13 @@ fun ItemOverview(
                     .weight(3f)
             ) {
                 Text(
-                    text = "Greek Salad",
+                    text = itemName,
                     style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier.padding(bottom = 6.dp)
                 )
 
                 Text(
-                    "The famous greek salad of crispy lettuce, peppers, olives and our Chicago style feta cheese, garnished with crunchy garlic and rosemary croutons.",
+                    text = itemDescription,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.labelSmall,
@@ -93,13 +99,13 @@ fun ItemOverview(
                 )
 
                 Text(
-                    text = "$12",
+                    text = itemPrice.toString(),
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
 
             Image(
-                painter = painterResource(R.drawable.greek_salad),
+                painter = painterResource(id = dishesImagesMap[itemId] ?: R.drawable.greek_salad),
                 contentDescription = "Greek Salad",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier

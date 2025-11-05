@@ -12,12 +12,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.material.icons.filled.RemoveCircleOutline
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -84,7 +87,12 @@ fun LemonCartItem(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row {
+                Row(
+                    modifier = Modifier
+                        .wrapContentHeight(),
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Image(
                         painter = painterResource(id = dishesImagesMap.getValue(item.id)),
                         modifier = Modifier
@@ -118,10 +126,10 @@ fun LemonCartItem(
                                 onClick = {
                                     onMinusClicked()
                                 },
-                                modifier = Modifier.size(15.dp)
+                                modifier = Modifier.size(20.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.RemoveCircleOutline,
+                                    imageVector = Icons.Default.RemoveCircle,
                                     contentDescription = null
                                 )
                             }
@@ -134,10 +142,10 @@ fun LemonCartItem(
                                 onClick = {
                                     onAddClicked()
                                 },
-                                modifier = Modifier.size(15.dp)
+                                modifier = Modifier.size(20.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.AddCircleOutline,
+                                    imageVector = Icons.Default.AddCircle,
                                     contentDescription = null
                                 )
                             }

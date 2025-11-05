@@ -11,6 +11,10 @@ sealed class Screen(val route: String) {
     object Register : Screen("register")
     object ReservationTableDetails : Screen("reservationTableDetails")
     object ReservationTableConfirmation : Screen("reservationTableConfirmation")
-    object ReservationPayment : Screen("reservationPayment")
     object Cart : Screen("cart")
+    object Checkout : Screen("checkout")
+    object CartPayment: Screen("cart_payment")
+    object ReservationPayment: Screen("reservation_payment")
+    object Search : Screen("search")
+    object GenreSearch : Screen("genre_search")
 }
