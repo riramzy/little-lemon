@@ -25,4 +25,7 @@ interface LocalCartDao {
 
     @Query("SELECT COUNT(*) FROM cart_items")
     fun getLocalCartCount(): Int
+
+    @Query("DELETE FROM cart_items")
+    fun clearCart()
 }

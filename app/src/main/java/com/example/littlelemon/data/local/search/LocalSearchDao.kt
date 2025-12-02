@@ -13,4 +13,7 @@ interface LocalSearchDao {
 
     @Query("SELECT * FROM menu_items")
     fun getAllMenuItems(): Flow<List<LocalMenuItem>>
+
+    @Query("SELECT * FROM menu_items WHERE category = :category")
+    fun searchMenuItemsByCategory(category: String): Flow<List<LocalMenuItem>>
 }

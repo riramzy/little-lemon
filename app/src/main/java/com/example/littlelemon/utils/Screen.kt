@@ -10,11 +10,16 @@ sealed class Screen(val route: String) {
     object Login : Screen("login")
     object Register : Screen("register")
     object ReservationTableDetails : Screen("reservationTableDetails")
-    object ReservationTableConfirmation : Screen("reservationTableConfirmation")
+    object ReservationConfirmation : Screen("reservationConfirmation")
+    object CartConfirmation: Screen("cartConfirmation")
     object Cart : Screen("cart")
     object Checkout : Screen("checkout")
     object CartPayment: Screen("cart_payment")
     object ReservationPayment: Screen("reservation_payment")
     object Search : Screen("search")
-    object GenreSearch : Screen("genre_search")
+    object CategorySearch : Screen("category_search/{category}") {
+        fun createRoute(category: String) = "category_search/$category"
+    }
+    object Orders : Screen("orders")
+    object Reservations : Screen("reservations")
 }

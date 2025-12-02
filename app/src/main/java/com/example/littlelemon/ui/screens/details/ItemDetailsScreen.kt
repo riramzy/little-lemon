@@ -36,7 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -80,7 +80,7 @@ fun ItemDetailsScreen(
     val item by detailsVm.menuItem.collectAsState()
     val cartItems by cartVm.cartItems.collectAsState() // Or your state flow
     val existingCartItem = cartItems.firstOrNull { it.id == itemId }
-    var itemQty by remember { mutableStateOf(1) }
+    var itemQty by remember { mutableIntStateOf(1) }
 
 
     val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)

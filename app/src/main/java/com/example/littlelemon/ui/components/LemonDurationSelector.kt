@@ -15,10 +15,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,11 +25,11 @@ import com.example.littlelemon.ui.theme.LittleLemonTheme
 
 @Composable
 fun LemonDurationSelector(
+    modifier: Modifier = Modifier,
     duration: String = "1 hour",
-    modifier: Modifier = Modifier
+    isSelected: Boolean = false,
+    onClick: () -> Unit = {},
 ) {
-    var isPressed: Boolean by remember { mutableStateOf(false) }
-
     Card(
         modifier = modifier
             .width(120.dp)
@@ -41,26 +37,26 @@ fun LemonDurationSelector(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isSystemInDarkTheme()) {
-                if (isPressed) {
+                if (isSelected) {
                     MaterialTheme.colorScheme.secondary
                 } else {
                     MaterialTheme.colorScheme.background
                 }
             } else {
-                if (isPressed) {
+                if (isSelected) {
                     MaterialTheme.colorScheme.secondaryContainer
                 } else {
                     Color.White
                 }
             },
             contentColor = if (isSystemInDarkTheme()) {
-                if (isPressed) {
+                if (isSelected) {
                     MaterialTheme.colorScheme.onTertiary
                 } else {
                     MaterialTheme.colorScheme.secondary
                 }
             } else {
-                if (isPressed) {
+                if (isSelected) {
                     Color.White
                 } else {
                     MaterialTheme.colorScheme.secondaryContainer
@@ -79,7 +75,7 @@ fun LemonDurationSelector(
             )
         },
         onClick = {
-            isPressed = !isPressed
+            onClick()
         }
     ) {
         Column(

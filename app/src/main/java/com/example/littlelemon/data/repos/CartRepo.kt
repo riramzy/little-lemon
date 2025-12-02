@@ -28,4 +28,8 @@ class CartRepo(private val dao: LocalCartDao) {
     suspend fun getLocalCartCount(): Int {
         return dao.getLocalCartCount()
     }
+
+    suspend fun clearCart() {
+        dao.clearCart()
+    }
 }

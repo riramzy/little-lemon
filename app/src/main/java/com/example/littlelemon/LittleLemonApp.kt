@@ -15,6 +15,7 @@ import androidx.navigation.navArgument
 import com.example.littlelemon.di.AppContainer
 import com.example.littlelemon.ui.screens.cart.CartScreen
 import com.example.littlelemon.ui.screens.checkout.CheckoutScreen
+import com.example.littlelemon.ui.screens.confirmation.ConfirmationScreen
 import com.example.littlelemon.ui.screens.details.ItemDetailsScreen
 import com.example.littlelemon.ui.screens.home.HomeScreen
 import com.example.littlelemon.ui.screens.login.LoginScreen
@@ -22,10 +23,11 @@ import com.example.littlelemon.ui.screens.onboarding.OnboardingBrowseScreen
 import com.example.littlelemon.ui.screens.onboarding.OnboardingFindScreen
 import com.example.littlelemon.ui.screens.onboarding.OnboardingQuickScreen
 import com.example.littlelemon.ui.screens.onboarding.OnboardingWelcomeScreen
+import com.example.littlelemon.ui.screens.orders.OrdersScreen
 import com.example.littlelemon.ui.screens.payment.PaymentScreen
 import com.example.littlelemon.ui.screens.profile.ProfileScreen
-import com.example.littlelemon.ui.screens.reservation.ReservationConfirmationScreen
 import com.example.littlelemon.ui.screens.reservation.ReservationTableDetailsScreen
+import com.example.littlelemon.ui.screens.reservation.ReservationsScreen
 import com.example.littlelemon.ui.screens.search.SearchScreen
 import com.example.littlelemon.ui.screens.signup.SignUpScreen
 import com.example.littlelemon.utils.Screen
@@ -40,7 +42,9 @@ fun LittleLemonApp() {
     val userVm = appContainer.userVm
     val reservationVm = appContainer.reservationVm
     val cartVm = appContainer.cartVm
-
+    val homeVm = appContainer.homeVm
+    val ordersVm = appContainer.ordersVm
+    
     val startDestination = when {
         !userVm.isOnboardingDone() -> Screen.Onboarding.route
         userVm.isLoggedIn() -> Screen.Home.route
@@ -143,9 +147,28 @@ fun LittleLemonApp() {
             )
         }
 
-        composable(Screen.ReservationTableConfirmation.route) {
-            ReservationConfirmationScreen(
-                vm = reservationVm
+        //--- Confirmation ---
+        //--- Reservation Confirmation ---
+        composable(Screen.ReservationConfirmation.route) {
+            ConfirmationScreen(
+                vm = reservationVm,
+                navController = navController,
+                cartVm = cartVm,
+                ordersVm = ordersVm,
+                isCart = false,
+                isReservation = true
+            )
+        }
+
+        //--- Cart Confirmation ---
+        composable(Screen.CartConfirmation.route) {
+            ConfirmationScreen(
+                vm = reservationVm,
+                navController = navController,
+                cartVm = cartVm,
+                ordersVm = ordersVm,
+                isCart = true,
+                isReservation = false
             )
         }
 
@@ -161,6 +184,7 @@ fun LittleLemonApp() {
         composable(Screen.Checkout.route) {
             CheckoutScreen(
                 cartVm = cartVm,
+                homeVm = homeVm,
                 navController = navController
             )
         }
@@ -169,18 +193,20 @@ fun LittleLemonApp() {
         composable(Screen.ReservationPayment.route) {
             PaymentScreen(
                 navController = navController,
-                onNextClickedReservation = { navController.navigate(Screen.ReservationTableConfirmation.route) },
+                onNextClickedReservation = { navController.navigate(Screen.ReservationConfirmation.route) },
                 isForReservation = true,
                 isForCart = false,
+                appContainer = appContainer
             )
         }
 
         composable(Screen.CartPayment.route) {
             PaymentScreen(
                 navController = navController,
-                onNextClickedCart = {  },
+                onNextClickedCart = { navController.navigate(Screen.CartConfirmation.route) },
                 isForCart = true,
                 isForReservation = false,
+                appContainer = appContainer
             )
         }
 
@@ -188,16 +214,35 @@ fun LittleLemonApp() {
         composable(Screen.Search.route) {
             SearchScreen(
                 navController = navController,
-                isGenreSearch = false,
-                appContainer = appContainer
+                appContainer = appContainer,
+                category = null
             )
         }
 
-        composable(Screen.GenreSearch.route) {
+        composable(
+            route = Screen.CategorySearch.route,
+            arguments = listOf(navArgument("category") { type = NavType.StringType })
+        ) {
+            val category = it.arguments?.getString("category") ?: ""
             SearchScreen(
                 navController = navController,
-                isGenreSearch = true,
-                appContainer = appContainer
+                appContainer = appContainer,
+                category = category
+            )
+        }
+
+        //Orders Screen
+        composable(Screen.Orders.route) {
+            OrdersScreen(
+                navController = navController,
+                ordersVm = ordersVm,
+            )
+        }
+
+        //Reservations Screen
+        composable(Screen.Reservations.route) {
+            ReservationsScreen(
+                navController = navController
             )
         }
     }

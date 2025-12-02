@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,6 +14,7 @@ import androidx.compose.material3.FabPosition
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -34,14 +36,28 @@ import com.example.littlelemon.utils.Screen
 @Composable
 fun SearchScreen(
     navController: NavHostController,
-    isGenreSearch: Boolean = true,
-    appContainer: AppContainer
+    appContainer: AppContainer,
+    category: String?
 ) {
+    val categoriesFilters = listOf(
+        "Starters",
+        "Mains",
+        "Desserts",
+    )
+
+    val vm = appContainer.searchVm
     val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
 
-    val searchQuery by appContainer.searchVm.searchQuery.collectAsState()
-    val searchItems by appContainer.searchVm.searchedItems.collectAsState()
+    val searchQuery by vm.searchQuery.collectAsState()
+    val searchItems by vm.searchedItems.collectAsState()
+    val selectedCategory by vm.categoryFilter.collectAsState()
+
+    LaunchedEffect(category) {
+        if (!category.isNullOrBlank()) {
+            vm.searchByCategory(category)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -52,9 +68,7 @@ fun SearchScreen(
                         horizontal = 15.dp
                     ),
                 searchQuery = searchQuery,
-                onSearchQueryChange = {
-                    appContainer.searchVm.onSearchQueryChange(it)
-                }
+                onSearchQueryChange = vm::onSearchQueryChange
             )
         },
         floatingActionButton = {
@@ -87,26 +101,27 @@ fun SearchScreen(
             modifier = Modifier
                 .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Top
         ) {
-            if (isGenreSearch) {
-                LazyRow(
-                    modifier = Modifier.padding(
+            LazyRow(
+                modifier = Modifier
+                    .padding(
                         start = 15.dp,
                         end = 15.dp,
                         top = 15.dp
                     )
-                ) {
-                    items(6) {
-                        LemonGenrePill(
-                            genre = "Genre",
-                            isSelected = false,
-                            modifier = Modifier.padding(end = 10.dp)
-                        )
-                    }
+                    .fillMaxWidth()
+            ) {
+                items(categoriesFilters) { filterCategory ->
+                    val isSelected = filterCategory.equals(selectedCategory, ignoreCase = true)
+                    LemonGenrePill(
+                        genre = filterCategory,
+                        isSelected = isSelected,
+                        onGenreClicked = { vm.searchByCategory(filterCategory) },
+                        modifier = Modifier.padding(end = 10.dp),
+                    )
                 }
             }
-
             LazyColumn(
                 modifier = Modifier.padding(
                     start = 15.dp,
@@ -121,6 +136,11 @@ fun SearchScreen(
                         itemPrice = item.price,
                         itemId = item.id,
                         modifier = Modifier.padding(bottom = 15.dp),
+                        onItemClick = {
+                            navController.navigate(
+                                Screen.Details.createRoute(item.id)
+                            )
+                        }
                     )
                 }
             }
@@ -136,7 +156,8 @@ fun SearchScreenPreview() {
             navController = rememberNavController(),
             appContainer = AppContainer(
                 context = LocalContext.current
-            )
+            ),
+            category = "starters"
         )
     }
 }
@@ -149,7 +170,8 @@ fun SearchScreenDarkPreview() {
             navController = rememberNavController(),
             appContainer = AppContainer(
                 context = LocalContext.current
-            )
+            ),
+            category = null
         )
     }
 }

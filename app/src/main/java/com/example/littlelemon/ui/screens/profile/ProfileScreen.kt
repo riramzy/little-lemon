@@ -11,36 +11,54 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FabPosition
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.littlelemon.R
 import com.example.littlelemon.data.preferences.UserPreferences
 import com.example.littlelemon.data.repos.UserRepo
-import com.example.littlelemon.ui.components.GreenLemonButton
 import com.example.littlelemon.ui.components.LemonNavigationBar
-import com.example.littlelemon.ui.components.SubInputField
+import com.example.littlelemon.ui.components.YellowLemonButton
 import com.example.littlelemon.ui.theme.LittleLemonTheme
 import com.example.littlelemon.ui.viewmodel.UserVm
 import com.example.littlelemon.utils.Screen
@@ -54,42 +72,138 @@ fun ProfileScreen(
 
     val username = vm.getUsername()
     val firstName = vm.getFirstName()
-    val lastName = vm.getLastName()
     val email = vm.getEmail()
 
-    Scaffold(
-        topBar = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        if (isSystemInDarkTheme()) {
-                            MaterialTheme.colorScheme.onSecondary
-                        } else {
-                            MaterialTheme.colorScheme.secondaryContainer
-                        }
-                    ),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.profile_picture),
-                    contentDescription = "Logo",
-                    modifier = Modifier
-                        .padding(top = 15.dp)
-                        .size(120.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop,
-                )
+    var showLogoutDialog by remember { mutableStateOf(false) }
+    var showDeleteAccountDialog by remember { mutableStateOf(false) }
 
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showLogoutDialog = false
+            },
+            title = {
                 Text(
-                    text = "Profile",
-                    style = MaterialTheme.typography.headlineLarge,
-                    modifier = Modifier.padding(vertical = 15.dp),
-                    color = Color.White
+                    text = "Logout"
+                )
+            },
+            text = {
+                Text(
+                    text = "Are you sure you want to logout?",
+                )
+            },
+            confirmButton = {
+                YellowLemonButton(
+                    text = "Logout",
+                    onClick = {
+                        vm.logout()
+                        Toast.makeText(
+                            context,
+                            "Logged out successfully",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        navController.navigate(Screen.Login.route)
+                        showLogoutDialog = false
+                    },
+                    color = if (isSystemInDarkTheme()) {
+                        MaterialTheme.colorScheme.errorContainer
+                    } else {
+                        MaterialTheme.colorScheme.error
+                    },
+                    textColor = if (isSystemInDarkTheme()) {
+                        MaterialTheme.colorScheme.onErrorContainer
+                        } else {
+                        MaterialTheme.colorScheme.onError
+                    },
+                    modifier = Modifier.width(100.dp)
+                )
+            },
+            dismissButton = {
+                YellowLemonButton(
+                    text = "Cancel",
+                    onClick = {
+                        showLogoutDialog = false
+                    },
+                    color = if (isSystemInDarkTheme()) {
+                        MaterialTheme.colorScheme.background
+                    } else {
+                        MaterialTheme.colorScheme.background
+                    },
+                    textColor = if (isSystemInDarkTheme()) {
+                        MaterialTheme.colorScheme.onBackground
+                        } else {
+                        MaterialTheme.colorScheme.onBackground
+                    },
+                    modifier = Modifier.width(100.dp)
                 )
             }
-        },
+        )
+    }
+
+    if (showDeleteAccountDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showDeleteAccountDialog = false
+            },
+            title = {
+                Text(
+                    text = "Delete account"
+                )
+            },
+            text = {
+                Text(
+                    text = "Are you sure you want to delete your account??",
+                )
+            },
+            confirmButton = {
+                YellowLemonButton(
+                    text = "Delete",
+                    onClick = {
+                        vm.deleteAccount()
+                        Toast.makeText(
+                            context,
+                            "Account deleted successfully",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        navController.navigate(Screen.Login.route)
+                        showDeleteAccountDialog = false
+                    },
+                    color = if (isSystemInDarkTheme()) {
+                        MaterialTheme.colorScheme.errorContainer
+                    } else {
+                        MaterialTheme.colorScheme.error
+                    },
+                    textColor = if (isSystemInDarkTheme()) {
+                        MaterialTheme.colorScheme.onErrorContainer
+                    } else {
+                        MaterialTheme.colorScheme.onError
+                    },
+                    modifier = Modifier.width(100.dp)
+                )
+            },
+            dismissButton = {
+                YellowLemonButton(
+                    text = "Cancel",
+                    onClick = {
+                        showDeleteAccountDialog = false
+                    },
+                    color = if (isSystemInDarkTheme()) {
+                        MaterialTheme.colorScheme.background
+                    } else {
+                        MaterialTheme.colorScheme.background
+                    },
+                    textColor = if (isSystemInDarkTheme()) {
+                        MaterialTheme.colorScheme.onBackground
+                    } else {
+                        MaterialTheme.colorScheme.onBackground
+                    },
+                    modifier = Modifier.width(100.dp)
+                )
+            }
+        )
+    }
+
+    Scaffold(
         floatingActionButton = {
             LemonNavigationBar(
                 onHomeClicked = {
@@ -108,239 +222,331 @@ fun ProfileScreen(
             )
         },
         floatingActionButtonPosition = FabPosition.Center,
+        containerColor = if (isSystemInDarkTheme()) {
+            MaterialTheme.colorScheme.background
+        } else {
+            Color.White
+        },
     ) { innerPadding ->
-        Box(
+        LazyColumn(
             modifier = Modifier
-                .padding(innerPadding)
                 .fillMaxSize()
-                .background(
-                    if (isSystemInDarkTheme()) {
-                        MaterialTheme.colorScheme.onSecondary
-                    } else {
-                        MaterialTheme.colorScheme.secondaryContainer
-                    }
-                )
+                .padding(innerPadding),
+            contentPadding = PaddingValues(
+                bottom = innerPadding.calculateBottomPadding() + 90.dp
+            ),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Top
         ) {
-            Card(
-                modifier = Modifier
-                    .fillMaxSize(),
-                shape = RoundedCornerShape(
-                    topStart = 20.dp,
-                    topEnd = 20.dp,
-                    bottomEnd = 0.dp,
-                    bottomStart = 0.dp
-                ),
-                colors = CardDefaults.cardColors(
-                    if (isSystemInDarkTheme()) {
-                        Color.Black
-                    } else {
-                        Color.White
-                    }
-                )
-            ) {
-                LazyColumn(
+            item {
+                Column(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = 15.dp),
-                    contentPadding = PaddingValues(
-                        bottom = innerPadding.calculateBottomPadding() + 90.dp
-                    ),
+                        .padding(
+                            start = 15.dp,
+                            end = 15.dp,
+                            top = 40.dp,
+                            bottom = 40.dp
+                        )
+                        .fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.SpaceBetween
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    item {
-                        Card(
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 15.dp)
+                            .size(100.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.profile_picture),
+                            contentDescription = "Logo",
                             modifier = Modifier
-                                .wrapContentSize()
-                                .padding(horizontal = 15.dp),
-                            colors = CardDefaults.cardColors(
-                                if (isSystemInDarkTheme()) {
-                                    Color.Black
-                                } else {
-                                    Color.White
-                                }
-                            ),
-                        ) {
-                            Text(
-                                text = "Username",
-                                style = MaterialTheme.typography.labelLarge,
-                                modifier = Modifier
-                                    .padding(top = 15.dp)
-                                    .fillMaxWidth(),
-                                textAlign = TextAlign.Start,
-                                color = if (isSystemInDarkTheme()) {
-                                    Color.White
-                                } else {
-                                    Color.Black
-                                }
-                            )
-                            SubInputField(
-                                requiredText = username ?: "",
-                                modifier = Modifier
-                                    .padding(top = 14.dp)
-                                    .fillMaxWidth(),
-                            )
-                        }
-                    }
-                    item {
-                        Card(
-                            modifier = Modifier
-                                .wrapContentSize()
-                                .padding(horizontal = 15.dp),
-                            colors = CardDefaults.cardColors(
-                                if (isSystemInDarkTheme()) {
-                                    Color.Black
-                                } else {
-                                    Color.White
-                                }
-                            ),
-                        ) {
-                            Text(
-                                text = "First name",
-                                style = MaterialTheme.typography.labelLarge,
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                textAlign = TextAlign.Start,
-                                color = if (isSystemInDarkTheme()) {
-                                    Color.White
-                                } else {
-                                    Color.Black
-                                }
-                            )
-                            SubInputField(
-                                requiredText = firstName ?: "",
-                                modifier = Modifier
-                                    .padding(top = 14.dp)
-                                    .fillMaxWidth(),
-                            )
-                        }
-                    }
-                    item {
-                        Card(
-                            modifier = Modifier
-                                .wrapContentSize()
-                                .padding(horizontal = 15.dp),
-                            colors = CardDefaults.cardColors(
-                                if (isSystemInDarkTheme()) {
-                                    Color.Black
-                                } else {
-                                    Color.White
-                                }
-                            ),
-                        ) {
-                            Text(
-                                text = "Last name",
-                                style = MaterialTheme.typography.labelLarge,
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                textAlign = TextAlign.Start,
-                                color = if (isSystemInDarkTheme()) {
-                                    Color.White
-                                } else {
-                                    Color.Black
-                                }
-                            )
-                            SubInputField(
-                                requiredText = lastName ?: "",
-                                modifier = Modifier
-                                    .padding(top = 14.dp)
-                                    .fillMaxWidth(),
-                            )
-                        }
-                    }
-                    item {
-                        Card(
-                            modifier = Modifier
-                                .wrapContentSize()
-                                .padding(horizontal = 15.dp),
-                            colors = CardDefaults.cardColors(
-                                if (isSystemInDarkTheme()) {
-                                    Color.Black
-                                } else {
-                                    Color.White
-                                }
-                            ),
-                        ) {
-                            Text(
-                                text = "Email",
-                                style = MaterialTheme.typography.labelLarge,
-                                modifier = Modifier
-                                    .padding(top = 14.dp)
-                                    .fillMaxWidth(),
-                                textAlign = TextAlign.Start,
-                                color = if (isSystemInDarkTheme()) {
-                                    Color.White
-                                } else {
-                                    Color.Black
-                                }
-                            )
-                            SubInputField(
-                                requiredText = email ?: "",
-                                modifier = Modifier
-                                    .padding(top = 14.dp)
-                                    .fillMaxWidth(),
-                            )
-                        }
-                    }
-                    item {
-                        GreenLemonButton(
-                            text = "Log Out",
-                            modifier = Modifier
-                                .padding(horizontal = 15.dp)
-                                .fillMaxWidth(),
-                            color = if (isSystemInDarkTheme()) {
-                                MaterialTheme.colorScheme.errorContainer
-                            } else {
-                                MaterialTheme.colorScheme.error
-                            },
-                            onClick = {
-                                vm.logout()
-                                Toast.makeText(
-                                    context,
-                                    "Logged out successfully",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                navController.navigate(Screen.Login.route)
-                            }
+                                .size(100.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop,
                         )
+                        IconButton(
+                            onClick = { },
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .clip(CircleShape)
+                                .size(24.dp)
+                                .background(
+                                    if (isSystemInDarkTheme()) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else {
+                                        MaterialTheme.colorScheme.primaryContainer
+                                    }
+                                )
 
-                        GreenLemonButton(
-                            text = "Delete account",
-                            modifier = Modifier
-                                .padding(horizontal = 15.dp)
-                                .fillMaxWidth(),
-                            color = if (isSystemInDarkTheme()) {
-                                MaterialTheme.colorScheme.background
-                            } else {
-                                MaterialTheme.colorScheme.background
-                            },
-                            borderColor = if (isSystemInDarkTheme()) {
-                                MaterialTheme.colorScheme.errorContainer
-                            } else {
-                                MaterialTheme.colorScheme.error
-                            },
-                            textColor = if (isSystemInDarkTheme()) {
-                                MaterialTheme.colorScheme.errorContainer
-                            } else {
-                                MaterialTheme.colorScheme.error
-                            },
-                            onClick = {
-                                vm.deleteAccount()
-                                Toast.makeText(
-                                    context,
-                                    "Account deleted successfully",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                navController.navigate(Screen.Login.route)
-                            }
-                        )
+                        ) {
+                            Icon(
+                                Icons.Filled.Edit,
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .padding(4.dp),
+                                contentDescription = "Edit",
+                                tint = if (isSystemInDarkTheme()) {
+                                    Color.Black
+                                } else {
+                                    Color.White
+                                }
+                            )
+                        }
                     }
+
+                    Text(
+                        text = firstName?.replaceFirstChar {
+                            it.uppercase()
+                        } ?: "Ramzy",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontSize = 26.sp,
+                        modifier = Modifier.padding(
+                            bottom = 10.dp,
+                            top = 10.dp
+                        )
+                    )
+                    Text(
+                        text = username ?: "riramzy",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = if (isSystemInDarkTheme()) {
+                            Color.White.copy(0.5f)
+                        } else {
+                            Color.Black.copy(0.5f)
+                        }
+
+                    )
+                    Text(
+                        text = email ?: "james.iredell@examplepetstore.com",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = if (isSystemInDarkTheme()) {
+                            Color.White.copy(0.5f)
+                        } else {
+                            Color.Black.copy(0.5f)
+                        }
+                    )
+                }
+            }
+
+            item {
+                Box(
+                    modifier = Modifier
+                        .padding(
+                            bottom = 10.dp,
+                            start = 10.dp,
+                            end = 10.dp
+                        )
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    SectionHead(
+                        title = "Profile",
+                        icon = Icons.Default.Person,
+                    )
+                }
+            }
+            item {
+                Box(
+                    modifier = Modifier
+                        .padding(
+                            bottom = 10.dp,
+                            start = 10.dp,
+                            end = 10.dp
+                        )
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    SectionHead(
+                        title = "Shipping Address",
+                        icon = Icons.Default.LocationOn,
+                    )
+                }
+            }
+            item {
+                Box(
+                    modifier = Modifier
+                        .padding(
+                            bottom = 10.dp,
+                            start = 10.dp,
+                            end = 10.dp
+                        )
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    SectionHead(
+                        title = "Orders",
+                        icon = Icons.Default.History,
+                        onClick = {
+                            navController.navigate(Screen.Orders.route)
+                        }
+                    )
+                }
+            }
+            item {
+                Box(
+                    modifier = Modifier
+                        .padding(
+                            bottom = 10.dp,
+                            start = 10.dp,
+                            end = 10.dp
+                        )
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    SectionHead(
+                        title = "Reservations",
+                        icon = Icons.Default.Restaurant,
+                        modifier = Modifier,
+                        onClick = {
+                            navController.navigate(Screen.Reservations.route)
+                        }
+                    )
+                }
+            }
+            item {
+                Box(
+                    modifier = Modifier
+                        .padding(
+                            bottom = 10.dp,
+                            start = 10.dp,
+                            end = 10.dp
+                        )
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    SectionHead(
+                        title = "Privacy Policy",
+                        icon = Icons.Default.Lock,
+                    )
+                }
+            }
+            item {
+                Box(
+                    modifier = Modifier
+                        .padding(
+                            bottom = 10.dp,
+                            start = 10.dp,
+                            end = 10.dp
+                        )
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    SectionHead(
+                        title = "Settings",
+                        icon = Icons.Default.Settings,
+                    )
+                }
+            }
+            item {
+                Box(
+                    modifier = Modifier
+                        .padding(
+                            bottom = 10.dp,
+                            start = 10.dp,
+                            end = 10.dp
+                        )
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    SectionHead(
+                        title = "Logout",
+                        icon = Icons.AutoMirrored.Filled.Login,
+                        onClick = {
+                            showLogoutDialog = true
+                        }
+                    )
+                }
+            }
+            item {
+                Box(
+                    modifier = Modifier
+                        .padding(
+                            bottom = 10.dp,
+                            start = 10.dp,
+                            end = 10.dp
+                        )
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    SectionHead(
+                        title = "Delete Account",
+                        icon = Icons.Default.DeleteForever,
+                        onClick = {
+                            showDeleteAccountDialog = true
+                        }
+                    )
                 }
             }
         }
     }
 }
 
+@Composable
+fun SectionHead(
+    modifier: Modifier = Modifier,
+    title: String,
+    icon: ImageVector,
+    onClick: () -> Unit = {}
+) {
+    Card(
+        modifier = modifier
+            .width(300.dp)
+            .height(50.dp),
+        colors = CardDefaults.cardColors(
+            if (isSystemInDarkTheme()) {
+                Color.Black
+            } else {
+                MaterialTheme.colorScheme.tertiaryContainer
+            }
+        ),
+        shape = CircleShape,
+        onClick = {
+            onClick()
+        }
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = TextAlign.Center,
+                color = if (isSystemInDarkTheme()) {
+                    Color.White
+                } else {
+                    Color.Black
+                }
+            )
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = 10.dp)
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(
+                        if (isSystemInDarkTheme()) {
+                            MaterialTheme.colorScheme.primary.copy(0.2f)
+                        } else {
+                            MaterialTheme.colorScheme.primaryContainer.copy(0.2f)
+                        }
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = "Logo",
+                    modifier = Modifier
+                        .size(24.dp),
+                    tint = if (isSystemInDarkTheme()) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.primaryContainer
+                    }
+                )
+            }
+        }
+    }
+}
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable

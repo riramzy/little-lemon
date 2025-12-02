@@ -5,7 +5,6 @@ import com.example.littlelemon.data.local.menu.LocalMenuItem
 import com.example.littlelemon.data.remote.NetworkMenuItem
 
 //Converts between network and local models using extension functions
-
 fun NetworkMenuItem.toEntity(): LocalMenuItem = LocalMenuItem(
     id = this.id,
     title = this.title,

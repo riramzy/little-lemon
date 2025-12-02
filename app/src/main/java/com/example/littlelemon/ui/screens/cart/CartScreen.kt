@@ -34,7 +34,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.littlelemon.R
-import com.example.littlelemon.data.local.cart.LocalCartItem
 import com.example.littlelemon.di.AppContainer
 import com.example.littlelemon.ui.components.LemonCartItem
 import com.example.littlelemon.ui.components.LemonNavigationBar
@@ -49,7 +48,7 @@ fun CartScreen(
     cartVm: CartVm,
     navController: NavController
 ) {
-    var cartItems = cartVm.cartItems.collectAsState().value
+    val cartItems = cartVm.cartItems.collectAsState().value
 
     /*
     cartItems = listOf(
@@ -166,7 +165,7 @@ fun CartScreen(
                     .padding(innerPadding)
                     .fillMaxSize(),
                 contentPadding = PaddingValues(
-                    bottom = innerPadding.calculateBottomPadding() + 90.dp
+                    bottom = innerPadding.calculateBottomPadding() + 100.dp
                 ),
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.CenterHorizontally

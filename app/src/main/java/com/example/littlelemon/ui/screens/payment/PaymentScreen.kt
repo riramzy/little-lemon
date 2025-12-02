@@ -1,6 +1,7 @@
 package com.example.littlelemon.ui.screens.payment
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.widget.Toast
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,17 +18,21 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.littlelemon.R
+import com.example.littlelemon.di.AppContainer
 import com.example.littlelemon.ui.components.InputField
 import com.example.littlelemon.ui.components.LemonNavigationBar
 import com.example.littlelemon.ui.components.LemonPaymentSelector
@@ -42,10 +47,39 @@ fun PaymentScreen(
     onNextClickedReservation: () -> Unit = {},
     navController: NavHostController,
     isForReservation: Boolean = false,
-    isForCart: Boolean = false
+    isForCart: Boolean = true,
+    appContainer: AppContainer
 ) {
+    val context = LocalContext.current
+    val paymentVm: PaymentVm = viewModel(
+        factory = PaymentVmFactory(
+            userVm = appContainer.userVm,
+            reservationVm = appContainer.reservationVm
+        )
+    )
+
     val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
+
+    val isLogged = appContainer.userVm.isLoggedIn()
+
+    // Collect state from the ViewModel
+    val firstName by paymentVm.firstName.collectAsState()
+    val lastName by paymentVm.lastName.collectAsState()
+    val email by paymentVm.email.collectAsState()
+    val phoneNumber by paymentVm.phoneNumber.collectAsState()
+    val paymentMethod by paymentVm.paymentMethod.collectAsState()
+    val cardNumber by paymentVm.cardNumber.collectAsState()
+    val cardMonth by paymentVm.cardMonth.collectAsState()
+    val cardYear by paymentVm.cardYear.collectAsState()
+    val cardCvv by paymentVm.cardCvv.collectAsState()
+
+    // Listen for toast messages
+    LaunchedEffect(Unit) {
+        paymentVm.toastMessage.collect { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -61,19 +95,10 @@ fun PaymentScreen(
         floatingActionButton = {
             LemonNavigationBar(
                 isActionEnabled = true,
-                onActionText = if (isForReservation) {
-                    "Confirm"
-                } else if (isForCart) {
-                    "Sumbit"
-                } else {
-                    ""
-                },
-                onActionClicked = if (isForReservation) {
-                    onNextClickedReservation
-                } else if (isForCart) {
-                    onNextClickedCart
-                } else {
-                    {}
+                onActionText = if (isForReservation) "Confirm" else if (isForCart) "Submit" else "",
+                onActionClicked = {
+                    val onNext = if (isForReservation) onNextClickedReservation else onNextClickedCart
+                    paymentVm.onNextClicked(onNext)
                 },
                 onHomeClicked = {
                     navController.navigate(Screen.Home.route)
@@ -125,7 +150,16 @@ fun PaymentScreen(
                     UserInformation(
                         modifier = Modifier.padding(
                             horizontal = 15.dp,
-                        )
+                        ),
+                        isLogged = isLogged,
+                        firstName = firstName,
+                        onFirstNameChange = paymentVm::onFirstNameChange,
+                        lastName = lastName,
+                        onLastNameChange = paymentVm::onLastNameChange,
+                        email = email,
+                        onEmailChange = paymentVm::onEmailChange,
+                        phoneNumber = phoneNumber,
+                        onPhoneNumberChange = paymentVm::onPhoneNumberChange
                     )
                 }
                 item {
@@ -148,6 +182,8 @@ fun PaymentScreen(
                             title = "Mastercard",
                             subtitle = "So, we can charge you",
                             picture = R.drawable.mastercard_logo,
+                            isSelected = paymentMethod == "Mastercard",
+                            onClick = { paymentVm.onPaymentMethodChange("Mastercard") },
                             modifier = Modifier.padding(
                                 bottom = 15.dp
                             )
@@ -156,6 +192,8 @@ fun PaymentScreen(
                             title = "Visa",
                             subtitle = "Yes, we can charge as well",
                             picture = R.drawable.visa_logo,
+                            isSelected = paymentMethod == "Visa",
+                            onClick = { paymentVm.onPaymentMethodChange("Visa") },
                             modifier = Modifier.padding(
                                 bottom = 15.dp
                             )
@@ -165,16 +203,26 @@ fun PaymentScreen(
                                 title = "Cash On Delivery",
                                 subtitle = "We will charge you, later",
                                 picture = R.drawable.cash,
+                                isSelected = paymentMethod == "Cash On Delivery",
+                                onClick = { paymentVm.onPaymentMethodChange("Cash On Delivery") },
                             )
                         }
                     }
                 }
-                item {
-                    CardInformation(
-                        modifier = Modifier.padding(
-                            horizontal = 15.dp,
+                if (paymentMethod != "Cash On Delivery") {
+                    item {
+                        CardInformation(
+                            modifier = Modifier.padding(horizontal = 15.dp),
+                            cardNumber = cardNumber,
+                            onCardNumberChange = paymentVm::onCardNumberChange,
+                            month = cardMonth,
+                            onMonthChange = paymentVm::onCardMonthChange,
+                            year = cardYear,
+                            onYearChange = paymentVm::onCardYearChange,
+                            cvv = cardCvv,
+                            onCvvChange = paymentVm::onCardCvvChange
                         )
-                    )
+                    }
                 }
             }
         }
@@ -196,8 +244,10 @@ fun PaymentHeadline(
         Text(
             text = if (isForReservation) {
                 "Table Reservation".uppercase()
-            } else {
+            } else if (isForCart) {
                 "Checkout".uppercase()
+            } else {
+                "Payment".uppercase()
             },
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.ExtraBold,
@@ -216,7 +266,16 @@ fun PaymentHeadline(
 
 @Composable
 fun UserInformation(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isLogged: Boolean = false,
+    firstName: String,
+    onFirstNameChange: (String) -> Unit,
+    lastName: String,
+    onLastNameChange: (String) -> Unit,
+    email: String,
+    onEmailChange: (String) -> Unit,
+    phoneNumber: String,
+    onPhoneNumberChange: (String) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -233,21 +292,32 @@ fun UserInformation(
         )
         InputField(
             requiredText = "First Name",
+            value = firstName.replaceFirstChar { it.uppercase() },
+            onValueChange = onFirstNameChange,
+            isReadOnly = isLogged,
             modifier = Modifier
                 .padding(bottom = 15.dp)
         )
         InputField(
             requiredText = "Last Name",
+            value = lastName.replaceFirstChar { it.uppercase() },
+            onValueChange = onLastNameChange,
+            isReadOnly = isLogged,
             modifier = Modifier
                 .padding(bottom = 15.dp)
         )
         InputField(
             requiredText = "Email",
+            value = email,
+            onValueChange = onEmailChange,
+            isReadOnly = isLogged,
             modifier = Modifier
                 .padding(bottom = 15.dp)
         )
         InputField(
             requiredText = "Phone Number",
+            value = phoneNumber,
+            onValueChange = onPhoneNumberChange,
             modifier = Modifier
         )
     }
@@ -255,7 +325,15 @@ fun UserInformation(
 
 @Composable
 fun CardInformation(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    cardNumber: String,
+    onCardNumberChange: (String) -> Unit,
+    month: String,
+    onMonthChange: (String) -> Unit,
+    year: String,
+    onYearChange: (String) -> Unit,
+    cvv: String,
+    onCvvChange: (String) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -265,6 +343,8 @@ fun CardInformation(
     ) {
         InputField(
             requiredText = "Card Number",
+            value = cardNumber,
+            onValueChange = onCardNumberChange,
             modifier = Modifier
                 .padding(bottom = 15.dp)
         )
@@ -274,18 +354,24 @@ fun CardInformation(
         ) {
             SubInputField(
                 requiredText = "Month",
+                value = month,
+                onValueChange = onMonthChange,
                 modifier = Modifier
                     .weight(1f)
                     .padding(end = 6.dp)
             )
             SubInputField(
                 requiredText = "Year",
+                value = year,
+                onValueChange = onYearChange,
                 modifier = Modifier
                     .weight(1f)
                     .padding(end = 6.dp)
             )
             SubInputField(
                 requiredText = "CVV",
+                value = cvv,
+                onValueChange = onCvvChange,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -299,7 +385,10 @@ fun PaymentScreenPreview() {
         PaymentScreen(
             onNextClickedCart = {},
             onNextClickedReservation = {},
-            navController = rememberNavController()
+            navController = rememberNavController(),
+            appContainer = AppContainer(
+                LocalContext.current
+            )
         )
     }
 }
@@ -311,7 +400,10 @@ fun PaymentScreenDarkPreview() {
         PaymentScreen(
             onNextClickedCart = {},
             onNextClickedReservation = {},
-            navController = rememberNavController()
+            navController = rememberNavController(),
+            appContainer = AppContainer(
+                LocalContext.current
+            )
         )
     }
 }

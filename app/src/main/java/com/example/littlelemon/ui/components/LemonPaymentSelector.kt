@@ -21,10 +21,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,9 +36,11 @@ fun LemonPaymentSelector(
     modifier: Modifier = Modifier,
     title: String,
     subtitle: String,
-    picture: Int
+    picture: Int,
+    isSelected: Boolean = false,
+    onClick: () -> Unit = {}
 ) {
-    var isPressed: Boolean by remember { mutableStateOf(false) }
+    //var isPressed: Boolean by remember { mutableStateOf(false) }
 
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -79,7 +77,7 @@ fun LemonPaymentSelector(
             },
             shape = RoundedCornerShape(16.dp),
             onClick = {
-                isPressed = !isPressed
+                onClick()
             }
         ) {
             Image(
@@ -94,7 +92,7 @@ fun LemonPaymentSelector(
             modifier = Modifier
                 .weight(3f)
                 .clickable {
-                    isPressed = !isPressed
+                    onClick()
                 },
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -120,7 +118,7 @@ fun LemonPaymentSelector(
                     }
                 )
             }
-            if (isPressed) {
+            if (isSelected) {
                 Icon(
                     imageVector = Icons.Filled.CheckCircle,
                     tint = Color.Blue,

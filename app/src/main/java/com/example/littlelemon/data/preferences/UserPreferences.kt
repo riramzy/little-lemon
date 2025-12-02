@@ -51,6 +51,7 @@ class UserPreferences(context: Context) {
 
     fun getFirstName(): String? = sharedPreferences.getString(KEY_FIRST_NAME, null)
     fun getLastName(): String? = sharedPreferences.getString(KEY_LAST_NAME, null)
+    fun getFullName(): String? = "${getFirstName()} ${getLastName()}"
     fun getEmail(): String? = sharedPreferences.getString(KEY_EMAIL, null)
     fun getUsername(): String? = sharedPreferences.getString(KEY_USERNAME, null)
 

@@ -2,6 +2,7 @@ package com.example.littlelemon.ui.screens.reservation
 
 import android.content.res.Configuration
 import android.os.Build
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -15,9 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.FabPosition
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,7 +37,6 @@ import com.example.littlelemon.ui.components.LemonNavigationBar
 import com.example.littlelemon.ui.components.LemonNumberOfDinersSelector
 import com.example.littlelemon.ui.components.LemonTimeSelector
 import com.example.littlelemon.ui.components.TopAppBar
-import com.example.littlelemon.ui.components.YellowLemonButton
 import com.example.littlelemon.ui.theme.LittleLemonTheme
 import com.example.littlelemon.utils.Screen
 import java.time.LocalDate
@@ -56,6 +55,7 @@ fun ReservationTableDetailsScreen(
 ) {
     val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -72,7 +72,22 @@ fun ReservationTableDetailsScreen(
             LemonNavigationBar(
                 isActionEnabled = true,
                 onActionText = "Next",
-                onActionClicked = onNextClicked,
+                onActionClicked = {
+                    if (
+                        vm.selectedDate.value == null ||
+                        vm.selectedTime.value == null ||
+                        vm.selectedDuration.value == null ||
+                        vm.selectedNumberOfDiners.value == null
+                    ) {
+                        Toast.makeText(
+                            context,
+                            "Please select all fields",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        onNextClicked()
+                    }
+                                  },
                 onHomeClicked = {
                     navController.navigate(Screen.Home.route)
                 },
@@ -131,38 +146,18 @@ fun ReservationTableDetailsScreen(
                 DurationPicker(
                     modifier = Modifier.padding(
                         horizontal = 15.dp
-                    )
+                    ),
+                    vm = vm
                 )
             }
             item {
                 NumberOfDinerPicker(
                     modifier = Modifier.padding(
                         horizontal = 15.dp
-                    )
+                    ),
+                    vm = vm
                 )
             }
-            /*
-            item {
-                LinearProgressIndicator(
-                    progress = { 0.5f },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            start = 15.dp,
-                            end = 15.dp,
-                            top = 50.dp
-                        ),
-                    color = if (isSystemInDarkTheme()) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.primaryContainer
-                    },
-                    trackColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
-                )
-            }
-
-             */
         }
     }
 }
@@ -237,7 +232,7 @@ fun DatePicker(
 
         LazyRow {
             items(monthDays) { day ->
-                var isSelected = selectedDate?.dayOfMonth == day.dayOfMonth
+                val isSelected = selectedDate?.dayOfMonth == day.dayOfMonth
                 LemonDateSelector(
                     day = day,
                     isSelected = isSelected,
@@ -294,7 +289,7 @@ fun TimePicker(
 
         LazyRow {
             items(timeSlots) { time ->
-                var isSelected = selectedTime == time
+                val isSelected = selectedTime == time
                 LemonTimeSelector(
                     time = time,
                     isSelected = isSelected,
@@ -310,7 +305,8 @@ fun TimePicker(
 
 @Composable
 fun DurationPicker(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    vm: ReservationVm
 ) {
     val durations = listOf(
         "1  hour",
@@ -340,8 +336,13 @@ fun DurationPicker(
 
         LazyRow {
             items(durations) { duration ->
+                val isSelected = vm.selectedDuration.value == duration
                 LemonDurationSelector(
                     duration = duration,
+                    onClick = {
+                        vm.selectedDuration.value = duration
+                    },
+                    isSelected = isSelected,
                     modifier = Modifier.padding(end = 15.dp)
                 )
             }
@@ -351,7 +352,8 @@ fun DurationPicker(
 
 @Composable
 fun NumberOfDinerPicker(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    vm: ReservationVm
 ) {
     val numberOfDiners = listOf(
         "1",
@@ -387,8 +389,13 @@ fun NumberOfDinerPicker(
 
         LazyRow {
             items(numberOfDiners) { diners ->
+                val isSelected = vm.selectedNumberOfDiners.value.toString() == diners
                 LemonNumberOfDinersSelector(
                     numberOfDiners = diners,
+                    onClick = {
+                        vm.selectedNumberOfDiners.value = diners.toInt()
+                    },
+                    isSelected = isSelected,
                     modifier = Modifier.padding(end = 15.dp)
                 )
             }

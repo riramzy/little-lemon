@@ -5,9 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.littlelemon.data.local.cart.LocalCartItem
 import com.example.littlelemon.data.repos.CartRepo
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
@@ -66,6 +64,12 @@ class CartVm(
     fun updateQuantity(itemId: Int, newQuantity: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             cartRepo.updateQuantity(itemId, newQuantity)
+        }
+    }
+
+    fun clearCart() {
+        viewModelScope.launch(Dispatchers.IO) {
+            cartRepo.clearCart()
         }
     }
 }

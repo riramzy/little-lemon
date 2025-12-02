@@ -1,31 +1,30 @@
-package com.example.littlelemon.ui.screens.reservation
+package com.example.littlelemon.ui.screens.confirmation
 
 import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,19 +32,39 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.littlelemon.data.repos.UserRepo
-import com.example.littlelemon.ui.components.GreenLemonButton
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.example.littlelemon.data.local.cart.LocalCartItem
+import com.example.littlelemon.di.AppContainer
 import com.example.littlelemon.ui.components.InputField
 import com.example.littlelemon.ui.components.LemonCutlerySelector
+import com.example.littlelemon.ui.components.LemonNavigationBar
 import com.example.littlelemon.ui.components.TopAppBar
-import com.example.littlelemon.ui.components.YellowLemonButton
+import com.example.littlelemon.ui.screens.cart.CartVm
+import com.example.littlelemon.ui.screens.cart.CartVmFactory
+import com.example.littlelemon.ui.screens.orders.OrdersVm
+import com.example.littlelemon.ui.screens.orders.OrdersVmFactory
+import com.example.littlelemon.ui.screens.reservation.ReservationVm
 import com.example.littlelemon.ui.theme.LittleLemonTheme
+import com.example.littlelemon.utils.Screen
 
 @Composable
-fun ReservationConfirmationScreen(
+fun ConfirmationScreen(
     modifier: Modifier = Modifier,
-    vm: ReservationVm
+    vm: ReservationVm,
+    cartVm: CartVm,
+    ordersVm: OrdersVm,
+    navController: NavController,
+    isCart: Boolean = true,
+    isReservation: Boolean = false,
 ) {
+    val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
+    val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
+
+    val cartItems = cartVm.cartItems.collectAsState().value
+    val userRepo = AppContainer(LocalContext.current).userRepo
+    val userName = userRepo.getFullName()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -57,72 +76,33 @@ fun ReservationConfirmationScreen(
                 isSearchRequired = false
             )
         },
-        bottomBar = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                LinearProgressIndicator(
-                    progress = { 1f },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            start = 15.dp,
-                            end = 15.dp,
-                            top = 15.dp
-                        ),
-                    color = if (isSystemInDarkTheme()) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.primaryContainer
-                    },
-                    trackColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
-                )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .padding(
-                            15.dp
-                        ),
-                    horizontalArrangement = Arrangement.spacedBy(15.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    GreenLemonButton(
-                        text = "Edit",
-                        modifier = Modifier
-                            .weight(1f),
-                        color = if (isSystemInDarkTheme()) {
-                            MaterialTheme.colorScheme.onSecondary
-                        } else {
-                            MaterialTheme.colorScheme.secondaryContainer
-                        },
-                        textColor = if (isSystemInDarkTheme()) {
-                            MaterialTheme.colorScheme.secondary
-                        } else {
-                            MaterialTheme.colorScheme.onSecondaryContainer
-                        }
-                    )
-                    YellowLemonButton(
-                        text = "Confirm",
-                        modifier = Modifier.weight(1f),
-                        color = if (isSystemInDarkTheme()) {
-                            MaterialTheme.colorScheme.onPrimary
-                        } else {
-                            MaterialTheme.colorScheme.primaryContainer
-                        },
-                        textColor = if (isSystemInDarkTheme()) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.onPrimaryContainer
-                        }
-                    )
-                }
-            }
+        floatingActionButton = {
+            LemonNavigationBar(
+                isActionEnabled = true,
+                onActionText = "Confirm",
+                onActionClicked = {
+                    if (isCart) {
+                        ordersVm.placeOrder(cartItems)
+                        cartVm.clearCart()
+                        navController.navigate(Screen.Orders.route)
+                    }
+                },
+                onHomeClicked = {
+                    navController.navigate(Screen.Home.route)
+                },
+                onReservationClicked = {
+                    navController.navigate(Screen.ReservationTableDetails.route)
+                },
+                onCartClicked = {
+                    navController.navigate(Screen.Cart.route)
+                },
+                onProfileClicked = {
+                    navController.navigate(Screen.Profile.route)
+                },
+                selectedRoute = currentRoute
+            )
         },
+        floatingActionButtonPosition = FabPosition.Center,
         containerColor = if (isSystemInDarkTheme()) {
             MaterialTheme.colorScheme.background
         } else {
@@ -132,7 +112,7 @@ fun ReservationConfirmationScreen(
             .statusBarsPadding()
     ) { innerPadding ->
         LazyColumn(
-            modifier = Modifier
+            modifier = modifier
                 .padding(innerPadding)
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -150,7 +130,11 @@ fun ReservationConfirmationScreen(
                     modifier = Modifier.padding(
                         horizontal = 15.dp,
                     ),
-                    vm = vm
+                    vm = vm,
+                    cartItems = cartItems,
+                    isCart = isCart,
+                    isReservation = isReservation,
+                    userName = userName.toString(),
                 )
             }
             item {
@@ -167,7 +151,11 @@ fun ReservationConfirmationScreen(
 @Composable
 fun ReservationDetailsCard(
     modifier: Modifier = Modifier,
-    vm: ReservationVm
+    vm: ReservationVm,
+    cartItems: List<LocalCartItem> = emptyList(),
+    isCart: Boolean,
+    isReservation: Boolean,
+    userName: String = "Ramzi",
 ) {
     Card(
         modifier = modifier
@@ -175,7 +163,7 @@ fun ReservationDetailsCard(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isSystemInDarkTheme()) {
-                MaterialTheme.colorScheme.onPrimary
+                MaterialTheme.colorScheme.primary
             } else {
                 MaterialTheme.colorScheme.primaryContainer
             }
@@ -185,7 +173,7 @@ fun ReservationDetailsCard(
             modifier = Modifier.padding(15.dp)
         ) {
             Text(
-                text = "Reservation Details".uppercase(),
+                text = if (isCart) "Your Order is Placed!".uppercase() else if (isReservation) "Your Reservation is accepted!".uppercase() else TODO(),
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(bottom = 15.dp)
             )
@@ -197,57 +185,90 @@ fun ReservationDetailsCard(
             ) {
                 item {
                     InputField(
-                        requiredText = "Name"
+                        requiredText = "Order ID",
+                        value = vm.orderId.value.toString(),
+                        isReadOnly = true
                     )
                 }
+
                 item {
                     InputField(
-                        requiredText = "Phone number"
+                        requiredText = "Name",
+                        value = userName.split(" ").joinToString(" ") {
+                            it.replaceFirstChar { c -> c.uppercase() }
+                        },
+                        isReadOnly = true
                     )
                 }
+
                 item {
                     InputField(
-                        requiredText = "At",
+                        requiredText = "Phone number",
                         isReadOnly = true,
-                        value = vm.selectedTime.value.toString(),
+                        value = vm.phoneNumber.value.toString()
                     )
                 }
-                item {
-                    InputField(
-                        requiredText = "For"
-                    )
+
+                if (isReservation) {
+                    item {
+                        InputField(
+                            requiredText = "At",
+                            isReadOnly = true,
+                            value = vm.selectedTime.value.toString(),
+                        )
+                    }
+
+                    item {
+                        InputField(
+                            requiredText = "For",
+                            isReadOnly = true,
+                            value = vm.selectedNumberOfDiners.value.toString(),
+                        )
+                    }
+
+                    item {
+                        InputField(
+                            requiredText = "Date",
+                            isReadOnly = true,
+                            value = vm.selectedDate.value.toString(),
+                        )
+                    }
+
+                    item {
+                        InputField(
+                            requiredText = "Duration",
+                            isReadOnly = true,
+                            value = vm.selectedDuration.value.toString(),
+                        )
+                    }
                 }
+
                 item {
                     InputField(
-                        requiredText = "Date",
+                        requiredText = "Payment type",
                         isReadOnly = true,
-                        value = vm.selectedDate.value.toString(),
+                        value = vm.selectedPaymentMethod.value.toString()
                     )
                 }
-                item {
-                    InputField(
-                        requiredText = "Duration",
-                    )
+
+                if (isCart) {
+                    item {
+                        InputField(
+                            requiredText = "Items",
+                            isReadOnly = true,
+                            value = cartItems.joinToString(separator = "\n") { cartItem ->
+                                "${cartItem.quantity}x ${cartItem.title}"
+                            },
+                            isMultiline = true
+                        )
+                    }
                 }
+
                 item {
                     InputField(
-                        requiredText = "Courses"
-                    )
-                }
-                item {
-                    InputField(
-                        requiredText = "Payment type"
-                    )
-                }
-                item {
-                    InputField(
-                        requiredText = "Order ID"
-                    )
-                }
-                item {
-                    InputField(
-                        requiredText = "Total"
-                    )
+                        requiredText = "Total",
+                        isReadOnly = true,
+                        value = "%.2f".format(cartItems.sumOf { it.price * it.quantity } + 5)                    )
                 }
             }
         }
@@ -319,20 +340,26 @@ fun AdditionalNotes(
 
 @Preview
 @Composable
-fun ReservationConfirmationScreenPreview() {
+fun ConfirmationScreenPreview() {
     LittleLemonTheme {
-        ReservationConfirmationScreen(
-            vm = ReservationVm()
+        ConfirmationScreen(
+            vm = ReservationVm(),
+            navController = NavController(LocalContext.current),
+            cartVm = viewModel(factory = CartVmFactory(AppContainer(LocalContext.current))),
+            ordersVm = viewModel(factory = OrdersVmFactory(AppContainer(LocalContext.current))),
         )
     }
 }
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun ReservationConfirmationScreenDarkPreview() {
+fun ConfirmationScreenDarkPreview() {
     LittleLemonTheme {
-        ReservationConfirmationScreen(
-            vm = ReservationVm()
+        ConfirmationScreen(
+            vm = ReservationVm(),
+            navController = NavController(LocalContext.current),
+            cartVm = viewModel(factory = CartVmFactory(AppContainer(LocalContext.current))),
+            ordersVm = viewModel(factory = OrdersVmFactory(AppContainer(LocalContext.current))),
         )
     }
 }

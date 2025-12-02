@@ -97,7 +97,7 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(innerPadding),
             contentPadding = PaddingValues(
-                bottom = innerPadding.calculateBottomPadding() + 90.dp
+                bottom = innerPadding.calculateBottomPadding() + 100.dp
             )
         ) {
             item {
@@ -159,8 +159,8 @@ fun HomeScreen(
                     title = "SHOP BY CATEGORY",
                     subTitle = "Find what you want quickly",
                     isCategory = true,
-                    onItemClicked = {
-
+                    onItemClicked = { item ->
+                        navController.navigate(Screen.CategorySearch.createRoute(item.category))
                     }
                 )
             }

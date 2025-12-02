@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -30,10 +29,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.littlelemon.R
-import com.example.littlelemon.data.local.menu.LocalMenuItem
 import com.example.littlelemon.ui.theme.LittleLemonTheme
 import com.example.littlelemon.utils.dishesImagesMap
-import kotlin.collections.get
 
 @Composable
 fun ItemOverview(
@@ -42,6 +39,7 @@ fun ItemOverview(
     itemDescription: String = "The famous greek salad of crispy lettuce, peppers, olives and our Chicago...",
     itemPrice: Double = 12.99,
     itemId: Int = 1,
+    onItemClick: () -> Unit = {}
 ) {
     Card(
         modifier = modifier
@@ -67,7 +65,10 @@ fun ItemOverview(
                 MaterialTheme.colorScheme.secondaryContainer
             }
         ),
-        shape = RoundedCornerShape(20.dp)
+        shape = RoundedCornerShape(20.dp),
+        onClick = {
+            onItemClick()
+        }
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

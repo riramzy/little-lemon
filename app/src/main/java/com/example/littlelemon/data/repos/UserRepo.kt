@@ -58,4 +58,5 @@ class UserRepo(
     fun getLastName(): String? = userPreferences.getLastName()
     fun getEmail(): String? = userPreferences.getEmail()
     fun getUsername(): String? = userPreferences.getUsername()
+    fun getFullName(): String? = userPreferences.getFullName()
 }

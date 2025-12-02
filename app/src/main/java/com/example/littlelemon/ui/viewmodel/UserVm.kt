@@ -53,6 +53,7 @@ class UserVm(
     fun getUsername(): String? { return userRepo.getUsername() }
     fun getFirstName(): String? { return userRepo.getFirstName() }
     fun getLastName(): String? { return userRepo.getLastName() }
+    fun getFullName(): String? { return userRepo.getFullName() }
     fun getEmail(): String? { return userRepo.getEmail() }
 
     fun isLoggedIn(): Boolean {

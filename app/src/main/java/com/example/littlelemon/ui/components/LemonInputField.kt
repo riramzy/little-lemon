@@ -46,7 +46,8 @@ fun InputField(
     value: String = "",
     onValueChange: (String) -> Unit = {},
     isPasswordField: Boolean = false,
-    isReadOnly: Boolean = false
+    isReadOnly: Boolean = false,
+    isMultiline: Boolean = true,
 ) {
     var isClicked by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -64,9 +65,15 @@ fun InputField(
                 Color.Black
             }
         ),
-        modifier = modifier
-            .height(45.dp)
-            .width(380.dp),
+        modifier = if (isMultiline) {
+            modifier
+                .wrapContentHeight()
+                .width(380.dp)
+        } else {
+            modifier
+                .height(45.dp)
+                .width(380.dp)
+        }
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -116,7 +123,7 @@ fun InputField(
                         isClicked = it.isNotEmpty()
                     }
                 },
-                singleLine = true,
+                singleLine = !isMultiline,
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
                     color = if (isSystemInDarkTheme()) Color.White else Color.Black,
                 ),
@@ -133,7 +140,13 @@ fun InputField(
                 decorationBox = { innerTextField ->
                     Box(
                         modifier = Modifier
-                            .height(45.dp)
+                            .then(
+                                if (isMultiline) {
+                                    Modifier.wrapContentHeight()
+                                } else {
+                                    Modifier.height(45.dp)
+                                }
+                            )
                             .fillMaxWidth()
                             .background(
                                 if (isSystemInDarkTheme()) MaterialTheme.colorScheme.onTertiary
@@ -189,10 +202,12 @@ fun InputField(
 
 @Composable
 fun SubInputField(
-    requiredText: String,
     modifier: Modifier = Modifier,
+    requiredText: String,
+    value: String = "",
+    onValueChange: (String) -> Unit = {},
 ) {
-    var textValue by remember { mutableStateOf("") }
+    //var textValue by remember { mutableStateOf("") }
     var isClicked by remember { mutableStateOf(false) }
 
     Card(
@@ -221,9 +236,10 @@ fun SubInputField(
                 .padding(8.dp)
         ) {
             BasicTextField(
-                value = textValue,
+                value = value,
                 onValueChange = {
-                    textValue = it
+                    onValueChange(it)
+                    isClicked = it.isNotEmpty()
                 },
                 singleLine = true,
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
@@ -245,7 +261,7 @@ fun SubInputField(
                             .padding(horizontal = 6.dp, vertical = 0.dp),
                         contentAlignment = Alignment.CenterStart
                     ) {
-                        if (textValue.isEmpty()) {
+                        if (value.isEmpty()) {
                             Text(
                                 text = requiredText,
                                 style = MaterialTheme.typography.bodyMedium.copy(
@@ -287,8 +303,9 @@ fun InputFieldPreview() {
         ) {
             InputField(
                 requiredText = "Ramzy",
-                value = "",
-                onValueChange = {}
+                value = "Lemon\nGreek\nLemon",
+                onValueChange = {},
+                isMultiline = true
             )
             InputField(
                 requiredText = "Ramzy",

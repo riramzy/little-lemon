@@ -16,12 +16,12 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,24 +39,27 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.littlelemon.data.local.cart.LocalCartItem
+import com.example.littlelemon.data.local.menu.LocalMenuItem
 import com.example.littlelemon.di.AppContainer
 import com.example.littlelemon.ui.components.ItemOverview
 import com.example.littlelemon.ui.components.LemonCutlerySelector
 import com.example.littlelemon.ui.components.LemonNavigationBar
 import com.example.littlelemon.ui.components.TopAppBar
-import com.example.littlelemon.ui.components.YellowLemonButton
 import com.example.littlelemon.ui.screens.cart.CartVm
 import com.example.littlelemon.ui.screens.cart.CartVmFactory
-import com.example.littlelemon.ui.screens.details.DeliveryDetails
+import com.example.littlelemon.ui.screens.home.HomeVm
+import com.example.littlelemon.ui.screens.home.HomeVmFactory
 import com.example.littlelemon.ui.theme.LittleLemonTheme
 import com.example.littlelemon.utils.Screen
 
 @Composable
 fun CheckoutScreen(
     cartVm: CartVm,
+    homeVm: HomeVm,
     navController: NavController
 ) {
-    var cartItems = cartVm.cartItems.collectAsState().value
+    val cartItems = cartVm.cartItems.collectAsState().value
+    val menuItems = homeVm.menuItems.collectAsState().value
 
     /*
     cartItems = listOf(
@@ -95,7 +98,7 @@ fun CheckoutScreen(
         floatingActionButton = {
             LemonNavigationBar(
                 isActionEnabled = true,
-                onActionText = "Confirm",
+                onActionText = "Next",
                 onActionClicked = {
                     navController.navigate(Screen.CartPayment.route)
                 },
@@ -158,7 +161,8 @@ fun CheckoutScreen(
                             .padding(
                                 horizontal = 15.dp,
                                 vertical = 15.dp
-                            )
+                            ),
+                        menuItems = menuItems
                     )
                 }
             }
@@ -259,7 +263,8 @@ fun OrderSummary(
 
 @Composable
 fun SuggestionsSection(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    menuItems: List<LocalMenuItem> = emptyList()
 ) {
     Column(
         modifier = modifier
@@ -280,12 +285,16 @@ fun SuggestionsSection(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
-            items(5) {
+            items(menuItems) { item ->
                 ItemOverview(
                     modifier = Modifier
                         .width(295.dp)
                         .height(110.dp)
-                        .padding(end = 10.dp)
+                        .padding(end = 10.dp),
+                    itemName = item.title,
+                    itemPrice = item.price,
+                    itemDescription = item.description,
+                    itemId = item.id
                 )
             }
         }
@@ -417,6 +426,7 @@ fun CheckoutScreenPreview() {
     LittleLemonTheme {
         CheckoutScreen(
             cartVm = viewModel(factory = CartVmFactory(AppContainer(LocalContext.current))),
+            homeVm = viewModel(factory = HomeVmFactory(AppContainer(LocalContext.current))),
             navController = NavController(LocalContext.current)
         )
     }
@@ -428,6 +438,7 @@ fun CheckoutScreenDarkPreview() {
     LittleLemonTheme {
         CheckoutScreen(
             cartVm = viewModel(factory = CartVmFactory(AppContainer(LocalContext.current))),
+            homeVm = viewModel(factory = HomeVmFactory(AppContainer(LocalContext.current))),
             navController = NavController(LocalContext.current)
         )
     }
