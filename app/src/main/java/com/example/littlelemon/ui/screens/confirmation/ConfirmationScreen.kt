@@ -36,7 +36,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.littlelemon.data.local.cart.LocalCartItem
 import com.example.littlelemon.di.AppContainer
-import com.example.littlelemon.ui.components.InputField
+import com.example.littlelemon.ui.components.LemonInputField
 import com.example.littlelemon.ui.components.LemonCutlerySelector
 import com.example.littlelemon.ui.components.LemonNavigationBar
 import com.example.littlelemon.ui.components.TopAppBar
@@ -46,6 +46,7 @@ import com.example.littlelemon.ui.screens.orders.OrdersVm
 import com.example.littlelemon.ui.screens.orders.OrdersVmFactory
 import com.example.littlelemon.ui.screens.reservation.ReservationVm
 import com.example.littlelemon.ui.theme.LittleLemonTheme
+import com.example.littlelemon.ui.viewmodel.UserVm
 import com.example.littlelemon.utils.Screen
 
 @Composable
@@ -85,6 +86,8 @@ fun ConfirmationScreen(
                         ordersVm.placeOrder(cartItems)
                         cartVm.clearCart()
                         navController.navigate(Screen.Orders.route)
+                    } else {
+                        navController.navigate(Screen.Reservations.route)
                     }
                 },
                 onHomeClicked = {
@@ -184,7 +187,7 @@ fun ReservationDetailsCard(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 item {
-                    InputField(
+                    LemonInputField(
                         requiredText = "Order ID",
                         value = vm.orderId.value.toString(),
                         isReadOnly = true
@@ -192,7 +195,7 @@ fun ReservationDetailsCard(
                 }
 
                 item {
-                    InputField(
+                    LemonInputField(
                         requiredText = "Name",
                         value = userName.split(" ").joinToString(" ") {
                             it.replaceFirstChar { c -> c.uppercase() }
@@ -202,7 +205,7 @@ fun ReservationDetailsCard(
                 }
 
                 item {
-                    InputField(
+                    LemonInputField(
                         requiredText = "Phone number",
                         isReadOnly = true,
                         value = vm.phoneNumber.value.toString()
@@ -211,7 +214,7 @@ fun ReservationDetailsCard(
 
                 if (isReservation) {
                     item {
-                        InputField(
+                        LemonInputField(
                             requiredText = "At",
                             isReadOnly = true,
                             value = vm.selectedTime.value.toString(),
@@ -219,7 +222,7 @@ fun ReservationDetailsCard(
                     }
 
                     item {
-                        InputField(
+                        LemonInputField(
                             requiredText = "For",
                             isReadOnly = true,
                             value = vm.selectedNumberOfDiners.value.toString(),
@@ -227,7 +230,7 @@ fun ReservationDetailsCard(
                     }
 
                     item {
-                        InputField(
+                        LemonInputField(
                             requiredText = "Date",
                             isReadOnly = true,
                             value = vm.selectedDate.value.toString(),
@@ -235,7 +238,7 @@ fun ReservationDetailsCard(
                     }
 
                     item {
-                        InputField(
+                        LemonInputField(
                             requiredText = "Duration",
                             isReadOnly = true,
                             value = vm.selectedDuration.value.toString(),
@@ -244,7 +247,7 @@ fun ReservationDetailsCard(
                 }
 
                 item {
-                    InputField(
+                    LemonInputField(
                         requiredText = "Payment type",
                         isReadOnly = true,
                         value = vm.selectedPaymentMethod.value.toString()
@@ -253,7 +256,7 @@ fun ReservationDetailsCard(
 
                 if (isCart) {
                     item {
-                        InputField(
+                        LemonInputField(
                             requiredText = "Items",
                             isReadOnly = true,
                             value = cartItems.joinToString(separator = "\n") { cartItem ->
@@ -265,7 +268,7 @@ fun ReservationDetailsCard(
                 }
 
                 item {
-                    InputField(
+                    LemonInputField(
                         requiredText = "Total",
                         isReadOnly = true,
                         value = "%.2f".format(cartItems.sumOf { it.price * it.quantity } + 5)                    )
@@ -343,7 +346,10 @@ fun AdditionalNotes(
 fun ConfirmationScreenPreview() {
     LittleLemonTheme {
         ConfirmationScreen(
-            vm = ReservationVm(),
+            vm = ReservationVm(
+                reservationsRepo = AppContainer(LocalContext.current).reservationsRepo,
+                userVm = UserVm(AppContainer(LocalContext.current).userRepo)
+            ),
             navController = NavController(LocalContext.current),
             cartVm = viewModel(factory = CartVmFactory(AppContainer(LocalContext.current))),
             ordersVm = viewModel(factory = OrdersVmFactory(AppContainer(LocalContext.current))),
@@ -356,7 +362,10 @@ fun ConfirmationScreenPreview() {
 fun ConfirmationScreenDarkPreview() {
     LittleLemonTheme {
         ConfirmationScreen(
-            vm = ReservationVm(),
+            vm = ReservationVm(
+                reservationsRepo = AppContainer(LocalContext.current).reservationsRepo,
+                userVm = UserVm(AppContainer(LocalContext.current).userRepo)
+            ),
             navController = NavController(LocalContext.current),
             cartVm = viewModel(factory = CartVmFactory(AppContainer(LocalContext.current))),
             ordersVm = viewModel(factory = OrdersVmFactory(AppContainer(LocalContext.current))),

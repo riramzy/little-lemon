@@ -3,6 +3,7 @@ package com.example.littlelemon.ui.screens.home
 import android.content.res.Configuration
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +24,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -30,8 +32,11 @@ import androidx.navigation.NavController
 import com.example.littlelemon.R
 import com.example.littlelemon.di.AppContainer
 import com.example.littlelemon.ui.components.HeroCard
+import com.example.littlelemon.ui.components.LemonAboutUs
+import com.example.littlelemon.ui.components.LemonCategorySection
 import com.example.littlelemon.ui.components.LemonNavigationBar
 import com.example.littlelemon.ui.components.LemonSection
+import com.example.littlelemon.ui.components.LemonSpecialOffers
 import com.example.littlelemon.ui.components.TopAppBar
 import com.example.littlelemon.ui.theme.LittleLemonTheme
 import com.example.littlelemon.utils.Screen
@@ -133,6 +138,7 @@ fun HomeScreen(
                     )
                 }
             }
+
             item {
                 Text(
                     text = "Original Dishes from the Heart of Chicago",
@@ -142,6 +148,7 @@ fun HomeScreen(
                         .padding(horizontal = 15.dp)
                 )
             }
+
             item {
                 HeroCard(
                     modifier = Modifier
@@ -153,27 +160,92 @@ fun HomeScreen(
                     onReserveClicked = { navController.navigate(Screen.ReservationTableDetails.route) }
                 )
             }
+
+            //Categories Section
             item {
-                LemonSection(
+                LemonCategorySection(
                     menuItems = menuItems,
-                    title = "SHOP BY CATEGORY",
+                    title = "Shop by Category",
                     subTitle = "Find what you want quickly",
                     isCategory = true,
                     onItemClicked = { item ->
                         navController.navigate(Screen.CategorySearch.createRoute(item.category))
-                    }
+                    },
+                    modifier = Modifier.padding(
+                        bottom = 20.dp,
+                        end = 15.dp
+                    )
                 )
             }
+
+            //Famous Dishes Section
             item {
                 LemonSection(
                     menuItems = menuItems,
-                    title = "FAMOUS DISHES",
+                    title = "Famous Dishes",
                     subTitle = "What people order the most?",
-                    modifier = Modifier.padding(top = 15.dp),
+                    modifier = Modifier.padding(bottom = 20.dp),
                     isCategory = false,
                     onItemClicked = { item ->
                         navController.navigate(Screen.Details.createRoute(item.id))
-                    }
+                    },
+                )
+            }
+
+            //Special Offers Section
+            item {
+                Column(
+                    modifier = Modifier.padding(top = 15.dp),
+                    ) {
+                    Text(
+                        text = "Special Offers",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.ExtraBold,
+                        modifier = Modifier.padding(
+                            start = 15.dp,
+                            bottom = 5.dp
+                        )
+                    )
+
+                    Text(
+                        text = "Don't miss out on our current promotions",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(
+                            start = 15.dp,
+                            bottom = 20.dp
+                        )
+                    )
+
+                    LemonSpecialOffers(
+                        icon = R.drawable.percentage,
+                        iconColor = Color.Cyan,
+                        title = "20% Off",
+                        description = "First-time customers get 20% off their entire order"
+                    )
+
+                    LemonSpecialOffers(
+                        icon = R.drawable.quick_icon,
+                        iconColor = Color.Green,
+                        title = "Happy Hour",
+                        description = "Special prices on drinks and appetizers 3-6pm daily"
+                    )
+
+                    LemonSpecialOffers(
+                        icon = R.drawable.gift,
+                        iconColor = Color.Magenta,
+                        title = "Family Deal",
+                        description = "Order for 4 or more and get a free dessert platter"
+                    )
+                }
+            }
+
+            //About Us
+            item {
+                LemonAboutUs(
+                    modifier = Modifier.padding(
+                        horizontal = 20.dp,
+                        vertical = 20.dp
+                    )
                 )
             }
         }

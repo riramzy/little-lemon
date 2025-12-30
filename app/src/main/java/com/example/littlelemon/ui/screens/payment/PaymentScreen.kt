@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -33,10 +34,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.littlelemon.R
 import com.example.littlelemon.di.AppContainer
-import com.example.littlelemon.ui.components.InputField
+import com.example.littlelemon.ui.components.LemonInputField
 import com.example.littlelemon.ui.components.LemonNavigationBar
 import com.example.littlelemon.ui.components.LemonPaymentSelector
-import com.example.littlelemon.ui.components.SubInputField
+import com.example.littlelemon.ui.components.LemonSubInputField
 import com.example.littlelemon.ui.components.TopAppBar
 import com.example.littlelemon.ui.theme.LittleLemonTheme
 import com.example.littlelemon.utils.Screen
@@ -123,6 +124,7 @@ fun PaymentScreen(
         },
         modifier = Modifier
             .statusBarsPadding()
+            .imePadding()
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -290,7 +292,7 @@ fun UserInformation(
                 .fillMaxWidth()
                 .padding(bottom = 20.dp)
         )
-        InputField(
+        LemonInputField(
             requiredText = "First Name",
             value = firstName.replaceFirstChar { it.uppercase() },
             onValueChange = onFirstNameChange,
@@ -298,7 +300,7 @@ fun UserInformation(
             modifier = Modifier
                 .padding(bottom = 15.dp)
         )
-        InputField(
+        LemonInputField(
             requiredText = "Last Name",
             value = lastName.replaceFirstChar { it.uppercase() },
             onValueChange = onLastNameChange,
@@ -306,7 +308,7 @@ fun UserInformation(
             modifier = Modifier
                 .padding(bottom = 15.dp)
         )
-        InputField(
+        LemonInputField(
             requiredText = "Email",
             value = email,
             onValueChange = onEmailChange,
@@ -314,7 +316,7 @@ fun UserInformation(
             modifier = Modifier
                 .padding(bottom = 15.dp)
         )
-        InputField(
+        LemonInputField(
             requiredText = "Phone Number",
             value = phoneNumber,
             onValueChange = onPhoneNumberChange,
@@ -341,7 +343,7 @@ fun CardInformation(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.Start
     ) {
-        InputField(
+        LemonInputField(
             requiredText = "Card Number",
             value = cardNumber,
             onValueChange = onCardNumberChange,
@@ -352,7 +354,7 @@ fun CardInformation(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            SubInputField(
+            LemonSubInputField(
                 requiredText = "Month",
                 value = month,
                 onValueChange = onMonthChange,
@@ -360,7 +362,7 @@ fun CardInformation(
                     .weight(1f)
                     .padding(end = 6.dp)
             )
-            SubInputField(
+            LemonSubInputField(
                 requiredText = "Year",
                 value = year,
                 onValueChange = onYearChange,
@@ -368,7 +370,7 @@ fun CardInformation(
                     .weight(1f)
                     .padding(end = 6.dp)
             )
-            SubInputField(
+            LemonSubInputField(
                 requiredText = "CVV",
                 value = cvv,
                 onValueChange = onCvvChange,

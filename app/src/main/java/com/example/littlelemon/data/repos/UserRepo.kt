@@ -48,15 +48,43 @@ class UserRepo(
             return false
         }
 
-        userPreferences.saveUsername(username)
+        userPreferences.editUsername(username)
         userPreferences.register(username, firstName, lastName, email, password)
         userPreferences.setLoggedIn(true)
         return true
     }
 
     fun getFirstName(): String? = userPreferences.getFirstName()
+
+    fun editFirstName(firstName: String) {
+        userPreferences.editFirstName(firstName)
+    }
+
     fun getLastName(): String? = userPreferences.getLastName()
+
+    fun editLastName(lastName: String) {
+        userPreferences.editLastName(lastName)
+    }
+
     fun getEmail(): String? = userPreferences.getEmail()
+
+    fun editEmail(email: String) {
+        userPreferences.editEmail(email)
+    }
+
     fun getUsername(): String? = userPreferences.getUsername()
+
+    fun editUsername(username: String) {
+        userPreferences.editUsername(username)
+    }
+
     fun getFullName(): String? = userPreferences.getFullName()
+
+    fun saveProfilePicture(uri: String) {
+        userPreferences.saveProfilePicture(uri)
+    }
+
+    fun getProfilePicture(): String? {
+        return userPreferences.getProfilePicture()
+    }
 }

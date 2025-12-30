@@ -1,6 +1,7 @@
 package com.example.littlelemon.ui.screens.reservation
 
 import android.content.res.Configuration
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,23 +21,33 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.littlelemon.R
+import com.example.littlelemon.di.AppContainer
 import com.example.littlelemon.ui.components.LemonNavigationBar
 import com.example.littlelemon.ui.components.LemonReservationCard
 import com.example.littlelemon.ui.components.TopAppBar
+import com.example.littlelemon.ui.components.YellowLemonButton
 import com.example.littlelemon.ui.theme.LittleLemonTheme
+import com.example.littlelemon.ui.viewmodel.UserVm
 import com.example.littlelemon.utils.Screen
 
 @Composable
 fun ReservationsScreen(
-    navController: NavController
+    navController: NavController,
+    reservationVm: ReservationVm
 ) {
     val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
+
+    //Collect reservations with items
+    val reservations = reservationVm.reservations.collectAsState().value
 
     Scaffold(
         topBar = {
@@ -49,24 +60,28 @@ fun ReservationsScreen(
                         ),
                     isSearchRequired = false,
                 )
-                Text(
-                    text = "Reservations",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontSize = 26.sp,
-                    fontWeight = FontWeight.Black,
-                    modifier = Modifier
-                        .padding(
-                            start = 15.dp,
-                            end = 15.dp,
-                            bottom = 15.dp
-                        )
-                )
+                if (reservations.isNotEmpty()) {
+                    Text(
+                        text = "Reservations",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontSize = 26.sp,
+                        fontWeight = FontWeight.Black,
+                        modifier = Modifier
+                            .padding(
+                                start = 15.dp,
+                                end = 15.dp,
+                                bottom = 15.dp
+                            )
+                    )
+                }
             }
         },
         floatingActionButton = {
             LemonNavigationBar(
+                isActionEnabled = reservations.isNotEmpty(),
+                onActionText = "Clear",
                 onActionClicked = {
-                    navController.navigate(Screen.Checkout.route)
+                    reservationVm.clearReservations()
                 },
                 onHomeClicked = {
                     navController.navigate(Screen.Home.route)
@@ -92,23 +107,69 @@ fun ReservationsScreen(
         modifier = Modifier
             .statusBarsPadding()
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .statusBarsPadding(),
-            contentPadding = PaddingValues(
-                bottom = innerPadding.calculateBottomPadding() + 100.dp
-            ),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            items(10) {
-                LemonReservationCard(
-                    modifier = Modifier.padding(
-                        vertical = 8.dp
-                    )
+        if (reservations.isEmpty()) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.waiting_reservation),
+                    contentDescription = "Empty Cart",
                 )
+
+                Text(
+                    text = "No reservations yet",
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontSize = 26.sp,
+                    modifier = Modifier
+                        .padding(vertical = 15.dp)
+                )
+
+                YellowLemonButton(
+                    text = "Add a reservation now!",
+                    color = if (isSystemInDarkTheme()) {
+                        MaterialTheme.colorScheme.onPrimary
+                    } else {
+                        MaterialTheme.colorScheme.primaryContainer
+                    },
+                    textColor = if (isSystemInDarkTheme()) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    },
+                    onClick = {
+                        navController.navigate(Screen.Home.route)
+                    }
+                )
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize()
+                    .statusBarsPadding(),
+                contentPadding = PaddingValues(
+                    bottom = innerPadding.calculateBottomPadding() + 100.dp
+                ),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                items(reservations.size) { reservation ->
+                    LemonReservationCard(
+                        modifier = Modifier.padding(vertical = 8.dp, horizontal = 15.dp),
+                        nameOfReserver = reservations[reservation].nameOfReserver,
+                        date = reservations[reservation].date,
+                        time = reservations[reservation].time,
+                        duration = reservations[reservation].duration,
+                        numberOfDiners = reservations[reservation].numberOfDiners,
+                        totalPrice = reservations[reservation].totalPrice,
+                        paymentMethod = reservations[reservation].paymentMethod,
+                        reservationId = reservations[reservation].id
+                    )
+                }
             }
         }
     }
@@ -119,7 +180,11 @@ fun ReservationsScreen(
 fun ReservationsScreenPreview() {
     LittleLemonTheme {
         ReservationsScreen(
-            navController = NavController(LocalContext.current)
+            navController = NavController(LocalContext.current),
+            reservationVm = ReservationVm(
+                reservationsRepo = AppContainer(LocalContext.current).reservationsRepo,
+                userVm = UserVm(AppContainer(LocalContext.current).userRepo)
+            )
         )
     }
 }
@@ -129,7 +194,11 @@ fun ReservationsScreenPreview() {
 fun ReservationScreenDarkPreview() {
     LittleLemonTheme {
         ReservationsScreen(
-            navController = NavController(LocalContext.current)
+            navController = NavController(LocalContext.current),
+            reservationVm = ReservationVm(
+                reservationsRepo = AppContainer(LocalContext.current).reservationsRepo,
+                userVm = UserVm(AppContainer(LocalContext.current).userRepo)
+            )
         )
     }
 }

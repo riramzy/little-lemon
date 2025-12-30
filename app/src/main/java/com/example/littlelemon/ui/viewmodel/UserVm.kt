@@ -51,12 +51,40 @@ class UserVm(
     }
 
     fun getUsername(): String? { return userRepo.getUsername() }
+
+    fun editUsername(username: String) {
+        userRepo.editUsername(username)
+    }
+
     fun getFirstName(): String? { return userRepo.getFirstName() }
+
+    fun editFirstName(firstName: String) {
+        userRepo.editFirstName(firstName)
+    }
+
     fun getLastName(): String? { return userRepo.getLastName() }
+
+    fun editLastName(lastName: String) {
+        userRepo.editLastName(lastName)
+    }
+
     fun getFullName(): String? { return userRepo.getFullName() }
     fun getEmail(): String? { return userRepo.getEmail() }
 
+    fun editEmail(email: String) {
+        userRepo.editEmail(email)
+    }
+
+
     fun isLoggedIn(): Boolean {
         return userRepo.isLoggedIn()
+    }
+
+    fun saveProfilePicture(uri: String) {
+        userRepo.saveProfilePicture(uri)
+    }
+
+    fun getProfilePicture(): String? {
+        return userRepo.getProfilePicture()
     }
 }

@@ -2,7 +2,6 @@ package com.example.littlelemon.ui.screens.search
 
 import android.content.res.Configuration
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -46,6 +45,7 @@ fun SearchScreen(
     )
 
     val vm = appContainer.searchVm
+
     val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
 
@@ -53,8 +53,11 @@ fun SearchScreen(
     val searchItems by vm.searchedItems.collectAsState()
     val selectedCategory by vm.categoryFilter.collectAsState()
 
-    LaunchedEffect(category) {
-        if (!category.isNullOrBlank()) {
+    /**
+     * Apply category ONLY once when coming from Home
+     */
+    LaunchedEffect(Unit) {
+        if (!category.isNullOrBlank() && selectedCategory == null) {
             vm.searchByCategory(category)
         }
     }
@@ -62,29 +65,19 @@ fun SearchScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                modifier = Modifier
-                    .padding(
-                        vertical = 10.dp,
-                        horizontal = 15.dp
-                    ),
+                modifier = Modifier.padding(vertical = 10.dp, horizontal = 15.dp),
                 searchQuery = searchQuery,
                 onSearchQueryChange = vm::onSearchQueryChange
             )
         },
         floatingActionButton = {
             LemonNavigationBar(
-                onHomeClicked = {
-                    navController.navigate(Screen.Home.route)
-                },
+                onHomeClicked = { navController.navigate(Screen.Home.route) },
                 onReservationClicked = {
                     navController.navigate(Screen.ReservationTableDetails.route)
                 },
-                onCartClicked = {
-                    navController.navigate(Screen.Cart.route)
-                },
-                onProfileClicked = {
-                    navController.navigate(Screen.Profile.route)
-                },
+                onCartClicked = { navController.navigate(Screen.Cart.route) },
+                onProfileClicked = { navController.navigate(Screen.Profile.route) },
                 selectedRoute = currentRoute
             )
         },
@@ -94,34 +87,38 @@ fun SearchScreen(
         } else {
             Color.White
         },
-        modifier = Modifier
-            .statusBarsPadding()
+        modifier = Modifier.statusBarsPadding()
     ) { innerPadding ->
+
         Column(
-            modifier = Modifier
-                .padding(innerPadding),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
+            modifier = Modifier.padding(innerPadding),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
+            /** Category Filters */
             LazyRow(
                 modifier = Modifier
-                    .padding(
-                        start = 15.dp,
-                        end = 15.dp,
-                        top = 15.dp
-                    )
+                    .padding(start = 15.dp, end = 15.dp, top = 15.dp)
                     .fillMaxWidth()
             ) {
                 items(categoriesFilters) { filterCategory ->
-                    val isSelected = filterCategory.equals(selectedCategory, ignoreCase = true)
+                    val isSelected =
+                        filterCategory.equals(selectedCategory, ignoreCase = true)
+
                     LemonGenrePill(
                         genre = filterCategory,
                         isSelected = isSelected,
-                        onGenreClicked = { vm.searchByCategory(filterCategory) },
+                        onGenreClicked = {
+                            vm.searchByCategory(
+                                if (isSelected) null else filterCategory
+                            )
+                        },
                         modifier = Modifier.padding(end = 10.dp),
                     )
                 }
             }
+
+            /** Search Results */
             LazyColumn(
                 modifier = Modifier.padding(
                     start = 15.dp,

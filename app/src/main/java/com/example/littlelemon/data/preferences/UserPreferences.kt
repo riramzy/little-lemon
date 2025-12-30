@@ -13,6 +13,15 @@ class UserPreferences(context: Context) {
         private const val KEY_FIRST_NAME = "first_name"
         private const val KEY_LAST_NAME = "last_name"
         private const val KEY_EMAIL = "email"
+        private const val KEY_PROFILE_PICTURE = "profile_picture"
+    }
+
+    fun getProfilePicture(): String? {
+        return sharedPreferences.getString(KEY_PROFILE_PICTURE, null)
+    }
+
+    fun saveProfilePicture(uri: String) {
+        sharedPreferences.edit().putString(KEY_PROFILE_PICTURE, uri).apply()
     }
 
     fun setLoggedIn(isLoggedIn: Boolean) {
@@ -21,10 +30,6 @@ class UserPreferences(context: Context) {
 
     fun isLoggedIn(): Boolean {
         return sharedPreferences.getBoolean(KEY_IS_LOGGED_IN, false)
-    }
-
-    fun saveUsername(username: String) {
-        sharedPreferences.edit().putString(KEY_USERNAME, username).apply()
     }
 
     fun register(
@@ -50,10 +55,26 @@ class UserPreferences(context: Context) {
     }
 
     fun getFirstName(): String? = sharedPreferences.getString(KEY_FIRST_NAME, null)
+
+    fun editFirstName(firstName: String) {
+        sharedPreferences.edit().putString(KEY_FIRST_NAME, firstName).apply()
+    }
     fun getLastName(): String? = sharedPreferences.getString(KEY_LAST_NAME, null)
+
+    fun editLastName(lastName: String) {
+        sharedPreferences.edit().putString(KEY_LAST_NAME, lastName).apply()
+    }
     fun getFullName(): String? = "${getFirstName()} ${getLastName()}"
     fun getEmail(): String? = sharedPreferences.getString(KEY_EMAIL, null)
+
+    fun editEmail(email: String) {
+        sharedPreferences.edit().putString(KEY_EMAIL, email).apply()
+    }
     fun getUsername(): String? = sharedPreferences.getString(KEY_USERNAME, null)
+
+    fun editUsername(username: String) {
+        sharedPreferences.edit().putString(KEY_USERNAME, username).apply()
+    }
 
     fun setOnboardingDone(onboardingDone: Boolean) {
         sharedPreferences.edit().putBoolean(KEY_ONBOARDING_DONE, onboardingDone).apply()

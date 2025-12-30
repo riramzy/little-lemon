@@ -2,8 +2,12 @@ package com.example.littlelemon.ui.screens.profile
 
 import android.content.res.Configuration
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -53,7 +57,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.littlelemon.R
 import com.example.littlelemon.data.preferences.UserPreferences
 import com.example.littlelemon.data.repos.UserRepo
@@ -62,6 +68,7 @@ import com.example.littlelemon.ui.components.YellowLemonButton
 import com.example.littlelemon.ui.theme.LittleLemonTheme
 import com.example.littlelemon.ui.viewmodel.UserVm
 import com.example.littlelemon.utils.Screen
+import org.jetbrains.annotations.Async
 
 @Composable
 fun ProfileScreen(
@@ -76,6 +83,10 @@ fun ProfileScreen(
 
     var showLogoutDialog by remember { mutableStateOf(false) }
     var showDeleteAccountDialog by remember { mutableStateOf(false) }
+
+    var selectedImageUri by remember {
+        mutableStateOf(vm.getProfilePicture()?.toUri())
+    }
 
     if (showLogoutDialog) {
         AlertDialog(
@@ -256,16 +267,26 @@ fun ProfileScreen(
                             .padding(horizontal = 15.dp)
                             .size(100.dp)
                     ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.profile_picture),
-                            contentDescription = "Logo",
+                        AsyncImage(
+                            model = selectedImageUri,
+                            contentDescription = "Profile Picture",
+                            placeholder = painterResource(R.drawable.profile_picture),
+                            error = painterResource(R.drawable.profile_picture),
                             modifier = Modifier
                                 .size(100.dp)
                                 .clip(CircleShape),
                             contentScale = ContentScale.Crop,
                         )
+
+                        /*
                         IconButton(
-                            onClick = { },
+                            onClick = {
+                                photoPickerLauncher.launch(
+                                    PickVisualMediaRequest(
+                                        ActivityResultContracts.PickVisualMedia.ImageOnly
+                                    )
+                                )
+                            },
                             modifier = Modifier
                                 .align(Alignment.BottomEnd)
                                 .clip(CircleShape)
@@ -289,9 +310,11 @@ fun ProfileScreen(
                                     Color.Black
                                 } else {
                                     Color.White
-                                }
+                                },
                             )
                         }
+
+                         */
                     }
 
                     Text(
@@ -341,6 +364,9 @@ fun ProfileScreen(
                     SectionHead(
                         title = "Profile",
                         icon = Icons.Default.Person,
+                        onClick = {
+                            navController.navigate(Screen.ProfileDetails.route)
+                        }
                     )
                 }
             }

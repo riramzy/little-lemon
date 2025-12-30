@@ -31,6 +31,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.littlelemon.data.local.reservations.LocalReservation
+import com.example.littlelemon.di.AppContainer
 import com.example.littlelemon.ui.components.LemonDateSelector
 import com.example.littlelemon.ui.components.LemonDurationSelector
 import com.example.littlelemon.ui.components.LemonNavigationBar
@@ -38,6 +40,7 @@ import com.example.littlelemon.ui.components.LemonNumberOfDinersSelector
 import com.example.littlelemon.ui.components.LemonTimeSelector
 import com.example.littlelemon.ui.components.TopAppBar
 import com.example.littlelemon.ui.theme.LittleLemonTheme
+import com.example.littlelemon.ui.viewmodel.UserVm
 import com.example.littlelemon.utils.Screen
 import java.time.LocalDate
 import java.time.LocalTime
@@ -49,13 +52,15 @@ import java.util.Locale
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ReservationTableDetailsScreen(
-    onNextClicked: () -> Unit = {},
-    vm: ReservationVm,
+    reservationVm: ReservationVm,
     navController: NavHostController,
+
 ) {
     val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
     val context = LocalContext.current
+    val firstName by reservationVm.firstName.collectAsState()
+    val lastName by reservationVm.lastName.collectAsState()
 
     Scaffold(
         topBar = {
@@ -74,10 +79,10 @@ fun ReservationTableDetailsScreen(
                 onActionText = "Next",
                 onActionClicked = {
                     if (
-                        vm.selectedDate.value == null ||
-                        vm.selectedTime.value == null ||
-                        vm.selectedDuration.value == null ||
-                        vm.selectedNumberOfDiners.value == null
+                        reservationVm.selectedDate.value == null ||
+                        reservationVm.selectedTime.value == null ||
+                        reservationVm.selectedDuration.value == null ||
+                        reservationVm.selectedNumberOfDiners.value == null
                     ) {
                         Toast.makeText(
                             context,
@@ -85,7 +90,18 @@ fun ReservationTableDetailsScreen(
                             Toast.LENGTH_SHORT
                         ).show()
                     } else {
-                        onNextClicked()
+                        reservationVm.insertReservation(
+                            LocalReservation(
+                                date = reservationVm.selectedDate.value.toString(),
+                                time = reservationVm.selectedTime.value.toString(),
+                                duration = reservationVm.selectedDuration.value.toString(),
+                                numberOfDiners = reservationVm.selectedNumberOfDiners.value.toString(),
+                                createdAt = System.currentTimeMillis(),
+                                nameOfReserver = "${firstName.replaceFirstChar { it.uppercase() }} ${lastName.replaceFirstChar { it.uppercase() }}",
+
+                            )
+                        )
+                        navController.navigate(Screen.ReservationPayment.route)
                     }
                                   },
                 onHomeClicked = {
@@ -131,7 +147,7 @@ fun ReservationTableDetailsScreen(
                     modifier = Modifier.padding(
                         horizontal = 15.dp
                     ),
-                    vm = vm
+                    vm = reservationVm
                 )
             }
             item {
@@ -139,7 +155,7 @@ fun ReservationTableDetailsScreen(
                     modifier = Modifier.padding(
                         horizontal = 15.dp
                     ),
-                    vm = vm
+                    vm = reservationVm
                 )
             }
             item {
@@ -147,7 +163,7 @@ fun ReservationTableDetailsScreen(
                     modifier = Modifier.padding(
                         horizontal = 15.dp
                     ),
-                    vm = vm
+                    vm = reservationVm
                 )
             }
             item {
@@ -155,7 +171,7 @@ fun ReservationTableDetailsScreen(
                     modifier = Modifier.padding(
                         horizontal = 15.dp
                     ),
-                    vm = vm
+                    vm = reservationVm
                 )
             }
         }
@@ -409,7 +425,10 @@ fun NumberOfDinerPicker(
 fun ReservationTableDetailsScreenPreview() {
     LittleLemonTheme {
         ReservationTableDetailsScreen(
-            vm = ReservationVm(),
+            reservationVm = ReservationVm(
+                reservationsRepo = AppContainer(LocalContext.current).reservationsRepo,
+                userVm = UserVm(AppContainer(LocalContext.current).userRepo)
+            ),
             navController = rememberNavController()
         )
     }
@@ -421,7 +440,10 @@ fun ReservationTableDetailsScreenPreview() {
 fun ReservationTableDetailsScreenDarkPreview() {
     LittleLemonTheme {
         ReservationTableDetailsScreen(
-            vm = ReservationVm(),
+            reservationVm = ReservationVm(
+                reservationsRepo = AppContainer(LocalContext.current).reservationsRepo,
+                userVm = UserVm(AppContainer(LocalContext.current).userRepo)
+            ),
             navController = rememberNavController()
         )
     }

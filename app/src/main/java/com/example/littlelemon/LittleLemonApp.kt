@@ -25,6 +25,7 @@ import com.example.littlelemon.ui.screens.onboarding.OnboardingQuickScreen
 import com.example.littlelemon.ui.screens.onboarding.OnboardingWelcomeScreen
 import com.example.littlelemon.ui.screens.orders.OrdersScreen
 import com.example.littlelemon.ui.screens.payment.PaymentScreen
+import com.example.littlelemon.ui.screens.profile.ProfileDetailsScreen
 import com.example.littlelemon.ui.screens.profile.ProfileScreen
 import com.example.littlelemon.ui.screens.reservation.ReservationTableDetailsScreen
 import com.example.littlelemon.ui.screens.reservation.ReservationsScreen
@@ -138,11 +139,18 @@ fun LittleLemonApp() {
             )
         }
 
+        //--- Profile Details ---
+        composable(Screen.ProfileDetails.route) {
+            ProfileDetailsScreen(
+                navController = navController,
+                vm = userVm
+            )
+        }
+
         //--- Reservation ---
         composable(Screen.ReservationTableDetails.route) {
             ReservationTableDetailsScreen(
-                onNextClicked = { navController.navigate(Screen.ReservationPayment.route) },
-                vm = reservationVm,
+                reservationVm = reservationVm,
                 navController = navController
             )
         }
@@ -242,7 +250,8 @@ fun LittleLemonApp() {
         //Reservations Screen
         composable(Screen.Reservations.route) {
             ReservationsScreen(
-                navController = navController
+                navController = navController,
+                reservationVm = reservationVm
             )
         }
     }

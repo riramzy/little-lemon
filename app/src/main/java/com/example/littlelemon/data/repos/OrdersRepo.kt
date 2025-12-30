@@ -7,7 +7,6 @@ import com.example.littlelemon.data.local.orders.LocalOrdersDao
 import kotlinx.coroutines.flow.Flow
 
 class OrdersRepo(private val dao: LocalOrdersDao) {
-
     // 1️⃣ Get all orders as Flow
     fun getLocalOrders(): Flow<List<LocalOrder>> {
         return dao.getAllLocalOrders()

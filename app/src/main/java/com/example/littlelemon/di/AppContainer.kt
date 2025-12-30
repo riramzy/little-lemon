@@ -6,6 +6,7 @@ import com.example.littlelemon.data.preferences.UserPreferences
 import com.example.littlelemon.data.repos.CartRepo
 import com.example.littlelemon.data.repos.MenuRepo
 import com.example.littlelemon.data.repos.OrdersRepo
+import com.example.littlelemon.data.repos.ReservationsRepo
 import com.example.littlelemon.data.repos.SearchRepo
 import com.example.littlelemon.data.repos.UserRepo
 import com.example.littlelemon.ui.screens.cart.CartVm
@@ -25,10 +26,11 @@ class AppContainer(context: Context) {
     val cartRepo = CartRepo(database.localCartDao())
     val searchRepo = SearchRepo(database.localSearchDao())
     val ordersRepo = OrdersRepo(database.localOrdersDao())
+    val reservationsRepo = ReservationsRepo(database.localReservationsDao())
 
     val userVm = UserVm(userRepo)
     val homeVm = HomeVm(menuRepo)
-    val reservationVm = ReservationVm()
+    val reservationVm = ReservationVm(reservationsRepo, userVm)
     val cartVm = CartVm(cartRepo)
     val searchVm = SearchVm(searchRepo)
     val paymentVm = PaymentVm(userVm, reservationVm)

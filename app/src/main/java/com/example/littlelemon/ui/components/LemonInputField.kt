@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -40,7 +41,7 @@ import androidx.compose.ui.unit.dp
 import com.example.littlelemon.ui.theme.LittleLemonTheme
 
 @Composable
-fun InputField(
+fun LemonInputField(
     modifier: Modifier = Modifier,
     requiredText: String,
     value: String = "",
@@ -65,22 +66,18 @@ fun InputField(
                 Color.Black
             }
         ),
-        modifier = if (isMultiline) {
-            modifier
-                .wrapContentHeight()
-                .width(380.dp)
-        } else {
-            modifier
-                .height(45.dp)
-                .width(380.dp)
-        }
+        modifier = modifier
+            .width(380.dp)
+            .wrapContentHeight()
+            .defaultMinSize(minHeight = 45.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start,
             modifier = Modifier
+                .width(380.dp)
                 .wrapContentHeight()
-                .padding(8.dp)
+                .defaultMinSize(minHeight = 45.dp)
         ) {
             Text(
                 text = requiredText,
@@ -100,7 +97,7 @@ fun InputField(
                         Color.Black
                 },
                 modifier = Modifier
-                    .padding(start = 6.dp)
+                    .padding(start = 15.dp)
             )
 
             val visualTransformation = if (isPasswordField && !passwordVisible) {
@@ -153,7 +150,7 @@ fun InputField(
                                 else MaterialTheme.colorScheme.tertiaryContainer,
                                 shape = RoundedCornerShape(8.dp)
                             )
-                            .padding(horizontal = 12.dp, vertical = 0.dp),
+                            .padding(horizontal = 12.dp, vertical = 4.dp),
                         contentAlignment = Alignment.CenterStart
                     ) {
                         if (value.isEmpty()) {
@@ -201,7 +198,7 @@ fun InputField(
 }
 
 @Composable
-fun SubInputField(
+fun LemonSubInputField(
     modifier: Modifier = Modifier,
     requiredText: String,
     value: String = "",
@@ -294,26 +291,26 @@ fun SubInputField(
 
 @Preview
 @Composable
-fun InputFieldPreview() {
+fun LemonInputFieldPreviewLemon() {
     LittleLemonTheme {
         Column(
             modifier = Modifier,
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            InputField(
+            LemonInputField(
                 requiredText = "Ramzy",
                 value = "Lemon\nGreek\nLemon",
                 onValueChange = {},
                 isMultiline = true
             )
-            InputField(
+            LemonInputField(
                 requiredText = "Ramzy",
                 value = "",
                 onValueChange = {},
                 isPasswordField = true
             )
-            SubInputField(
+            LemonSubInputField(
                 requiredText = "Ramzy"
             )
         }
@@ -323,25 +320,25 @@ fun InputFieldPreview() {
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun InputFieldDarkPreview() {
+fun LemonInputFieldDarkPreviewLemon() {
     LittleLemonTheme {
         Column(
             modifier = Modifier,
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            InputField(
+            LemonInputField(
                 requiredText = "Ramzy",
                 value = "",
                 onValueChange = {}
             )
-            InputField(
+            LemonInputField(
                 requiredText = "Ramzy",
                 value = "",
                 onValueChange = {},
                 isPasswordField = true
             )
-            SubInputField(
+            LemonSubInputField(
                 requiredText = "Ramzy"
             )
         }

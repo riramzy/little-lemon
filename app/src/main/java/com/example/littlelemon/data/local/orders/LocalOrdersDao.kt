@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface LocalOrdersDao {
-
     // 1️⃣ Get all orders as Flow
     @Query("SELECT * FROM orders")
     fun getAllLocalOrders(): Flow<List<LocalOrder>>

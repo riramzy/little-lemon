@@ -2,8 +2,10 @@ package com.example.littlelemon.ui.components
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.gestures.snapping.SnapPosition.Center
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -21,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterEnd
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -30,6 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.littlelemon.R
 import com.example.littlelemon.ui.theme.LittleLemonTheme
 
@@ -66,70 +70,77 @@ fun HeroCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
         ) {
-            Column(
+            Box(
                 modifier = Modifier
-                    .padding(10.dp)
-                    .weight(1.5f),
-                verticalArrangement = Arrangement.SpaceAround,
+                    .fillMaxSize()
             ) {
-                Card(
+                Column(
                     modifier = Modifier
-                        .padding(bottom = 10.dp)
-                        .weight(1f)
-                        .wrapContentHeight(),
-                    shape = RoundedCornerShape(100.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (isSystemInDarkTheme()) {
-                            Color.Green.copy(
-                                alpha = 0.5f
-                            )
-                        } else {
-                            Color.Green
-                        },
-                        contentColor = Color.White
-                    ),
+                        .padding(10.dp)
+                        .align(Alignment.CenterStart)
+                        .width(170.dp),
+                    verticalArrangement = Arrangement.SpaceAround,
                 ) {
-                    Text(
-                        text = headlineText,
-                        style = MaterialTheme.typography.labelSmall,
+                    Card(
                         modifier = Modifier
-                            .padding(6.dp),
-                        textAlign = TextAlign.Center
+                            .padding(bottom = 10.dp)
+                            .weight(1f)
+                            .wrapContentHeight(),
+                        shape = RoundedCornerShape(100.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (isSystemInDarkTheme()) {
+                                Color.Green.copy(
+                                    alpha = 0.5f
+                                )
+                            } else {
+                                Color.Green.copy(0.7f)
+                            },
+                            contentColor = Color.White
+                        ),
+                    ) {
+                        Text(
+                            text = headlineText,
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier
+                                .padding(6.dp),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+
+                    Text(
+                        text = descriptionText,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier
+                            .padding(bottom = 10.dp)
+                            .weight(2f),
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                    YellowLemonButton(
+                        text = buttonText,
+                        color = if (isSystemInDarkTheme()) {
+                            MaterialTheme.colorScheme.onPrimary
+                        } else {
+                            MaterialTheme.colorScheme.primaryContainer
+                        },
+                        textColor = if (isSystemInDarkTheme()) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onPrimaryContainer
+                        },
+                        onClick = onReserveClicked,
+                        modifier = Modifier.weight(1f)
                     )
                 }
-
-                Text(
-                    text = descriptionText,
-                    style = MaterialTheme.typography.bodyMedium,
+                Image(
+                    painter = painterResource(heroImage),
+                    contentDescription = "Hero Image",
+                    contentScale = ContentScale.FillHeight,
                     modifier = Modifier
-                        .padding(bottom = 10.dp)
-                        .weight(2f),
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                YellowLemonButton(
-                    text = buttonText,
-                    color = if (isSystemInDarkTheme()) {
-                        MaterialTheme.colorScheme.onPrimary
-                    } else {
-                        MaterialTheme.colorScheme.primaryContainer
-                    },
-                    textColor = if (isSystemInDarkTheme()) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.onPrimaryContainer
-                    },
-                    onClick = onReserveClicked,
-                    modifier = Modifier.weight(1f)
+                        .align(CenterEnd)
+                        .width(180.dp)
                 )
             }
-            Image(
-                painter = painterResource(heroImage),
-                contentDescription = "Hero Image",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .weight(1f)
-            )
         }
     }
 }

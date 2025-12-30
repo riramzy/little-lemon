@@ -11,6 +11,8 @@ import com.example.littlelemon.data.local.menu.LocalMenuItem
 import com.example.littlelemon.data.local.orders.LocalOrder
 import com.example.littlelemon.data.local.orders.LocalOrderItem
 import com.example.littlelemon.data.local.orders.LocalOrdersDao
+import com.example.littlelemon.data.local.reservations.LocalReservation
+import com.example.littlelemon.data.local.reservations.LocalReservationsDao
 import com.example.littlelemon.data.local.search.LocalSearchDao
 
 //Room database instance that builds the database
@@ -20,15 +22,17 @@ import com.example.littlelemon.data.local.search.LocalSearchDao
         LocalMenuItem::class,
         LocalCartItem::class,
         LocalOrder::class,
-        LocalOrderItem::class
+        LocalOrderItem::class,
+        LocalReservation::class,
     ],
-    version = 17
+    version = 20
 )
 abstract class LocalDatabase: RoomDatabase() {
     abstract fun localMenuDao(): LocalMenuDao
     abstract fun localCartDao(): LocalCartDao
     abstract fun localSearchDao(): LocalSearchDao
     abstract fun localOrdersDao(): LocalOrdersDao
+    abstract fun localReservationsDao(): LocalReservationsDao
 
     companion object {
         @Volatile private var INSTANCE: LocalDatabase? = null

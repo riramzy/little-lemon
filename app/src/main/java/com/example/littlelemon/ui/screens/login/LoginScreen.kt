@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -36,7 +37,7 @@ import com.example.littlelemon.R
 import com.example.littlelemon.data.preferences.UserPreferences
 import com.example.littlelemon.data.repos.UserRepo
 import com.example.littlelemon.ui.components.GreenLemonButton
-import com.example.littlelemon.ui.components.InputField
+import com.example.littlelemon.ui.components.LemonInputField
 import com.example.littlelemon.ui.theme.LittleLemonTheme
 import com.example.littlelemon.ui.viewmodel.UserVm
 import com.example.littlelemon.utils.Screen
@@ -53,6 +54,7 @@ fun LoginScreen(
 
     Column(
         modifier = Modifier
+            .imePadding()
             .fillMaxSize()
             .background(
                 if (isSystemInDarkTheme()) {
@@ -118,7 +120,7 @@ fun LoginScreen(
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                InputField(
+                LemonInputField(
                     requiredText = "Username:",
                     value = username,
                     onValueChange = { username = it },
@@ -127,7 +129,7 @@ fun LoginScreen(
                         .fillMaxWidth(),
                 )
 
-                InputField(
+                LemonInputField(
                     requiredText = "Password:",
                     value = password,
                     onValueChange = { password = it },
