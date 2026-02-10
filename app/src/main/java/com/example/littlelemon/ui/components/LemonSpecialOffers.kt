@@ -62,7 +62,7 @@ fun LemonSpecialOffers(
             ),
             colors = CardDefaults.cardColors(
                 containerColor = if (isSystemInDarkTheme()) {
-                    Color.Black
+                    MaterialTheme.colorScheme.background
 
                 } else {
                     Color.White

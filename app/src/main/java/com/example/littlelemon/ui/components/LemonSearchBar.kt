@@ -43,7 +43,6 @@ fun SearchBar(
     searchQuery: String = "",
     onSearchQueryChange: (String) -> Unit = {},
 ) {
-    //var textValue by remember { mutableStateOf("") }
     var isClicked by remember { mutableStateOf(false) }
     val requiredText = "Search"
 
@@ -54,9 +53,9 @@ fun SearchBar(
         shape = RoundedCornerShape(100.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isSystemInDarkTheme()) {
-                MaterialTheme.colorScheme.onTertiary
+                MaterialTheme.colorScheme.background
             } else {
-                MaterialTheme.colorScheme.tertiaryContainer
+                Color.White
             },
         ),
         border = BorderStroke(
@@ -113,8 +112,8 @@ fun SearchBar(
                                 .height(45.dp)
                                 .fillMaxWidth()
                                 .background(
-                                    if (isSystemInDarkTheme()) MaterialTheme.colorScheme.onTertiary
-                                    else MaterialTheme.colorScheme.tertiaryContainer,
+                                    if (isSystemInDarkTheme()) MaterialTheme.colorScheme.background
+                                    else Color.White,
                                     shape = RoundedCornerShape(8.dp)
                                 )
                                 .padding(horizontal = 6.dp, vertical = 0.dp),

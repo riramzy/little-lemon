@@ -22,7 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -47,22 +46,22 @@ fun ItemOverview(
             .width(376.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isSystemInDarkTheme()) {
-                MaterialTheme.colorScheme.onTertiary
+                MaterialTheme.colorScheme.background
             } else {
-                MaterialTheme.colorScheme.tertiaryContainer
+                MaterialTheme.colorScheme.background
             },
             contentColor = if (isSystemInDarkTheme()) {
-                Color.White
+                MaterialTheme.colorScheme.primary
             } else {
-                Color.Black
+                MaterialTheme.colorScheme.primary
             }
         ),
         border = BorderStroke(
             0.5.dp,
             if (isSystemInDarkTheme()) {
-                MaterialTheme.colorScheme.tertiaryContainer
+                MaterialTheme.colorScheme.primary
             } else {
-                MaterialTheme.colorScheme.secondaryContainer
+                MaterialTheme.colorScheme.primary
             }
         ),
         shape = RoundedCornerShape(20.dp),

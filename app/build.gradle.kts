@@ -5,6 +5,15 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     id("com.google.gms.google-services")
+    alias(libs.plugins.hilt)
+}
+
+configurations.all {
+    resolutionStrategy {
+        force("org.jetbrains.kotlin:kotlin-stdlib:2.0.21")
+        force("org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.0.21")
+        force("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.21")
+    }
 }
 
 android {
@@ -83,8 +92,8 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.7.0")
 
     //Icons
-    implementation("androidx.compose.material:material-icons-core:1.6.8") // Already have if using Material 3
-    implementation("androidx.compose.material:material-icons-extended:1.6.8") // Or latest version
+    implementation("androidx.compose.material:material-icons-core:1.6.8")
+    implementation("androidx.compose.material:material-icons-extended:1.6.8")
 
     //Navigation
     implementation(libs.androidx.navigation.compose)
@@ -92,6 +101,11 @@ dependencies {
     //Google Firebase Services
     implementation("com.google.firebase:firebase-auth:23.1.0")
     implementation("com.google.android.gms:play-services-auth:21.2.0")
+
+    // Hilt Core
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
     // Testing
     testImplementation(libs.junit)
