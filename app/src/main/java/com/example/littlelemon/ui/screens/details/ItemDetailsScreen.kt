@@ -52,39 +52,32 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.littlelemon.R
+import com.example.littlelemon.data.local.cart.LocalCartItem
 import com.example.littlelemon.data.local.menu.LocalMenuItem
 import com.example.littlelemon.data.model.toCartItems
-import com.example.littlelemon.di.AppContainer
 import com.example.littlelemon.ui.components.LemonNavigationBar
 import com.example.littlelemon.ui.components.LemonSnackbarHost
 import com.example.littlelemon.ui.components.TopAppBar
 import com.example.littlelemon.ui.screens.cart.CartVm
-import com.example.littlelemon.ui.screens.cart.CartVmFactory
 import com.example.littlelemon.ui.theme.LittleLemonTheme
 import com.example.littlelemon.utils.Screen
 import com.example.littlelemon.utils.dishesImagesMap
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
 fun ItemDetailsScreen(
     itemId: Int,
-    appContainer: AppContainer,
-    navController: NavController
+    navController: NavController,
+    detailsVm: DetailsVm = hiltViewModel(),
+    cartVm: CartVm = hiltViewModel()
 ) {
-    val detailsVm: DetailsVm = viewModel(factory = DetailsVmFactory(appContainer))
-    val cartVm: CartVm = viewModel(factory = CartVmFactory(appContainer))
-
     val item by detailsVm.menuItem.collectAsState()
     val cartItems by cartVm.cartItems.collectAsState() // Or your state flow
     val existingCartItem = cartItems.firstOrNull { it.id == itemId }
-    var itemQty by remember { mutableIntStateOf(1) }
-
-
-    val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
-    val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -92,6 +85,38 @@ fun ItemDetailsScreen(
     LaunchedEffect(itemId) {
         detailsVm.loadItem(itemId)
     }
+
+    ItemDetailsScreenContent(
+        navController = navController,
+        itemId = itemId,
+        item = item,
+        cartItems = cartItems,
+        existingCartItem = existingCartItem,
+        snackbarHostState = snackbarHostState,
+        scope = scope,
+        addToCart = cartVm::addToCart,
+        updateQuantity = cartVm::updateQuantity,
+        removeFromCart = cartVm::removeFromCart,
+    )
+}
+
+@Composable
+fun ItemDetailsScreenContent(
+    navController: NavController,
+    itemId: Int,
+    item: LocalMenuItem?,
+    cartItems: List<LocalCartItem>,
+    existingCartItem: LocalCartItem?,
+    snackbarHostState: SnackbarHostState,
+    scope: CoroutineScope,
+    addToCart: (LocalCartItem) -> Unit,
+    updateQuantity: (Int, Int) -> Unit,
+    removeFromCart: (Int) -> Unit
+) {
+    val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
+    val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
+
+    var itemQty by remember { mutableIntStateOf(1) }
 
     Scaffold(
         topBar = {
@@ -113,12 +138,12 @@ fun ItemDetailsScreen(
 
                     if (existingCartItem == null) {
                         // first time adding this item
-                        cartVm.addToCart(
+                        addToCart(
                             product.toCartItems().copy(quantity = itemQty)
                         )
                     } else {
                         // item already in cart → increase quantity
-                        cartVm.updateQuantity(
+                        updateQuantity(
                             product.id,
                             existingCartItem.quantity + itemQty
                         )
@@ -134,12 +159,12 @@ fun ItemDetailsScreen(
                         if (result == SnackbarResult.ActionPerformed) {
                             if (existingCartItem == null) {
                                 // Remove newly added item
-                                cartVm.removeFromCart(product.id)
+                                removeFromCart(product.id)
                             } else {
                                 // Undo = revert added quantity
-                                cartVm.updateQuantity(
+                                updateQuantity(
                                     product.id,
-                                    existingCartItem.quantity
+                                    existingCartItem.quantity - itemQty
                                 )
                             }
                         }
@@ -500,10 +525,32 @@ fun ItemNumberPicker(
 @Composable
 fun ItemDetailsScreenPreview() {
     LittleLemonTheme {
-        ItemDetailsScreen(
+        ItemDetailsScreenContent(
+            navController = NavController(LocalContext.current),
             itemId = 1,
-            appContainer = AppContainer(LocalContext.current),
-            navController = NavController(LocalContext.current)
+            item = LocalMenuItem(
+                id = 1,
+                title = "Greek Salad",
+                description = "The famous greek salad of crispy lettuce, peppers, olives and our",
+                price = 10.0,
+                image = "R.drawable.lemon_dessert",
+                category = "Mains"
+            ),
+            cartItems = emptyList(),
+            existingCartItem = LocalCartItem(
+                id = 2,
+                title = "Greek Salad",
+                price = 10.0,
+                image = "R.drawable.greek_salad",
+                quantity = 1
+            ),
+            snackbarHostState = remember { SnackbarHostState() },
+            scope = rememberCoroutineScope(),
+            addToCart = { },
+            updateQuantity = {
+                _, _ ->
+            },
+            removeFromCart = { }
         )
     }
 }
@@ -512,10 +559,32 @@ fun ItemDetailsScreenPreview() {
 @Composable
 fun ItemDetailsScreenDarkPreview() {
     LittleLemonTheme {
-        ItemDetailsScreen(
+        ItemDetailsScreenContent(
+            navController = NavController(LocalContext.current),
             itemId = 1,
-            appContainer = AppContainer(LocalContext.current),
-            navController = NavController(LocalContext.current)
+            item = LocalMenuItem(
+                id = 1,
+                title = "Greek Salad",
+                description = "The famous greek salad of crispy lettuce, peppers, olives and our",
+                price = 10.0,
+                image = "R.drawable.lemon_dessert",
+                category = "Mains"
+            ),
+            cartItems = emptyList(),
+            existingCartItem = LocalCartItem(
+                id = 2,
+                title = "Greek Salad",
+                price = 10.0,
+                image = "R.drawable.greek_salad",
+                quantity = 1
+            ),
+            snackbarHostState = remember { SnackbarHostState() },
+            scope = rememberCoroutineScope(),
+            addToCart = { },
+            updateQuantity = {
+                    _, _ ->
+            },
+            removeFromCart = { }
         )
     }
 }

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -29,10 +28,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.littlelemon.R
-import com.example.littlelemon.di.AppContainer
+import com.example.littlelemon.data.local.orders.LocalOrderWithItems
 import com.example.littlelemon.ui.components.LemonNavigationBar
 import com.example.littlelemon.ui.components.LemonOrderCard
 import com.example.littlelemon.ui.components.TopAppBar
@@ -43,13 +42,27 @@ import com.example.littlelemon.utils.Screen
 @Composable
 fun OrdersScreen(
     navController: NavController,
-    ordersVm: OrdersVm,
+    ordersVm: OrdersVm = hiltViewModel(),
+) {
+    // Collect orders WITH their items
+    val ordersWithItems = ordersVm.ordersWithItems.collectAsState().value
+
+    OrdersScreenContent(
+        navController = navController,
+        ordersWithItems = ordersWithItems,
+        clearOrders = ordersVm::clearOrders
+    )
+
+}
+
+@Composable
+fun OrdersScreenContent(
+    navController: NavController,
+    ordersWithItems: List<LocalOrderWithItems>,
+    clearOrders: () -> Unit
 ) {
     val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
-
-    // Collect orders WITH their items
-    val ordersWithItems = ordersVm.ordersWithItems.collectAsState().value
 
     Scaffold(
         topBar = {
@@ -74,7 +87,7 @@ fun OrdersScreen(
             LemonNavigationBar(
                 isActionEnabled = ordersWithItems.isNotEmpty(),
                 onActionText = "Clear",
-                onActionClicked = { ordersVm.clearOrders() },
+                onActionClicked = clearOrders,
                 onHomeClicked = { navController.navigate(Screen.Home.route) },
                 onReservationClicked = { navController.navigate(Screen.ReservationTableDetails.route) },
                 onCartClicked = { navController.navigate(Screen.Cart.route) },
@@ -86,7 +99,7 @@ fun OrdersScreen(
         containerColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.background else Color.White,
         modifier = Modifier.statusBarsPadding()
     ) { innerPadding ->
-        if (ordersWithItems.isNullOrEmpty()) {
+        if (ordersWithItems.isEmpty()) {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
@@ -147,14 +160,14 @@ fun OrdersScreen(
     }
 }
 
-
 @Preview
 @Composable
 fun OrdersScreenPreview() {
     LittleLemonTheme {
-        OrdersScreen(
+        OrdersScreenContent(
             navController = NavController(LocalContext.current),
-            ordersVm = viewModel(factory = OrdersVmFactory(AppContainer(LocalContext.current))),
+            ordersWithItems = emptyList(),
+            clearOrders = {}
         )
     }
 }
@@ -163,9 +176,10 @@ fun OrdersScreenPreview() {
 @Composable
 fun OrdersScreenDarkPreview() {
     LittleLemonTheme {
-        OrdersScreen(
+        OrdersScreenContent(
             navController = NavController(LocalContext.current),
-            ordersVm = viewModel(factory = OrdersVmFactory(AppContainer(LocalContext.current))),
+            ordersWithItems = emptyList(),
+            clearOrders = {}
         )
     }
 }

@@ -3,8 +3,31 @@ package com.example.littlelemon.data.repos
 import com.example.littlelemon.data.local.reservations.LocalReservation
 import com.example.littlelemon.data.local.reservations.LocalReservationsDao
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 class ReservationsRepo(private val dao: LocalReservationsDao) {
+    private val _paymentMethod = MutableStateFlow<String?>(null)
+    val paymentMethod: StateFlow<String?> = _paymentMethod
+
+    private val _orderId = MutableStateFlow<String?>(null)
+    val orderId: StateFlow<String?> = _orderId
+
+    private val _phoneNumber = MutableStateFlow<String?>(null)
+    val phoneNumber: StateFlow<String?> = _phoneNumber
+
+    fun setPaymentMethod(method: String) {
+        _paymentMethod.value = method
+    }
+
+    fun setOrderId(id: String) {
+        _orderId.value = id
+    }
+
+    fun setPhoneNumber(phone: String) {
+        _phoneNumber.value = phone
+    }
+
     //Get all reservations as Flow
     fun getAllLocalReservations(): Flow<List<LocalReservation>> {
         return dao.getAllLocalReservations()

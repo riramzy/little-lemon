@@ -22,9 +22,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.littlelemon.di.AppContainer
 import com.example.littlelemon.ui.components.ItemOverview
 import com.example.littlelemon.ui.components.LemonGenrePill
 import com.example.littlelemon.ui.components.LemonNavigationBar
@@ -35,8 +35,8 @@ import com.example.littlelemon.utils.Screen
 @Composable
 fun SearchScreen(
     navController: NavHostController,
-    appContainer: AppContainer,
-    category: String?
+    category: String?,
+    searchVm: SearchVm = hiltViewModel()
 ) {
     val categoriesFilters = listOf(
         "Starters",
@@ -44,21 +44,19 @@ fun SearchScreen(
         "Desserts",
     )
 
-    val vm = appContainer.searchVm
-
     val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
 
-    val searchQuery by vm.searchQuery.collectAsState()
-    val searchItems by vm.searchedItems.collectAsState()
-    val selectedCategory by vm.categoryFilter.collectAsState()
+    val searchQuery by searchVm.searchQuery.collectAsState()
+    val searchItems by searchVm.searchedItems.collectAsState()
+    val selectedCategory by searchVm.categoryFilter.collectAsState()
 
     /**
      * Apply category ONLY once when coming from Home
      */
     LaunchedEffect(Unit) {
         if (!category.isNullOrBlank() && selectedCategory == null) {
-            vm.searchByCategory(category)
+            searchVm.searchByCategory(category)
         }
     }
 
@@ -67,7 +65,7 @@ fun SearchScreen(
             TopAppBar(
                 modifier = Modifier.padding(vertical = 10.dp, horizontal = 15.dp),
                 searchQuery = searchQuery,
-                onSearchQueryChange = vm::onSearchQueryChange
+                onSearchQueryChange = searchVm::onSearchQueryChange
             )
         },
         floatingActionButton = {
@@ -109,7 +107,7 @@ fun SearchScreen(
                         genre = filterCategory,
                         isSelected = isSelected,
                         onGenreClicked = {
-                            vm.searchByCategory(
+                            searchVm.searchByCategory(
                                 if (isSelected) null else filterCategory
                             )
                         },
@@ -151,9 +149,6 @@ fun SearchScreenPreview() {
     LittleLemonTheme {
         SearchScreen(
             navController = rememberNavController(),
-            appContainer = AppContainer(
-                context = LocalContext.current
-            ),
             category = "starters"
         )
     }
@@ -165,9 +160,6 @@ fun SearchScreenDarkPreview() {
     LittleLemonTheme {
         SearchScreen(
             navController = rememberNavController(),
-            appContainer = AppContainer(
-                context = LocalContext.current
-            ),
             category = null
         )
     }

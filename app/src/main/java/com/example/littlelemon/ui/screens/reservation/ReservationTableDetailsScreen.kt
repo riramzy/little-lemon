@@ -29,10 +29,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.littlelemon.data.local.reservations.LocalReservation
-import com.example.littlelemon.di.AppContainer
 import com.example.littlelemon.ui.components.LemonDateSelector
 import com.example.littlelemon.ui.components.LemonDurationSelector
 import com.example.littlelemon.ui.components.LemonNavigationBar
@@ -52,10 +52,10 @@ import java.util.Locale
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ReservationTableDetailsScreen(
-    reservationVm: ReservationVm,
+    reservationVm: ReservationVm = hiltViewModel(),
     navController: NavHostController,
 
-) {
+    ) {
     val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
     val context = LocalContext.current
@@ -425,10 +425,6 @@ fun NumberOfDinerPicker(
 fun ReservationTableDetailsScreenPreview() {
     LittleLemonTheme {
         ReservationTableDetailsScreen(
-            reservationVm = ReservationVm(
-                reservationsRepo = AppContainer(LocalContext.current).reservationsRepo,
-                userVm = UserVm(AppContainer(LocalContext.current).userRepo)
-            ),
             navController = rememberNavController()
         )
     }
@@ -440,10 +436,6 @@ fun ReservationTableDetailsScreenPreview() {
 fun ReservationTableDetailsScreenDarkPreview() {
     LittleLemonTheme {
         ReservationTableDetailsScreen(
-            reservationVm = ReservationVm(
-                reservationsRepo = AppContainer(LocalContext.current).reservationsRepo,
-                userVm = UserVm(AppContainer(LocalContext.current).userRepo)
-            ),
             navController = rememberNavController()
         )
     }

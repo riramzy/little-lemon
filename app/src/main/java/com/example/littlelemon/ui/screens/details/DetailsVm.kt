@@ -4,12 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.littlelemon.data.local.menu.LocalMenuItem
 import com.example.littlelemon.data.repos.MenuRepo
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-
-class DetailsVm(
+@HiltViewModel
+class DetailsVm @Inject constructor(
     private val repo: MenuRepo
 ): ViewModel() {
     private val _menuItem = MutableStateFlow<LocalMenuItem?>(null)

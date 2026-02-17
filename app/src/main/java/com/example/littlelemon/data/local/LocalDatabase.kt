@@ -1,8 +1,6 @@
 package com.example.littlelemon.data.local
 
-import android.content.Context
 import androidx.room.Database
-import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.littlelemon.data.local.cart.LocalCartDao
 import com.example.littlelemon.data.local.cart.LocalCartItem
@@ -16,7 +14,6 @@ import com.example.littlelemon.data.local.reservations.LocalReservationsDao
 import com.example.littlelemon.data.local.search.LocalSearchDao
 
 //Room database instance that builds the database
-
 @Database(
     entities = [
         LocalMenuItem::class,
@@ -33,22 +30,4 @@ abstract class LocalDatabase: RoomDatabase() {
     abstract fun localSearchDao(): LocalSearchDao
     abstract fun localOrdersDao(): LocalOrdersDao
     abstract fun localReservationsDao(): LocalReservationsDao
-
-    companion object {
-        @Volatile private var INSTANCE: LocalDatabase? = null
-
-        fun getInstance(context: Context): LocalDatabase {
-            return INSTANCE ?: synchronized(this) {
-                val instance = Room.databaseBuilder(
-                    context.applicationContext,
-                    LocalDatabase::class.java,
-                    "little_lemon_db"
-                )
-                    .fallbackToDestructiveMigration()
-                    .build()
-                INSTANCE = instance
-                instance
-            }
-        }
-    }
 }

@@ -7,15 +7,19 @@ import com.example.littlelemon.data.local.orders.LocalOrder
 import com.example.littlelemon.data.local.orders.LocalOrderItem
 import com.example.littlelemon.data.local.orders.LocalOrderWithItems
 import com.example.littlelemon.data.repos.OrdersRepo
+import com.example.littlelemon.data.repos.ReservationsRepo
 import com.example.littlelemon.ui.screens.reservation.ReservationVm
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class OrdersVm(
+@HiltViewModel
+class OrdersVm @Inject constructor(
     private val ordersRepo: OrdersRepo,
-    private val reservationVm: ReservationVm
+    private val reservationRepo: ReservationsRepo
 ) : ViewModel() {
 
     // 1️⃣ StateFlow of orders WITH items
@@ -47,7 +51,7 @@ class OrdersVm(
 
             // Calculate total price
             val totalPrice = cartItems.sumOf { it.price * it.quantity } + 5
-            val paymentMethod = reservationVm.selectedPaymentMethod.value
+            val paymentMethod = reservationRepo.paymentMethod.value ?: "COD"
 
             // Insert new order and get generated ID
             val orderId = ordersRepo.insertOrder(LocalOrder(totalPrice = totalPrice, paymentMethod = paymentMethod.toString())).toInt()

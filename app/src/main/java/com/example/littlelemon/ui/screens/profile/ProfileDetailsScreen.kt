@@ -1,5 +1,6 @@
 package com.example.littlelemon.ui.screens.profile
 
+import android.content.res.Configuration
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -43,11 +44,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.littlelemon.R
-import com.example.littlelemon.data.preferences.UserPreferences
-import com.example.littlelemon.data.repos.UserRepo
 import com.example.littlelemon.ui.components.LemonInputField
 import com.example.littlelemon.ui.components.LemonNavigationBar
 import com.example.littlelemon.ui.components.YellowLemonButton
@@ -58,35 +59,63 @@ import com.example.littlelemon.utils.Screen
 @Composable
 fun ProfileDetailsScreen(
     navController: NavController,
-    vm: UserVm
+    userVm: UserVm = hiltViewModel()
 ) {
-    val context = LocalContext.current
+    ProfileDetailsScreenContent(
+        navController = navController,
+        getProfilePicture = userVm.getProfilePicture(),
+        saveProfilePicture = userVm::saveProfilePicture,
+        editUsername = userVm::editUsername,
+        editFirstName = userVm::editFirstName,
+        editLastName = userVm::editLastName,
+        getUsername = userVm.getUsername(),
+        getFirstName = userVm.getFirstName(),
+        getLastName = userVm.getLastName(),
+        getEmail = userVm.getEmail()
+    )
+}
 
-    var username by remember { mutableStateOf(vm.getUsername()) }
-    var tempUsername: String? by remember { mutableStateOf(vm.getUsername()) }
-    var firstName by remember { mutableStateOf(vm.getFirstName()) }
-    var tempFirstName by remember { mutableStateOf(vm.getFirstName()) }
-    var lastName by remember { mutableStateOf(vm.getLastName()) }
-    var tempLastName by remember { mutableStateOf(vm.getLastName()) }
-    val email = vm.getEmail()
+@Composable
+fun ProfileDetailsScreenContent(
+    navController: NavController,
+    getProfilePicture: String?,
+    saveProfilePicture: (String) -> Unit,
+    editUsername: (String) -> Unit,
+    editFirstName: (String) -> Unit,
+    editLastName: (String) -> Unit,
+    getUsername: String?,
+    getFirstName: String?,
+    getLastName: String?,
+    getEmail: String?,
+
+) {
+    var username by remember { mutableStateOf(getUsername) }
+    var tempUsername: String? by remember { mutableStateOf(getUsername) }
+    var firstName by remember { mutableStateOf(getFirstName) }
+    var tempFirstName by remember { mutableStateOf(getFirstName) }
+    var lastName by remember { mutableStateOf(getLastName) }
+    var tempLastName by remember { mutableStateOf(getLastName) }
+
 
     fun saveNewInfo() {
-        vm.editUsername(tempUsername!!)
-        vm.editFirstName(tempFirstName!!)
-        vm.editLastName(tempLastName!!)
+        editUsername(tempUsername!!)
+        editFirstName(tempFirstName!!)
+        editLastName(tempLastName!!)
     }
+
+    val context = LocalContext.current
 
     var showSaveDialog by remember { mutableStateOf(false) }
 
     var selectedImageUri by remember {
-        mutableStateOf(vm.getProfilePicture()?.toUri())
+        mutableStateOf(getProfilePicture?.toUri())
     }
 
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
             selectedImageUri = uri
-            vm.saveProfilePicture(uri.toString())
+            saveProfilePicture(uri.toString())
         }
     )
 
@@ -324,7 +353,7 @@ fun ProfileDetailsScreen(
 
                     LemonInputField(
                         requiredText = "Email",
-                        value = email ?: "",
+                        value = getEmail ?: "",
                         modifier = Modifier
                             .padding(
                                 bottom = 20.dp,
@@ -342,13 +371,36 @@ fun ProfileDetailsScreen(
 @Composable
 fun ProfileDetailsScreenPreview() {
     LittleLemonTheme {
-        ProfileDetailsScreen(
-            navController = NavController(LocalContext.current),
-            vm = UserVm(
-                UserRepo(
-                    UserPreferences(LocalContext.current)
-                )
-            )
+        ProfileDetailsScreenContent(
+            navController = rememberNavController(),
+            getProfilePicture = null,
+            saveProfilePicture = {},
+            editUsername = {},
+            editFirstName = {},
+            editLastName = {},
+            getUsername = null,
+            getFirstName = null,
+            getLastName = null,
+            getEmail = null
+        )
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun ProfileDetailsScreenDarkPreview() {
+    LittleLemonTheme {
+        ProfileDetailsScreenContent(
+            navController = rememberNavController(),
+            getProfilePicture = null,
+            saveProfilePicture = {},
+            editUsername = {},
+            editFirstName = {},
+            editLastName = {},
+            getUsername = null,
+            getFirstName = null,
+            getLastName = null,
+            getEmail = null
         )
     }
 }

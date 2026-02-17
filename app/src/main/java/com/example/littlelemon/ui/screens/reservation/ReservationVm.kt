@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.littlelemon.data.local.reservations.LocalReservation
 import com.example.littlelemon.data.repos.ReservationsRepo
 import com.example.littlelemon.ui.viewmodel.UserVm
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,8 +16,10 @@ import kotlinx.coroutines.launch
 import okhttp3.Dispatcher
 import java.time.LocalDate
 import java.time.LocalTime
+import javax.inject.Inject
 
-class ReservationVm(
+@HiltViewModel
+class ReservationVm @Inject constructor(
     private val reservationsRepo: ReservationsRepo,
     private val userVm: UserVm
 ): ViewModel() {
@@ -24,9 +27,9 @@ class ReservationVm(
     var selectedTime = mutableStateOf<LocalTime?>(null)
     var selectedNumberOfDiners = mutableStateOf<Int?>(null)
     var selectedDuration = mutableStateOf<String?>(null)
-    var selectedPaymentMethod = mutableStateOf<String?>(null)
-    var phoneNumber = mutableStateOf<String?>(null)
-    var orderId = mutableStateOf<String?>(null)
+    var selectedPaymentMethod: StateFlow<String?> = reservationsRepo.paymentMethod
+    val phoneNumber: StateFlow<String?> = reservationsRepo.phoneNumber
+    val orderId: StateFlow<String?> = reservationsRepo.orderId
 
     //User name for reservation
     private val _firstName = MutableStateFlow(if (userVm.isLoggedIn()) userVm.getFirstName() ?: "" else "")
@@ -63,6 +66,10 @@ class ReservationVm(
         viewModelScope.launch(Dispatchers.IO) {
             reservationsRepo.insertReservation(item)
         }
+    }
+
+    fun setPaymentMethod(method: String) {
+        reservationsRepo.setPaymentMethod(method)
     }
 
     //Clear all reservations

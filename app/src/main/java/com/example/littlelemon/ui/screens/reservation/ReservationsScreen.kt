@@ -27,9 +27,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.littlelemon.R
-import com.example.littlelemon.di.AppContainer
 import com.example.littlelemon.ui.components.LemonNavigationBar
 import com.example.littlelemon.ui.components.LemonReservationCard
 import com.example.littlelemon.ui.components.TopAppBar
@@ -41,7 +41,7 @@ import com.example.littlelemon.utils.Screen
 @Composable
 fun ReservationsScreen(
     navController: NavController,
-    reservationVm: ReservationVm
+    reservationVm: ReservationVm = hiltViewModel()
 ) {
     val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
@@ -181,10 +181,6 @@ fun ReservationsScreenPreview() {
     LittleLemonTheme {
         ReservationsScreen(
             navController = NavController(LocalContext.current),
-            reservationVm = ReservationVm(
-                reservationsRepo = AppContainer(LocalContext.current).reservationsRepo,
-                userVm = UserVm(AppContainer(LocalContext.current).userRepo)
-            )
         )
     }
 }
@@ -195,10 +191,6 @@ fun ReservationScreenDarkPreview() {
     LittleLemonTheme {
         ReservationsScreen(
             navController = NavController(LocalContext.current),
-            reservationVm = ReservationVm(
-                reservationsRepo = AppContainer(LocalContext.current).reservationsRepo,
-                userVm = UserVm(AppContainer(LocalContext.current).userRepo)
-            )
         )
     }
 }

@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.littlelemon.R
 import com.example.littlelemon.data.preferences.UserPreferences
@@ -44,7 +45,7 @@ import com.example.littlelemon.utils.Screen
 @Composable
 fun SignUpScreen(
     navController: NavController,
-    vm: UserVm
+    userVm: UserVm = hiltViewModel()
 ) {
     val context = LocalContext.current
 
@@ -179,7 +180,7 @@ fun SignUpScreen(
                         MaterialTheme.colorScheme.secondaryContainer
                     },
                     onClick = {
-                        val success = vm.register(
+                        val success = userVm.register(
                             username = username,
                             firstName = firstName,
                             lastName = lastName,
@@ -219,11 +220,6 @@ fun SignUpScreenPreview() {
     LittleLemonTheme {
         SignUpScreen(
             navController = NavController(LocalContext.current),
-            vm = UserVm(
-                UserRepo(
-                    UserPreferences(LocalContext.current)
-                )
-            )
         )
     }
 }
@@ -234,11 +230,6 @@ fun SignUpScreenDarkPreview() {
     LittleLemonTheme {
         SignUpScreen(
             navController = NavController(LocalContext.current),
-            vm = UserVm(
-                UserRepo(
-                    UserPreferences(LocalContext.current)
-                )
-            )
         )
     }
 }

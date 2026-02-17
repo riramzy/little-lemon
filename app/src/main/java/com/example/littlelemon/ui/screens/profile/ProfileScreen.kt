@@ -2,12 +2,7 @@ package com.example.littlelemon.ui.screens.profile
 
 import android.content.res.Configuration
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,7 +19,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Lock
@@ -36,7 +30,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -58,34 +51,56 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.littlelemon.R
-import com.example.littlelemon.data.preferences.UserPreferences
-import com.example.littlelemon.data.repos.UserRepo
 import com.example.littlelemon.ui.components.LemonNavigationBar
 import com.example.littlelemon.ui.components.YellowLemonButton
 import com.example.littlelemon.ui.theme.LittleLemonTheme
 import com.example.littlelemon.ui.viewmodel.UserVm
 import com.example.littlelemon.utils.Screen
-import org.jetbrains.annotations.Async
 
 @Composable
 fun ProfileScreen(
     navController: NavController,
-    vm: UserVm
+    userVm: UserVm = hiltViewModel()
+) {
+    val username = userVm.getUsername()
+    val firstName = userVm.getFirstName()
+    val email = userVm.getEmail()
+
+    ProfileScreenContent(
+        navController = navController,
+        username = username ?: "",
+        firstName = firstName ?: "",
+        email = email ?: "",
+        getProfilePicture = userVm.getProfilePicture(),
+        logout = userVm::logout,
+        deleteAccount = userVm::deleteAccount
+    )
+
+}
+
+@Composable
+fun ProfileScreenContent(
+    navController: NavController,
+    username: String,
+    firstName: String,
+    email: String,
+    getProfilePicture: String?,
+    logout: () -> Unit,
+    deleteAccount: () -> Unit
+
 ) {
     val context = LocalContext.current
-
-    val username = vm.getUsername()
-    val firstName = vm.getFirstName()
-    val email = vm.getEmail()
 
     var showLogoutDialog by remember { mutableStateOf(false) }
     var showDeleteAccountDialog by remember { mutableStateOf(false) }
 
     var selectedImageUri by remember {
-        mutableStateOf(vm.getProfilePicture()?.toUri())
+        mutableStateOf(getProfilePicture?.toUri())
     }
 
     if (showLogoutDialog) {
@@ -107,7 +122,7 @@ fun ProfileScreen(
                 YellowLemonButton(
                     text = "Logout",
                     onClick = {
-                        vm.logout()
+                        logout()
                         Toast.makeText(
                             context,
                             "Logged out successfully",
@@ -123,7 +138,7 @@ fun ProfileScreen(
                     },
                     textColor = if (isSystemInDarkTheme()) {
                         MaterialTheme.colorScheme.onErrorContainer
-                        } else {
+                    } else {
                         MaterialTheme.colorScheme.onError
                     },
                     modifier = Modifier.width(100.dp)
@@ -142,7 +157,7 @@ fun ProfileScreen(
                     },
                     textColor = if (isSystemInDarkTheme()) {
                         MaterialTheme.colorScheme.onBackground
-                        } else {
+                    } else {
                         MaterialTheme.colorScheme.onBackground
                     },
                     modifier = Modifier.width(100.dp)
@@ -170,7 +185,7 @@ fun ProfileScreen(
                 YellowLemonButton(
                     text = "Delete",
                     onClick = {
-                        vm.deleteAccount()
+                        deleteAccount()
                         Toast.makeText(
                             context,
                             "Account deleted successfully",
@@ -277,44 +292,6 @@ fun ProfileScreen(
                                 .clip(CircleShape),
                             contentScale = ContentScale.Crop,
                         )
-
-                        /*
-                        IconButton(
-                            onClick = {
-                                photoPickerLauncher.launch(
-                                    PickVisualMediaRequest(
-                                        ActivityResultContracts.PickVisualMedia.ImageOnly
-                                    )
-                                )
-                            },
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .clip(CircleShape)
-                                .size(24.dp)
-                                .background(
-                                    if (isSystemInDarkTheme()) {
-                                        MaterialTheme.colorScheme.primary
-                                    } else {
-                                        MaterialTheme.colorScheme.primaryContainer
-                                    }
-                                )
-
-                        ) {
-                            Icon(
-                                Icons.Filled.Edit,
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .padding(4.dp),
-                                contentDescription = "Edit",
-                                tint = if (isSystemInDarkTheme()) {
-                                    Color.Black
-                                } else {
-                                    Color.White
-                                },
-                            )
-                        }
-
-                         */
                     }
 
                     Text(
@@ -578,13 +555,14 @@ fun SectionHead(
 @Composable
 fun ProfileScreenPreview() {
     LittleLemonTheme {
-        ProfileScreen(
-            navController = NavController(LocalContext.current),
-            vm = UserVm(
-                UserRepo(
-                    UserPreferences(LocalContext.current)
-                )
-            )
+        ProfileScreenContent(
+            navController = rememberNavController(),
+            username = "riramzy",
+            firstName = "Ramzy",
+            email = "william.paterson@my-own-personal-domain.com",
+            getProfilePicture = null,
+            logout = {},
+            deleteAccount = {}
         )
     }
 }
@@ -593,13 +571,14 @@ fun ProfileScreenPreview() {
 @Composable
 fun ProfileScreenDarkPreview() {
     LittleLemonTheme {
-        ProfileScreen(
-            navController = NavController(LocalContext.current),
-            vm = UserVm(
-                UserRepo(
-                    UserPreferences(LocalContext.current)
-                )
-            )
+        ProfileScreenContent(
+            navController = rememberNavController(),
+            username = "riramzy",
+            firstName = "Ramzy",
+            email = "william.paterson@my-own-personal-domain.com",
+            getProfilePicture = null,
+            logout = {},
+            deleteAccount = {}
         )
     }
 }

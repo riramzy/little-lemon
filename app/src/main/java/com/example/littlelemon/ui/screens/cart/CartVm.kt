@@ -4,12 +4,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.littlelemon.data.local.cart.LocalCartItem
 import com.example.littlelemon.data.repos.CartRepo
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class CartVm(
+@HiltViewModel
+class CartVm @Inject constructor(
     private val cartRepo: CartRepo
 ): ViewModel() {
     private val _cartItems = MutableStateFlow<List<LocalCartItem>>(emptyList())

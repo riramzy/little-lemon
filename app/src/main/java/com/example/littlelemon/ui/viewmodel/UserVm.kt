@@ -1,11 +1,15 @@
 package com.example.littlelemon.ui.viewmodel
 
 import android.util.Patterns
+import androidx.lifecycle.ViewModel
 import com.example.littlelemon.data.repos.UserRepo
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class UserVm(
+@HiltViewModel
+class UserVm @Inject constructor(
     private val userRepo: UserRepo
-) {
+): ViewModel() {
     fun setOnboardingDone(onboardingDone: Boolean) {
         userRepo.setOnboardingDone(onboardingDone)
     }

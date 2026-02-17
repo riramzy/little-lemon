@@ -30,57 +30,47 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.littlelemon.data.local.cart.LocalCartItem
 import com.example.littlelemon.data.local.menu.LocalMenuItem
-import com.example.littlelemon.di.AppContainer
 import com.example.littlelemon.ui.components.ItemOverview
 import com.example.littlelemon.ui.components.LemonCutlerySelector
 import com.example.littlelemon.ui.components.LemonNavigationBar
 import com.example.littlelemon.ui.components.TopAppBar
 import com.example.littlelemon.ui.screens.cart.CartVm
-import com.example.littlelemon.ui.screens.cart.CartVmFactory
 import com.example.littlelemon.ui.screens.home.HomeVm
-import com.example.littlelemon.ui.screens.home.HomeVmFactory
 import com.example.littlelemon.ui.theme.LittleLemonTheme
 import com.example.littlelemon.utils.Screen
 
 @Composable
 fun CheckoutScreen(
-    cartVm: CartVm,
-    homeVm: HomeVm,
+    cartVm: CartVm = hiltViewModel(),
+    homeVm: HomeVm = hiltViewModel(),
     navController: NavController
 ) {
     val cartItems = cartVm.cartItems.collectAsState().value
     val menuItems = homeVm.menuItems.collectAsState().value
 
-    /*
-    cartItems = listOf(
-        LocalCartItem(
-            id = 1,
-            title = "Greek Salad",
-            price = 12.99,
-            image = "",
-            quantity = 1
-        ),
-        LocalCartItem(
-            id = 2,
-            title = "Bruschetta",
-            price = 12.99,
-            image = "",
-            quantity = 1
-        )
+    CheckoutScreenContent(
+        navController = navController,
+        cartItems = cartItems,
+        menuItems = menuItems
     )
+}
 
-     */
-
+@Composable
+fun CheckoutScreenContent(
+    navController: NavController,
+    cartItems: List<LocalCartItem>,
+    menuItems: List<LocalMenuItem>
+) {
     val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
 
@@ -424,10 +414,10 @@ fun TotalPrice(
 @Composable
 fun CheckoutScreenPreview() {
     LittleLemonTheme {
-        CheckoutScreen(
-            cartVm = viewModel(factory = CartVmFactory(AppContainer(LocalContext.current))),
-            homeVm = viewModel(factory = HomeVmFactory(AppContainer(LocalContext.current))),
-            navController = NavController(LocalContext.current)
+        CheckoutScreenContent(
+            navController = rememberNavController(),
+            cartItems = emptyList(),
+            menuItems = emptyList()
         )
     }
 }
@@ -436,10 +426,10 @@ fun CheckoutScreenPreview() {
 @Composable
 fun CheckoutScreenDarkPreview() {
     LittleLemonTheme {
-        CheckoutScreen(
-            cartVm = viewModel(factory = CartVmFactory(AppContainer(LocalContext.current))),
-            homeVm = viewModel(factory = HomeVmFactory(AppContainer(LocalContext.current))),
-            navController = NavController(LocalContext.current)
+        CheckoutScreenContent(
+            navController = rememberNavController(),
+            cartItems = emptyList(),
+            menuItems = emptyList()
         )
     }
 }

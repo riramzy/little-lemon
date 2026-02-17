@@ -32,18 +32,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.littlelemon.data.local.cart.LocalCartItem
-import com.example.littlelemon.di.AppContainer
-import com.example.littlelemon.ui.components.LemonInputField
 import com.example.littlelemon.ui.components.LemonCutlerySelector
+import com.example.littlelemon.ui.components.LemonInputField
 import com.example.littlelemon.ui.components.LemonNavigationBar
 import com.example.littlelemon.ui.components.TopAppBar
 import com.example.littlelemon.ui.screens.cart.CartVm
-import com.example.littlelemon.ui.screens.cart.CartVmFactory
 import com.example.littlelemon.ui.screens.orders.OrdersVm
-import com.example.littlelemon.ui.screens.orders.OrdersVmFactory
 import com.example.littlelemon.ui.screens.reservation.ReservationVm
 import com.example.littlelemon.ui.theme.LittleLemonTheme
 import com.example.littlelemon.ui.viewmodel.UserVm
@@ -51,21 +48,63 @@ import com.example.littlelemon.utils.Screen
 
 @Composable
 fun ConfirmationScreen(
-    modifier: Modifier = Modifier,
-    vm: ReservationVm,
-    cartVm: CartVm,
-    ordersVm: OrdersVm,
+    reservationVm: ReservationVm = hiltViewModel(),
+    cartVm: CartVm = hiltViewModel(),
+    ordersVm: OrdersVm = hiltViewModel(),
+    userVm: UserVm = hiltViewModel(),
     navController: NavController,
     isCart: Boolean = true,
     isReservation: Boolean = false,
 ) {
+    val cartItems = cartVm.cartItems.collectAsState().value
+
+    val userName = userVm.getFullName()
+    val orderId by reservationVm.orderId.collectAsState()
+    val paymentType by reservationVm.selectedPaymentMethod.collectAsState()
+    val phoneNumber by reservationVm.phoneNumber.collectAsState()
+
+    val selectedTime = reservationVm.selectedTime.value
+    val selectedDuration = reservationVm.selectedDuration.value
+    val selectedNumberOfDiners = reservationVm.selectedNumberOfDiners.value
+    val selectedDate = reservationVm.selectedDate.value
+
+    ConfirmationScreenContent(
+        navController = navController,
+        cartItems = cartItems,
+        userName = userName ?: "Ramzy",
+        orderId = orderId ?: "12",
+        paymentType = paymentType.toString(),
+        phoneNumber = phoneNumber ?: "01286909899",
+        selectedTime = selectedTime.toString(),
+        selectedNumberOfDiners = selectedNumberOfDiners.toString(),
+        selectedDate = selectedDate.toString(),
+        selectedDuration = selectedDuration.toString(),
+        isCart = isCart,
+        isReservation = isReservation,
+        placeOrder = ordersVm::placeOrder,
+        clearCart = cartVm::clearCart
+    )
+}
+
+@Composable
+fun ConfirmationScreenContent(
+    navController: NavController,
+    cartItems: List<LocalCartItem>,
+    userName: String,
+    orderId: String,
+    paymentType: String,
+    phoneNumber: String,
+    selectedTime: String,
+    selectedNumberOfDiners: String,
+    selectedDate: String,
+    selectedDuration: String,
+    isCart: Boolean,
+    isReservation: Boolean,
+    placeOrder: (List<LocalCartItem>) -> Unit,
+    clearCart: () -> Unit,
+) {
     val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
-
-    val cartItems = cartVm.cartItems.collectAsState().value
-    val userRepo = AppContainer(LocalContext.current).userRepo
-    val userName = userRepo.getFullName()
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -83,8 +122,8 @@ fun ConfirmationScreen(
                 onActionText = "Confirm",
                 onActionClicked = {
                     if (isCart) {
-                        ordersVm.placeOrder(cartItems)
-                        cartVm.clearCart()
+                        placeOrder(cartItems)
+                        clearCart()
                         navController.navigate(Screen.Orders.route)
                     } else {
                         navController.navigate(Screen.Reservations.route)
@@ -115,7 +154,7 @@ fun ConfirmationScreen(
             .statusBarsPadding()
     ) { innerPadding ->
         LazyColumn(
-            modifier = modifier
+            modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -133,11 +172,17 @@ fun ConfirmationScreen(
                     modifier = Modifier.padding(
                         horizontal = 15.dp,
                     ),
-                    vm = vm,
                     cartItems = cartItems,
                     isCart = isCart,
                     isReservation = isReservation,
-                    userName = userName.toString(),
+                    userName = userName,
+                    orderId = orderId,
+                    paymentType = paymentType,
+                    phoneNumber = phoneNumber,
+                    selectedTime = selectedTime,
+                    selectedDuration = selectedDuration,
+                    selectedDate = selectedDate,
+                    selectedNumberOfDiners = selectedNumberOfDiners
                 )
             }
             item {
@@ -154,11 +199,17 @@ fun ConfirmationScreen(
 @Composable
 fun ReservationDetailsCard(
     modifier: Modifier = Modifier,
-    vm: ReservationVm,
     cartItems: List<LocalCartItem> = emptyList(),
     isCart: Boolean,
     isReservation: Boolean,
     userName: String = "Ramzi",
+    orderId: String,
+    paymentType: String,
+    phoneNumber: String,
+    selectedTime: String,
+    selectedNumberOfDiners: String,
+    selectedDate: String,
+    selectedDuration: String,
 ) {
     Card(
         modifier = modifier
@@ -189,7 +240,7 @@ fun ReservationDetailsCard(
                 item {
                     LemonInputField(
                         requiredText = "Order ID",
-                        value = vm.orderId.value.toString(),
+                        value = orderId,
                         isReadOnly = true
                     )
                 }
@@ -208,7 +259,7 @@ fun ReservationDetailsCard(
                     LemonInputField(
                         requiredText = "Phone number",
                         isReadOnly = true,
-                        value = vm.phoneNumber.value.toString()
+                        value = phoneNumber
                     )
                 }
 
@@ -217,7 +268,7 @@ fun ReservationDetailsCard(
                         LemonInputField(
                             requiredText = "At",
                             isReadOnly = true,
-                            value = vm.selectedTime.value.toString(),
+                            value = selectedTime,
                         )
                     }
 
@@ -225,7 +276,7 @@ fun ReservationDetailsCard(
                         LemonInputField(
                             requiredText = "For",
                             isReadOnly = true,
-                            value = vm.selectedNumberOfDiners.value.toString(),
+                            value = selectedNumberOfDiners,
                         )
                     }
 
@@ -233,7 +284,7 @@ fun ReservationDetailsCard(
                         LemonInputField(
                             requiredText = "Date",
                             isReadOnly = true,
-                            value = vm.selectedDate.value.toString(),
+                            value = selectedDate,
                         )
                     }
 
@@ -241,7 +292,7 @@ fun ReservationDetailsCard(
                         LemonInputField(
                             requiredText = "Duration",
                             isReadOnly = true,
-                            value = vm.selectedDuration.value.toString(),
+                            value = selectedDuration,
                         )
                     }
                 }
@@ -250,7 +301,7 @@ fun ReservationDetailsCard(
                     LemonInputField(
                         requiredText = "Payment type",
                         isReadOnly = true,
-                        value = vm.selectedPaymentMethod.value.toString()
+                        value = paymentType
                     )
                 }
 
@@ -345,14 +396,21 @@ fun AdditionalNotes(
 @Composable
 fun ConfirmationScreenPreview() {
     LittleLemonTheme {
-        ConfirmationScreen(
-            vm = ReservationVm(
-                reservationsRepo = AppContainer(LocalContext.current).reservationsRepo,
-                userVm = UserVm(AppContainer(LocalContext.current).userRepo)
-            ),
+        ConfirmationScreenContent(
             navController = NavController(LocalContext.current),
-            cartVm = viewModel(factory = CartVmFactory(AppContainer(LocalContext.current))),
-            ordersVm = viewModel(factory = OrdersVmFactory(AppContainer(LocalContext.current))),
+            cartItems = emptyList(),
+            userName = "Ramzy",
+            orderId = "123456",
+            paymentType = "COD",
+            phoneNumber = "01286909899",
+            selectedDate = "4th Dec 2026",
+            selectedNumberOfDiners = "3",
+            selectedTime = "19:00",
+            selectedDuration = "3 hours",
+            isCart = true,
+            isReservation = false,
+            placeOrder = {},
+            clearCart = {}
         )
     }
 }
@@ -361,14 +419,21 @@ fun ConfirmationScreenPreview() {
 @Composable
 fun ConfirmationScreenDarkPreview() {
     LittleLemonTheme {
-        ConfirmationScreen(
-            vm = ReservationVm(
-                reservationsRepo = AppContainer(LocalContext.current).reservationsRepo,
-                userVm = UserVm(AppContainer(LocalContext.current).userRepo)
-            ),
+        ConfirmationScreenContent(
             navController = NavController(LocalContext.current),
-            cartVm = viewModel(factory = CartVmFactory(AppContainer(LocalContext.current))),
-            ordersVm = viewModel(factory = OrdersVmFactory(AppContainer(LocalContext.current))),
+            cartItems = emptyList(),
+            userName = "Ramzy",
+            orderId = "123456",
+            paymentType = "COD",
+            phoneNumber = "01286909899",
+            selectedDate = "4th Dec 2026",
+            selectedNumberOfDiners = "3",
+            selectedTime = "19:00",
+            selectedDuration = "3 hours",
+            isCart = true,
+            isReservation = false,
+            placeOrder = {},
+            clearCart = {}
         )
     }
 }

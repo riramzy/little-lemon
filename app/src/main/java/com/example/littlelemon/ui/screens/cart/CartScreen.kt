@@ -23,18 +23,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.littlelemon.R
-import com.example.littlelemon.di.AppContainer
+import com.example.littlelemon.data.local.cart.LocalCartItem
 import com.example.littlelemon.ui.components.LemonCartItem
 import com.example.littlelemon.ui.components.LemonNavigationBar
 import com.example.littlelemon.ui.components.TopAppBar
@@ -45,30 +44,29 @@ import com.example.littlelemon.utils.Screen
 
 @Composable
 fun CartScreen(
-    cartVm: CartVm,
+    cartVm: CartVm = hiltViewModel(),
     navController: NavController
 ) {
     val cartItems = cartVm.cartItems.collectAsState().value
 
-    /*
-    cartItems = listOf(
-        LocalCartItem(
-            id = 1,
-            title = "Greek Salad",
-            price = 12.99,
-            image = "",
-            quantity = 1
-        ),
-        LocalCartItem(
-            id = 2,
-            title = "Bruschetta",
-            price = 12.99,
-            image = "",
-            quantity = 1
-        )
+    CartScreenContent(
+        navController = navController,
+        cartItems = cartItems,
+        removeFromCart = cartVm::removeFromCart,
+        increaseQuantity = cartVm::increaseQuantity,
+        decreaseQuantity = cartVm::decreaseQuantity
     )
 
-     */
+}
+
+@Composable
+fun CartScreenContent(
+    navController: NavController,
+    cartItems: List<LocalCartItem>,
+    removeFromCart: (Int) -> Unit,
+    increaseQuantity: (Int) -> Unit,
+    decreaseQuantity: (Int) -> Unit,
+) {
     val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
 
@@ -198,13 +196,13 @@ fun CartScreen(
                             LemonCartItem(
                                 item = item,
                                 onRemoveClicked = {
-                                    cartVm.removeFromCart(item.id)
+                                    removeFromCart(item.id)
                                 },
                                 onAddClicked = {
-                                    cartVm.increaseQuantity(item.id)
+                                    increaseQuantity(item.id)
                                 },
                                 onMinusClicked = {
-                                    cartVm.decreaseQuantity(item.id)
+                                    decreaseQuantity(item.id)
                                 },
                                 modifier = Modifier.padding(
                                     start = 15.dp,
@@ -236,9 +234,12 @@ fun CartScreen(
 @Composable
 fun CartScreenPreview() {
     LittleLemonTheme {
-        CartScreen(
-            cartVm = viewModel(factory = CartVmFactory(AppContainer(LocalContext.current))),
-            navController = rememberNavController()
+        CartScreenContent(
+            navController = rememberNavController(),
+            cartItems = emptyList(),
+            removeFromCart = { },
+            increaseQuantity = { },
+            decreaseQuantity = { }
         )
     }
 }
@@ -247,9 +248,12 @@ fun CartScreenPreview() {
 @Composable
 fun CartScreenDarkPreview() {
     LittleLemonTheme {
-        CartScreen(
-            cartVm = viewModel(factory = CartVmFactory(AppContainer(LocalContext.current))),
-            navController = rememberNavController()
+        CartScreenContent(
+            navController = rememberNavController(),
+            cartItems = emptyList(),
+            removeFromCart = { },
+            increaseQuantity = { },
+            decreaseQuantity = { }
         )
     }
 }

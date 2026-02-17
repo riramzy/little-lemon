@@ -32,10 +32,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.littlelemon.R
-import com.example.littlelemon.data.preferences.UserPreferences
-import com.example.littlelemon.data.repos.UserRepo
 import com.example.littlelemon.ui.components.GreenLemonButton
 import com.example.littlelemon.ui.components.LemonInputField
 import com.example.littlelemon.ui.theme.LittleLemonTheme
@@ -45,7 +44,21 @@ import com.example.littlelemon.utils.Screen
 @Composable
 fun LoginScreen(
     navController: NavController,
-    vm: UserVm,
+    userVm: UserVm = hiltViewModel(),
+) {
+    LoginScreenContent(
+        navController = navController,
+        login = userVm::login,
+        fullName = userVm.getFullName() ?: ""
+    )
+
+}
+
+@Composable
+fun LoginScreenContent(
+    navController: NavController,
+    login: (String, String) -> Unit,
+    fullName: String
 ) {
     val context = LocalContext.current
 
@@ -169,8 +182,12 @@ fun LoginScreen(
                                 Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
                             }
 
-                            vm.login(username, password) -> {
-                                Toast.makeText(context, "Welcome ${vm.getFirstName() + " " + vm.getLastName()}", Toast.LENGTH_SHORT).show()
+                            username.isNotBlank() && password.isNotBlank() -> {
+                                login(
+                                    username,
+                                    password
+                                )
+                                Toast.makeText(context, "Welcome $fullName", Toast.LENGTH_SHORT).show()
                                 navController.navigate(Screen.Home.route)
                             }
 
@@ -206,13 +223,10 @@ fun LoginScreen(
 @Composable
 fun LoginScreenPreview() {
     LittleLemonTheme {
-        LoginScreen(
+        LoginScreenContent(
             navController = NavController(LocalContext.current),
-            vm = UserVm(
-                UserRepo(
-                    UserPreferences(LocalContext.current)
-                )
-            ),
+            login = { _, _ -> },
+            fullName = "Ramzy Habel"
         )
     }
 }
@@ -221,13 +235,10 @@ fun LoginScreenPreview() {
 @Composable
 fun LoginScreenDarkPreview() {
     LittleLemonTheme {
-        LoginScreen(
+        LoginScreenContent(
             navController = NavController(LocalContext.current),
-            vm = UserVm(
-                UserRepo(
-                    UserPreferences(LocalContext.current)
-                )
-            ),
+            login = { _, _ -> },
+            fullName = "Ramzy Habel"
         )
     }
 }

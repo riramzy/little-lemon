@@ -29,40 +29,32 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.littlelemon.R
-import com.example.littlelemon.di.AppContainer
 import com.example.littlelemon.ui.components.LemonInputField
 import com.example.littlelemon.ui.components.LemonNavigationBar
 import com.example.littlelemon.ui.components.LemonPaymentSelector
 import com.example.littlelemon.ui.components.LemonSubInputField
 import com.example.littlelemon.ui.components.TopAppBar
 import com.example.littlelemon.ui.theme.LittleLemonTheme
+import com.example.littlelemon.ui.viewmodel.UserVm
 import com.example.littlelemon.utils.Screen
 
 @Composable
 fun PaymentScreen(
     onNextClickedCart: () -> Unit = {},
     onNextClickedReservation: () -> Unit = {},
-    navController: NavHostController,
+    navController: NavController,
     isForReservation: Boolean = false,
     isForCart: Boolean = true,
-    appContainer: AppContainer
+    paymentVm: PaymentVm = hiltViewModel(),
+    userVm: UserVm = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val paymentVm: PaymentVm = viewModel(
-        factory = PaymentVmFactory(
-            userVm = appContainer.userVm,
-            reservationVm = appContainer.reservationVm
-        )
-    )
 
-    val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
-    val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
-
-    val isLogged = appContainer.userVm.isLoggedIn()
+    val isLogged = userVm.isLoggedIn()
 
     // Collect state from the ViewModel
     val firstName by paymentVm.firstName.collectAsState()
@@ -82,6 +74,68 @@ fun PaymentScreen(
         }
     }
 
+    PaymentScreenContent(
+        onNextClicked = paymentVm::onNextClicked,
+        onNextClickedCart = onNextClickedCart,
+        onNextClickedReservation = onNextClickedReservation,
+        onFirstNameChange = paymentVm::onFirstNameChange,
+        onLastNameChange = paymentVm::onLastNameChange,
+        onEmailChange = paymentVm::onEmailChange,
+        onPhoneNumberChange = paymentVm::onPhoneNumberChange,
+        onPaymentMethodChange = paymentVm::onPaymentMethodChange,
+        onCardNumberChange = paymentVm::onCardNumberChange,
+        onCardMonthChange = paymentVm::onCardMonthChange,
+        onCardYearChange = paymentVm::onCardYearChange,
+        onCardCvvChange = paymentVm::onCardCvvChange,
+        navController = navController,
+        isForReservation = isForReservation,
+        isForCart = isForCart,
+        isLogged = isLogged,
+        firstName = firstName,
+        lastName = lastName,
+        email = email,
+        phoneNumber = phoneNumber,
+        paymentMethod = paymentMethod,
+        cardNumber = cardNumber,
+        cardMonth = cardMonth,
+        cardYear = cardYear,
+        cardCvv = cardCvv,
+    )
+
+
+}
+
+@Composable
+fun PaymentScreenContent(
+    onNextClicked: (() -> Unit) -> Unit,
+    onNextClickedCart: () -> Unit,
+    onNextClickedReservation: () -> Unit,
+    onFirstNameChange: (String) -> Unit,
+    onLastNameChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
+    onPhoneNumberChange: (String) -> Unit,
+    onPaymentMethodChange: (String) -> Unit,
+    onCardNumberChange: (String) -> Unit,
+    onCardMonthChange: (String) -> Unit,
+    onCardYearChange: (String) -> Unit,
+    onCardCvvChange: (String) -> Unit,
+    navController: NavController,
+    isForReservation: Boolean,
+    isForCart: Boolean,
+    isLogged: Boolean,
+    firstName: String,
+    lastName: String,
+    email: String,
+    phoneNumber: String,
+    paymentMethod: String?,
+    cardNumber: String,
+    cardMonth: String,
+    cardYear: String,
+    cardCvv: String
+) {
+    val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
+    val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -99,7 +153,7 @@ fun PaymentScreen(
                 onActionText = if (isForReservation) "Confirm" else if (isForCart) "Submit" else "",
                 onActionClicked = {
                     val onNext = if (isForReservation) onNextClickedReservation else onNextClickedCart
-                    paymentVm.onNextClicked(onNext)
+                    onNextClicked(onNext)
                 },
                 onHomeClicked = {
                     navController.navigate(Screen.Home.route)
@@ -155,13 +209,13 @@ fun PaymentScreen(
                         ),
                         isLogged = isLogged,
                         firstName = firstName,
-                        onFirstNameChange = paymentVm::onFirstNameChange,
+                        onFirstNameChange = onFirstNameChange,
                         lastName = lastName,
-                        onLastNameChange = paymentVm::onLastNameChange,
+                        onLastNameChange = onLastNameChange,
                         email = email,
-                        onEmailChange = paymentVm::onEmailChange,
+                        onEmailChange = onEmailChange,
                         phoneNumber = phoneNumber,
-                        onPhoneNumberChange = paymentVm::onPhoneNumberChange
+                        onPhoneNumberChange = onPhoneNumberChange
                     )
                 }
                 item {
@@ -185,7 +239,7 @@ fun PaymentScreen(
                             subtitle = "So, we can charge you",
                             picture = R.drawable.mastercard_logo,
                             isSelected = paymentMethod == "Mastercard",
-                            onClick = { paymentVm.onPaymentMethodChange("Mastercard") },
+                            onClick = { onPaymentMethodChange("Mastercard") },
                             modifier = Modifier.padding(
                                 bottom = 15.dp
                             )
@@ -195,7 +249,7 @@ fun PaymentScreen(
                             subtitle = "Yes, we can charge as well",
                             picture = R.drawable.visa_logo,
                             isSelected = paymentMethod == "Visa",
-                            onClick = { paymentVm.onPaymentMethodChange("Visa") },
+                            onClick = { onPaymentMethodChange("Visa") },
                             modifier = Modifier.padding(
                                 bottom = 15.dp
                             )
@@ -206,7 +260,7 @@ fun PaymentScreen(
                                 subtitle = "We will charge you, later",
                                 picture = R.drawable.cash,
                                 isSelected = paymentMethod == "Cash On Delivery",
-                                onClick = { paymentVm.onPaymentMethodChange("Cash On Delivery") },
+                                onClick = { onPaymentMethodChange("Cash On Delivery") },
                             )
                         }
                     }
@@ -216,13 +270,13 @@ fun PaymentScreen(
                         CardInformation(
                             modifier = Modifier.padding(horizontal = 15.dp),
                             cardNumber = cardNumber,
-                            onCardNumberChange = paymentVm::onCardNumberChange,
+                            onCardNumberChange = onCardNumberChange,
                             month = cardMonth,
-                            onMonthChange = paymentVm::onCardMonthChange,
+                            onMonthChange = onCardMonthChange,
                             year = cardYear,
-                            onYearChange = paymentVm::onCardYearChange,
+                            onYearChange = onCardYearChange,
                             cvv = cardCvv,
-                            onCvvChange = paymentVm::onCardCvvChange
+                            onCvvChange = onCardCvvChange
                         )
                     }
                 }
@@ -384,13 +438,32 @@ fun CardInformation(
 @Composable
 fun PaymentScreenPreview() {
     LittleLemonTheme {
-        PaymentScreen(
+        PaymentScreenContent(
+            onNextClicked = {},
             onNextClickedCart = {},
             onNextClickedReservation = {},
+            onFirstNameChange = {},
+            onLastNameChange = {},
+            onEmailChange = {},
+            onPhoneNumberChange = {},
+            onPaymentMethodChange = {},
+            onCardNumberChange = {},
+            onCardMonthChange = {},
+            onCardYearChange = {},
+            onCardCvvChange = {},
             navController = rememberNavController(),
-            appContainer = AppContainer(
-                LocalContext.current
-            )
+            isForReservation = false,
+            isForCart = false,
+            isLogged = false,
+            firstName = "",
+            lastName = "",
+            email = "",
+            phoneNumber = "",
+            paymentMethod = "",
+            cardNumber = "",
+            cardMonth = "",
+            cardYear = "",
+            cardCvv = ""
         )
     }
 }
@@ -399,13 +472,32 @@ fun PaymentScreenPreview() {
 @Composable
 fun PaymentScreenDarkPreview() {
     LittleLemonTheme {
-        PaymentScreen(
+        PaymentScreenContent(
+            onNextClicked = {},
             onNextClickedCart = {},
             onNextClickedReservation = {},
+            onFirstNameChange = {},
+            onLastNameChange = {},
+            onEmailChange = {},
+            onPhoneNumberChange = {},
+            onPaymentMethodChange = {},
+            onCardNumberChange = {},
+            onCardMonthChange = {},
+            onCardYearChange = {},
+            onCardCvvChange = {},
             navController = rememberNavController(),
-            appContainer = AppContainer(
-                LocalContext.current
-            )
+            isForReservation = false,
+            isForCart = false,
+            isLogged = false,
+            firstName = "",
+            lastName = "",
+            email = "",
+            phoneNumber = "",
+            paymentMethod = "",
+            cardNumber = "",
+            cardMonth = "",
+            cardYear = "",
+            cardCvv = ""
         )
     }
 }

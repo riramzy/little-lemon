@@ -2,18 +2,22 @@ package com.example.littlelemon.ui.screens.payment
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.littlelemon.ui.screens.reservation.ReservationVm
+import com.example.littlelemon.data.repos.ReservationsRepo
 import com.example.littlelemon.ui.viewmodel.UserVm
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class PaymentVm(
+@HiltViewModel
+class PaymentVm @Inject constructor(
     userVm: UserVm,
-    private val reservationVm: ReservationVm
+    private val reservationsRepo: ReservationsRepo
 ) : ViewModel() {
 
     // Event channel for showing toasts
@@ -34,8 +38,7 @@ class PaymentVm(
     val phoneNumber = _phoneNumber.asStateFlow()
 
     // Payment Method State
-    private val _paymentMethod = MutableStateFlow(reservationVm.selectedPaymentMethod.value)
-    val paymentMethod = _paymentMethod.asStateFlow()
+    val paymentMethod: StateFlow<String?> = reservationsRepo.paymentMethod
 
     // Card Information State
     private val _cardNumber = MutableStateFlow("")
@@ -58,7 +61,9 @@ class PaymentVm(
             _phoneNumber.update { value }
         }
     }
-    fun onPaymentMethodChange(value: String) { _paymentMethod.update { value } }
+    fun onPaymentMethodChange(value: String) {
+        reservationsRepo.setPaymentMethod(value)
+    }
 
     fun onCardNumberChange(value: String) {
         if (value.all(Char::isDigit) && value.length <= 16) {
@@ -101,16 +106,15 @@ class PaymentVm(
                 return@launch
             }
 
-            if (_paymentMethod.value != "Cash On Delivery") {
+            if (paymentMethod.value != "Cash On Delivery") {
                 if (!areCardDetailsValid()) {
                     _toastMessage.emit("Please enter all card details")
                     return@launch
                 }
             }
 
-            reservationVm.orderId.value = (100000..999999).random().toString()
-            reservationVm.selectedPaymentMethod.value = _paymentMethod.value
-            reservationVm.phoneNumber.value = _phoneNumber.value
+            reservationsRepo.setOrderId((100000..999999).random().toString())
+            reservationsRepo.setPhoneNumber(_phoneNumber.value)
 
             onSuccess()
         }
@@ -126,7 +130,7 @@ class PaymentVm(
     }
 
     private fun isPaymentMethodSelected(): Boolean =
-        _paymentMethod.value?.isNotBlank() ?: false
+        paymentMethod.value?.isNotBlank() ?: false
 
     private fun areCardDetailsValid(): Boolean =
         _cardNumber.value.isNotBlank() && _cardMonth.value.isNotBlank() && _cardYear.value.isNotBlank() && _cardCvv.value.isNotBlank()

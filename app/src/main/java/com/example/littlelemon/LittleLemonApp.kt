@@ -3,48 +3,49 @@ package com.example.littlelemon
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.littlelemon.di.AppContainer
 import com.example.littlelemon.ui.screens.cart.CartScreen
+import com.example.littlelemon.ui.screens.cart.CartVm
 import com.example.littlelemon.ui.screens.checkout.CheckoutScreen
 import com.example.littlelemon.ui.screens.confirmation.ConfirmationScreen
 import com.example.littlelemon.ui.screens.details.ItemDetailsScreen
 import com.example.littlelemon.ui.screens.home.HomeScreen
+import com.example.littlelemon.ui.screens.home.HomeVm
 import com.example.littlelemon.ui.screens.login.LoginScreen
 import com.example.littlelemon.ui.screens.onboarding.OnboardingBrowseScreen
 import com.example.littlelemon.ui.screens.onboarding.OnboardingFindScreen
 import com.example.littlelemon.ui.screens.onboarding.OnboardingQuickScreen
 import com.example.littlelemon.ui.screens.onboarding.OnboardingWelcomeScreen
 import com.example.littlelemon.ui.screens.orders.OrdersScreen
+import com.example.littlelemon.ui.screens.orders.OrdersVm
 import com.example.littlelemon.ui.screens.payment.PaymentScreen
 import com.example.littlelemon.ui.screens.profile.ProfileDetailsScreen
 import com.example.littlelemon.ui.screens.profile.ProfileScreen
 import com.example.littlelemon.ui.screens.reservation.ReservationTableDetailsScreen
+import com.example.littlelemon.ui.screens.reservation.ReservationVm
 import com.example.littlelemon.ui.screens.reservation.ReservationsScreen
 import com.example.littlelemon.ui.screens.search.SearchScreen
+import com.example.littlelemon.ui.screens.search.SearchVm
 import com.example.littlelemon.ui.screens.signup.SignUpScreen
+import com.example.littlelemon.ui.viewmodel.UserVm
 import com.example.littlelemon.utils.Screen
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun LittleLemonApp() {
-    val context = LocalContext.current
-    val appContainer by remember { mutableStateOf(AppContainer(context)) }
     val navController = rememberNavController()
 
-    val userVm = appContainer.userVm
-    val reservationVm = appContainer.reservationVm
-    val cartVm = appContainer.cartVm
-    val homeVm = appContainer.homeVm
-    val ordersVm = appContainer.ordersVm
+    val userVm: UserVm = hiltViewModel()
+    val reservationVm: ReservationVm = hiltViewModel()
+    val cartVm: CartVm = hiltViewModel()
+    val homeVm: HomeVm = hiltViewModel()
+    val ordersVm: OrdersVm = hiltViewModel()
+    val searchVm: SearchVm = hiltViewModel()
     
     val startDestination = when {
         !userVm.isOnboardingDone() -> Screen.Onboarding.route
@@ -98,7 +99,7 @@ fun LittleLemonApp() {
         composable(Screen.Login.route) {
             LoginScreen(
                 navController = navController,
-                vm = userVm,
+                userVm = userVm,
                 //loginVm = loginVm
             )
         }
@@ -106,15 +107,15 @@ fun LittleLemonApp() {
         composable(Screen.Register.route) {
             SignUpScreen(
                 navController = navController,
-                vm = userVm
+                userVm = userVm
             )
         }
 
         //--- Home ---
         composable(Screen.Home.route) {
             HomeScreen(
-                appContainer = appContainer,
                 navController = navController,
+                searchVm = searchVm
             )
         }
 
@@ -126,7 +127,6 @@ fun LittleLemonApp() {
             val itemId = backStackEntry.arguments?.getInt("itemId") ?: 1
             ItemDetailsScreen(
                 itemId = itemId,
-                appContainer = appContainer,
                 navController = navController
             )
         }
@@ -135,7 +135,7 @@ fun LittleLemonApp() {
         composable(Screen.Profile.route) {
             ProfileScreen(
                 navController = navController,
-                vm = userVm
+                userVm = userVm
             )
         }
 
@@ -143,7 +143,7 @@ fun LittleLemonApp() {
         composable(Screen.ProfileDetails.route) {
             ProfileDetailsScreen(
                 navController = navController,
-                vm = userVm
+                userVm = userVm
             )
         }
 
@@ -159,7 +159,7 @@ fun LittleLemonApp() {
         //--- Reservation Confirmation ---
         composable(Screen.ReservationConfirmation.route) {
             ConfirmationScreen(
-                vm = reservationVm,
+                reservationVm = reservationVm,
                 navController = navController,
                 cartVm = cartVm,
                 ordersVm = ordersVm,
@@ -171,7 +171,7 @@ fun LittleLemonApp() {
         //--- Cart Confirmation ---
         composable(Screen.CartConfirmation.route) {
             ConfirmationScreen(
-                vm = reservationVm,
+                reservationVm = reservationVm,
                 navController = navController,
                 cartVm = cartVm,
                 ordersVm = ordersVm,
@@ -204,7 +204,6 @@ fun LittleLemonApp() {
                 onNextClickedReservation = { navController.navigate(Screen.ReservationConfirmation.route) },
                 isForReservation = true,
                 isForCart = false,
-                appContainer = appContainer
             )
         }
 
@@ -214,7 +213,6 @@ fun LittleLemonApp() {
                 onNextClickedCart = { navController.navigate(Screen.CartConfirmation.route) },
                 isForCart = true,
                 isForReservation = false,
-                appContainer = appContainer
             )
         }
 
@@ -222,8 +220,8 @@ fun LittleLemonApp() {
         composable(Screen.Search.route) {
             SearchScreen(
                 navController = navController,
-                appContainer = appContainer,
-                category = null
+                category = null,
+                searchVm = searchVm
             )
         }
 
@@ -234,8 +232,8 @@ fun LittleLemonApp() {
             val category = it.arguments?.getString("category") ?: ""
             SearchScreen(
                 navController = navController,
-                appContainer = appContainer,
-                category = category
+                category = category,
+                searchVm = searchVm
             )
         }
 

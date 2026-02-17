@@ -21,16 +21,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.littlelemon.R
-import com.example.littlelemon.di.AppContainer
+import com.example.littlelemon.data.local.menu.LocalMenuItem
 import com.example.littlelemon.ui.components.HeroCard
 import com.example.littlelemon.ui.components.LemonAboutUs
 import com.example.littlelemon.ui.components.LemonCategorySection
@@ -38,21 +38,37 @@ import com.example.littlelemon.ui.components.LemonNavigationBar
 import com.example.littlelemon.ui.components.LemonSection
 import com.example.littlelemon.ui.components.LemonSpecialOffers
 import com.example.littlelemon.ui.components.TopAppBar
+import com.example.littlelemon.ui.screens.search.SearchVm
 import com.example.littlelemon.ui.theme.LittleLemonTheme
 import com.example.littlelemon.utils.Screen
 
 @Composable
 fun HomeScreen(
-    appContainer: AppContainer,
     navController: NavController,
+    homeVm: HomeVm = hiltViewModel(),
+    searchVm: SearchVm = hiltViewModel()
 ) {
-    val viewModel: HomeVm = viewModel(factory = HomeVmFactory(appContainer))
-    val menuItems = viewModel.menuItems.collectAsState().value
-    
+    val menuItems = homeVm.menuItems.collectAsState().value
+    val searchQuery by searchVm.searchQuery.collectAsState()
+
+    HomeScreenContent(
+        navController = navController,
+        menuItems = menuItems,
+        searchQuery = searchQuery,
+        onSearchQueryChange = searchVm::onSearchQueryChange
+    )
+
+}
+
+@Composable
+fun HomeScreenContent(
+    navController: NavController,
+    menuItems: List<LocalMenuItem>,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+) {
     val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
-
-    val searchQuery by appContainer.searchVm.searchQuery.collectAsState()
 
     Scaffold(
         topBar = {
@@ -64,7 +80,7 @@ fun HomeScreen(
                     ),
                 searchQuery = searchQuery,
                 onSearchQueryChange = {
-                    appContainer.searchVm.onSearchQueryChange(it)
+                    onSearchQueryChange(it)
                 },
                 onSearchBarClicked = {
                     navController.navigate(Screen.Search.route)
@@ -196,7 +212,7 @@ fun HomeScreen(
             item {
                 Column(
                     modifier = Modifier.padding(top = 15.dp),
-                    ) {
+                ) {
                     Text(
                         text = "Special Offers",
                         style = MaterialTheme.typography.titleLarge,
@@ -256,11 +272,11 @@ fun HomeScreen(
 @Composable
 fun HomeScreenPreview() {
     LittleLemonTheme {
-        HomeScreen(
-            appContainer = AppContainer(
-                context = LocalContext.current
-            ),
-            navController = NavController(LocalContext.current)
+        HomeScreenContent(
+            navController = rememberNavController(),
+            menuItems = emptyList(),
+            searchQuery = "",
+            onSearchQueryChange = {}
         )
     }
 }
@@ -269,11 +285,11 @@ fun HomeScreenPreview() {
 @Composable
 fun HomeScreenDarkPreview() {
     LittleLemonTheme {
-        HomeScreen(
-            appContainer = AppContainer(
-                context = LocalContext.current
-            ),
-            navController = NavController(LocalContext.current)
+        HomeScreenContent(
+            navController = rememberNavController(),
+            menuItems = emptyList(),
+            searchQuery = "",
+            onSearchQueryChange = {}
         )
     }
 }
