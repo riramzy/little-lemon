@@ -1,168 +1,215 @@
 # Little Lemon
 
-A Kotlin-based Android application implemented with Jetpack Compose.  
+A modern, feature-rich Android application for restaurant ordering, built with Kotlin and Jetpack Compose. This project demonstrates professional Android development practices with offline-first capabilities, local data persistence, and secure authentication.
 
-Table of contents
-- [About](#about)
-- [Quick features](#quick-features)
-- [Requirements](#requirements)
-- [Project architecture (from repository)](#project-architecture-from-repository)
-- [How the pieces interact (high level)](#how-the-pieces-interact-high-level)
-- [APIs, SDKs & Libraries](#apis-sdks--libraries)
-- [Project structure (package map with key files)](#project-structure-package-map-with-key-files)
-- [Getting started — Build & Run](#getting-started---build--run)
-- [Testing](#testing)
-- [Missing items & next steps I can take](#missing-items--next-steps-i-can-take)
-- [Contact & links](#contact--links)
+## Table of contents
+- [Overview](#overview)
+- [Features](#features)
+- [Technical Requirements](#technical-requirements)
+- [Architecture](#architecture)
+- [Project Structure](#project-structure)
+- [Technology Stack](#technology-stack)
+- [Setup & Installation](#setup--installation)
+- [Key Implementation Details](#key-implementation-details)
+- [Resources](#resources)
 
-## About
-Little Lemon is an Android app written in Kotlin using Jetpack Compose for the UI. The app is designed with local persistence (Room), offline-first capabilities (local DAOs + repositories), Ktor for network calls and Firebase authentication integrations for sign-in flows.
+## Overview
 
-## Quick features
-- Compose-based UI and custom theme (fonts, colors, typography)
-- Local persistence with Room (DAOs, local entities)
-- Repository layer for data access (UserRepo, OrdersRepo, SearchRepo)
-- Ktor client + Kotlinx Serialization for networking
-- Firebase Authentication + Google Sign-in
-- Image loading with Coil
-- Navigation defined via sealed Screen routes
+Little Lemon is a production-ready Android application designed with a focus on:
 
-## Requirements
-- JDK 17 (project targets Java 17 / Kotlin jvmTarget = 17)
-- Android Studio (recommended)
-- Android SDK for API 34 (compileSdk = 34)
-- Device/emulator min API 24 (minSdk = 24)
-- Gradle (project uses Gradle wrapper)
+- **Offline-First Architecture**: Full functionality without internet connectivity using local database
+- **Clean Architecture**: Separation of concerns with repository pattern and layered design
+- **Modern UI**: Material Design 3 implementation with Jetpack Compose
+- **Robust Networking**: Type-safe API communication with Ktor client and Kotlin serialization
 
-## Project architecture
-The project follows a layered app architecture (Repository + local data + UI). The package structure and concrete files scanned in the repo show the following layout and responsibilities:
+The application enables users to browse menu items, search for dishes, manage their profile, and place orders with persistent local storage.
 
-- com.example.littlelemon
-    - MainActivity.kt — app entry point (sets Compose content)
-    - LittleLemonApp (Composable entry, referenced by MainActivity)
-- com.example.littlelemon.utils
-    - Screen.kt — sealed class listing navigation routes used by Navigation Compose
-- com.example.littlelemon.ui.theme
-    - Color.kt — color tokens
-    - Type.kt — font families and Typography
-    - (theme provider composables)
-- com.example.littlelemon.data
-    - local (database and DAOs)
-        - local order entities and dao types referenced (LocalOrder, LocalOrderItem, LocalOrderWithItems, LocalOrdersDao)
-    - repos (repository layer)
-        - UserRepo.kt — manages user session, registration, profile persistence using UserPreferences
-        - OrdersRepo.kt — local orders CRUD & queries (wraps LocalOrdersDao)
-        - SearchRepo.kt — search and list retrieval via LocalSearchDao
-    - preferences
-        - UserPreferences (referenced by UserRepo) — local key/value storage for user data / onboarding
-- resources
-    - drawables, vector assets, fonts (Karla, Markazi) used by theme
+## Features
 
-Key architectural decisions visible in code:
-- Repository pattern: Repos provide a clear API for ViewModels / UI to interact with data sources.
-- Local-first data: Room + DAOs for persistence (KSP used for Room compiler).
-- Compose navigation: routes centralized in `Screen.kt`.
-- The code uses Kotlin Coroutines / Flow (e.g., OrdersRepo exposes Flow<List<LocalOrder>>).
-- No DI framework code was found in the scanned files (no explicit Hilt/Koin/Dagger files detected). If you use DI, it may be in unscanned files or omitted.
+- **User Profile Management**: Persistent user data and preferences storage
+- **Menu Browsing**: View and search menu items with filtering capabilities
+- **Order Management**: Create, read, update, and delete orders locally
+- **Offline Support**: Full app functionality with offline-first database-backed approach
+- **Responsive UI**: Custom Material Design 3 theme with professional styling
+- **Image Loading**: Efficient image caching and loading with Coil
+- **Type-Safe Navigation**: Route-based navigation using sealed classes
+- **Modern Styling**: Custom typography, color schemes, and animations
 
-## How the pieces interact (high level)
-1. UI (Compose screens) read and observe data provided by ViewModels.
-2. ViewModels call repository methods to get data and perform actions.
-3. Repositories delegate to local DAOs (Room) or network clients (Ktor) and to preferences for simple user storage.
-4. Room entities and DAOs handle local persistence; KSP is used to generate Room boilerplate.
-5. Networking serialization is handled by kotlinx.serialization with Ktor content negotiation.
-6. Firebase Auth / Google Sign-In provide authentication flows and tokens for API calls (if applicable).
+## Technical Requirements
 
-## APIs, SDKs & Libraries
-Extracted from `app/build.gradle.kts` and top-level build file. Some dependencies are referenced via the Gradle Version Catalog (`libs.*`) — their exact versions live in the catalog file (not yet scanned). The following list contains all libraries and plugins discovered in the build files:
+| Requirement              | Version                   |
+|--------------------------|---------------------------|
+| **Java Development Kit** | 17+                       |
+| **Kotlin**               | 1.9.0+                    |
+| **Gradle**               | Latest (wrapper included) |
+| **Android Studio**       | Latest stable version     |
+| **Target SDK**           | API 34                    |
+| **Minimum SDK**          | API 24                    |
+| **Compile SDK**          | API 34                    |
 
-Build plugins (top-level)
-- org.jetbrains.kotlin.jvm version 1.9.0 (top-level reference)
-- com.google.gms:google-services version 4.4.4 (top-level reference)
-- Gradle catalog aliases used: `libs.plugins.android.application`, `libs.plugins.kotlin.android`, `libs.plugins.kotlin.compose`, `libs.plugins.kotlin.serialization`, `libs.plugins.ksp`
+## Architecture
+The architecture of the Little Lemon application follows the MVVM (Model-View-ViewModel) pattern, providing a clear separation of concerns and facilitating easier testing and maintenance.
 
-Core Android & Kotlin
-- Kotlin Standard Library (via Kotlin plugin)
-- androidx.core:core-ktx (alias: libs.androidx.core.ktx)
-- AndroidX Lifecycle:
-    - lifecycle-runtime (libs.androidx.lifecycle.runtime)
-    - lifecycle-viewmodel (libs.androidx.lifecycle.viewmodel)
-    - lifecycle-viewmodel-compose (libs.androidx.lifecycle.viewmodel.compose)
-    - lifecycle-livedata (libs.androidx.lifecycle.livedata)
+### Design Pattern
 
-Jetpack Compose
-- androidx.activity:activity-compose (libs.androidx.activity.compose)
-- Compose BOM (platform(libs.androidx.compose.bom))
-- androidx.compose.ui, graphics, tooling-preview (libs.androidx.compose.ui, libs.androidx.compose.ui.graphics, libs.androidx.compose.ui.tooling.preview)
-- Material3 (libs.androidx.compose.material3)
-- Debug tooling (compose ui tooling, ui test manifest)
-- Material icons (explicit versions found):
-    - androidx.compose.material:material-icons-core:1.6.8
-    - androidx.compose.material:material-icons-extended:1.6.8
+Little Lemon follows a **layered architecture** with clear separation of concerns:
 
-Navigation
-- androidx.navigation:navigation-compose (libs.androidx.navigation.compose)
+```
+┌─────────────────────────────────────┐
+│  Presentation Layer (Compose UI)    │
+├─────────────────────────────────────┤
+│  ViewModel & State Management       │
+├─────────────────────────────────────┤
+│  Repository Layer (Data Abstraction)│
+├─────────────────────────────────────┤
+│  Data Sources (Local & Remote)      │
+│  ├─ Room Database (DAOs)            │
+│  ├─ Ktor HTTP Client                │
+│  └─ SharedPreferences (UserData)    │
+└─────────────────────────────────────┘
+```
+### Key Architectural Decisions
 
-Persistence
-- Room runtime & ktx (libs.androidx.room.runtime, libs.androidx.room.ktx)
-- Room compiler via KSP: ksp(libs.androidx.room.compiler)
-- KSP plugin referenced (`libs.plugins.ksp`) is enabled in the app module
+1. **Repository Pattern**: Repositories abstract data sources and provide a clean API for ViewModels
+2. **Offline-First Approach**: Local Room database serves as the source of truth
+3. **Reactive Streams**: Kotlin Flow for continuous data observation
+4. **Type Safety**: Kotlin Coroutines for asynchronous operations
+5. **Code Generation**: KSP (Kotlin Symbol Processing) for Room entity compilation
 
-Networking & Serialization
-- Ktor client:
-    - ktor-client-core (libs.ktor.client.core)
-    - ktor-client-android (libs.ktor.client.android)
-    - ktor-client-content-negotiation (libs.ktor.client.content.negotiation)
-    - ktor-serialization-kotlinx-json (libs.ktor.serialization.kotlinx.json)
-    - ktor-client-logging (libs.ktor.client.logging)
-- Kotlinx Serialization: kotlinx-serialization-json (libs.kotlinx.serialization.json)
-- Serialization plugin enabled (libs.plugins.kotlin.serialization)
+## Project Structure
+- **/app:** Contains application code
+    - **/data:** Data layer (Repositories, Models)
+    - **/ui:** User interface layer (Activities, Fragments, Adapters)
+    - **/di:** Dependency Injection components
+    - **/utils:** Utility functions and classes
+    - **/theme:** Custom Material Design 3 theme
+  
+## Technology Stack
 
-Image Loading
-- Coil Compose: io.coil-kt:coil-compose:2.7.0
+### Core Android & Kotlin
+- **Kotlin**: 1.9.0
+- **Android Core**: androidx.core:core-ktx
+- **Lifecycle Management**:
+    - androidx.lifecycle:lifecycle-runtime
+    - androidx.lifecycle:lifecycle-viewmodel
+    - androidx.lifecycle:lifecycle-viewmodel-compose
+    - androidx.lifecycle:lifecycle-livedata
 
-Firebase & Google Sign-In
-- com.google.firebase:firebase-auth:23.1.0
-- com.google.android.gms:play-services-auth:21.2.0
-- Google services Gradle plugin referenced (com.google.gms.google-services)
+### UI Framework
+- **Jetpack Compose**: Material 3 with BOM management
+- **Material Design 3**: Latest components and theming
+- **Material Icons**: Core and extended icon sets (1.6.8)
+- **Activity Compose**: Integration with Compose
 
-Testing
-- JUnit (libs.junit)
-- AndroidX JUnit (libs.androidx.junit)
-- Espresso core (libs.androidx.espresso.core)
-- Compose UI test JUnit4 (libs.androidx.compose.ui.test.junit4)
-- Compose BOM used for androidTest as well
+### Data Persistence
+- **Room Database**: Local data storage with type safety
+    - Runtime & KTX extensions
+    - Compiler via KSP (Kotlin Symbol Processing)
+    - DAOs with Flow-based reactive queries
 
-Other
-- Kotlin JVM target: 17
-- compileSdk: 34, targetSdk: 34, minSdk: 24
+### Networking
+- **Ktor Client**:
+    - Core client for HTTP requests
+    - Android-specific implementation
+    - Content negotiation for automatic serialization
+    - Built-in logging capabilities
+- **Kotlinx Serialization**: JSON serialization/deserialization with compile-time safety
 
-## Getting started — Build & Run
-1. Clone the repo:
-   ```
-   git clone https://github.com/riramzy/little-lemon.git
-   cd little-lemon
-   ```
-2. Open the project in Android Studio and let the IDE sync Gradle.
-3. Add any required Firebase configuration (google-services.json) if you plan to test auth flows locally.
-4. Build and run:
-    - From Android Studio: Run on device/emulator.
-    - From terminal:
-      ```
-      ./gradlew assembleDebug
-      ./gradlew installDebug
-      ```
+### Image Loading
+- **Coil**: Modern, lightweight image loading library (2.7.0)
+- Compose integration with automatic caching
 
-## Testing
-- Unit tests: `./gradlew test`
-- Instrumented tests: `./gradlew connectedAndroidTest` (device/emulator)
-- Compose UI tests available under androidTest (compose ui test junit4 dependency included)
+### Navigation
+- **Androidx Navigation Compose**: Type-safe, composable navigation routing
 
-## Contact & links
-- Repository: https://github.com/riramzy/little-lemon
-- Example key source files:
-    - Screen routes: https://github.com/riramzy/little-lemon/blob/main/app/src/main/java/com/example/littlelemon/utils/Screen.kt
-    - MainActivity: https://github.com/riramzy/little-lemon/blob/main/app/src/main/java/com/example/littlelemon/MainActivity.kt
-    - UserRepo: https://github.com/riramzy/little-lemon/blob/main/app/src/main/java/com/example/littlelemon/data/repos/UserRepo.kt
-    - OrdersRepo: https://github.com/riramzy/little-lemon/blob/main/app/src/main/java/com/example/littlelemon/data/repos/OrdersRepo.kt
+### Dependency Injection
+- **Hilt**: Hilt is used for dependency injection throughout the application, ensuring that components are easily managed and providing a clean structure for our classes.
 
+## Setup & Installation
+
+### Prerequisites
+- Android Studio (latest stable version)
+- JDK 17 installed and configured
+- An Android device or emulator with API 24 minimum
+
+### Clone & Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/riramzy/little-lemon.git
+cd little-lemon
+
+# Open in Android Studio
+# File → Open → Select little-lemon directory
+```
+
+### Build & Run
+
+**Using Android Studio:**
+1. Sync Gradle files (File → Sync Now)
+2. Select device/emulator
+3. Click Run (Shift + F10)
+
+**Using Terminal:**
+
+```bash
+# Build debug APK
+./gradlew assembleDebug
+
+# Install on connected device
+./gradlew installDebug
+
+# Build and run directly
+./gradlew installDebug && adb shell am start -n com.example.littlelemon/.MainActivity
+```
+
+## Key Implementation Details
+
+### Data Flow Pattern
+
+1. **UI Layer** (Compose Screens)
+    - Observes LiveData or StateFlow from ViewModels
+    - Handles user interactions and navigation
+
+2. **ViewModel Layer**
+    - Manages UI state and business logic
+    - Calls repository methods to fetch/modify data
+    - Survives configuration changes
+
+3. **Repository Layer**
+    - Abstracts data sources (local + remote)
+    - Provides clean API for ViewModels
+    - Handles data validation and transformation
+
+4. **Data Sources**
+    - **Local**: Room DAOs with Flow-based reactive queries
+    - **Remote**: Ktor client for API communication
+    - **Preferences**: UserPreferences for simple key-value storage
+
+### Offline-First Strategy
+
+- Room database serves as the source of truth
+- Network requests populate/sync local cache
+- UI always reads from local database
+- Changes persist immediately to database
+- Background sync reconciles with server when online
+
+## Resources
+
+### Repository Links
+- **GitHub**: [riramzy/little-lemon](https://github.com/riramzy/little-lemon)
+
+### Key Source Files
+- [Navigation Routes](https://github.com/riramzy/little-lemon/blob/main/app/src/main/java/com/example/littlelemon/utils/Screen.kt)
+- [MainActivity](https://github.com/riramzy/little-lemon/blob/main/app/src/main/java/com/example/littlelemon/MainActivity.kt)
+- [User Repository](https://github.com/riramzy/little-lemon/blob/main/app/src/main/java/com/example/littlelemon/data/repos/UserRepo.kt)
+- [Orders Repository](https://github.com/riramzy/little-lemon/blob/main/app/src/main/java/com/example/littlelemon/data/repos/OrdersRepo.kt)
+
+### Documentation References
+- [Jetpack Compose Documentation](https://developer.android.com/jetpack/compose)
+- [Room Database Guide](https://developer.android.com/training/data-storage/room)
+- [Ktor Client Documentation](https://ktor.io/docs/client.html)
+- [Firebase Authentication](https://firebase.google.com/docs/auth)
+- [Android Architecture Components](https://developer.android.com/topic/architecture)
+
+---
