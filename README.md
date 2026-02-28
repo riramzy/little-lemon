@@ -160,7 +160,7 @@ cd little-lemon
 ./gradlew installDebug
 
 # Build and run directly
-./gradlew installDebug && adb shell am start -n com.example.littlelemon/.MainActivity
+./gradlew installDebug && adb shell am start -n com.riramzy.littlelemon/.MainActivity
 ```
 
 ## Key Implementation Details
