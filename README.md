@@ -200,10 +200,10 @@ cd little-lemon
 - **GitHub**: [riramzy/little-lemon](https://github.com/riramzy/little-lemon)
 
 ### Key Source Files
-- [Navigation Routes](https://github.com/riramzy/little-lemon/blob/main/app/src/main/java/com/example/littlelemon/utils/Screen.kt)
-- [MainActivity](https://github.com/riramzy/little-lemon/blob/main/app/src/main/java/com/example/littlelemon/MainActivity.kt)
-- [User Repository](https://github.com/riramzy/little-lemon/blob/main/app/src/main/java/com/example/littlelemon/data/repos/UserRepo.kt)
-- [Orders Repository](https://github.com/riramzy/little-lemon/blob/main/app/src/main/java/com/example/littlelemon/data/repos/OrdersRepo.kt)
+- [Navigation Routes](https://github.com/riramzy/little-lemon/blob/main/app/src/main/java/com/riramzy/littlelemon/utils/Screen.kt)
+- [MainActivity](https://github.com/riramzy/little-lemon/blob/main/app/src/main/java/com/riramzy/littlelemon/MainActivity.kt)
+- [User Repository](https://github.com/riramzy/little-lemon/blob/main/app/src/main/java/com/riramzy/littlelemon/data/repos/UserRepo.kt)
+- [Orders Repository](https://github.com/riramzy/little-lemon/blob/main/app/src/main/java/com/riramzy/littlelemon/data/repos/OrdersRepo.kt)
 
 ### Documentation References
 - [Jetpack Compose Documentation](https://developer.android.com/jetpack/compose)
