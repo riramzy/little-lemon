@@ -17,11 +17,11 @@ configurations.all {
 }
 
 android {
-    namespace = "com.example.littlelemon"
+    namespace = "com.riramzy.littlelemon"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.littlelemon"
+        applicationId = "com.riramzy.littlelemon"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
