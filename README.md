@@ -209,7 +209,6 @@ cd little-lemon
 - [Jetpack Compose Documentation](https://developer.android.com/jetpack/compose)
 - [Room Database Guide](https://developer.android.com/training/data-storage/room)
 - [Ktor Client Documentation](https://ktor.io/docs/client.html)
-- [Firebase Authentication](https://firebase.google.com/docs/auth)
 - [Android Architecture Components](https://developer.android.com/topic/architecture)
 
 ---
