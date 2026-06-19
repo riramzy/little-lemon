@@ -45,6 +45,17 @@ fun SignUpScreen(
     navController: NavController,
     userVm: UserVm = hiltViewModel()
 ) {
+    SignUpScreenContent(
+        navController = navController,
+        register = userVm::register
+    )
+}
+
+@Composable
+fun SignUpScreenContent(
+    navController: NavController,
+    register: (String, String, String, String, String) -> Boolean,
+) {
     val context = LocalContext.current
 
     var username by remember { mutableStateOf("") }
@@ -178,25 +189,22 @@ fun SignUpScreen(
                         MaterialTheme.colorScheme.secondaryContainer
                     },
                     onClick = {
-                        val success = userVm.register(
-                            username = username,
-                            firstName = firstName,
-                            lastName = lastName,
-                            email = email,
-                            password = password,
-                        )
-
+                        val isEmailValid = Patterns.EMAIL_ADDRESS.matcher(email).matches()
                         when {
                             username.isBlank() || firstName.isBlank() || lastName.isBlank() || email.isBlank() || password.isBlank() -> {
                                 Toast.makeText(context, "Please fill all fields.", Toast.LENGTH_LONG).show()
                             }
-                            !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
+
+                            !isEmailValid -> {
                                 Toast.makeText(context, "Invalid email format.", Toast.LENGTH_LONG).show()
                             }
+
                             password.length < 8 -> {
                                 Toast.makeText(context, "Password must be at least 8 characters.", Toast.LENGTH_LONG).show()
                             }
                             else -> {
+                                val success = register(username, firstName, lastName, email, password)
+
                                 if (success) {
                                     Toast.makeText(context, "Registration successful!", Toast.LENGTH_LONG).show()
                                     navController.navigate(Screen.Login.route)
@@ -216,8 +224,9 @@ fun SignUpScreen(
 @Composable
 fun SignUpScreenPreview() {
     LittleLemonTheme {
-        SignUpScreen(
+        SignUpScreenContent(
             navController = NavController(LocalContext.current),
+            register = { _, _, _, _, _ -> true }
         )
     }
 }
@@ -226,8 +235,9 @@ fun SignUpScreenPreview() {
 @Composable
 fun SignUpScreenDarkPreview() {
     LittleLemonTheme {
-        SignUpScreen(
+        SignUpScreenContent(
             navController = NavController(LocalContext.current),
+            register = { _, _, _, _, _ -> true }
         )
     }
 }

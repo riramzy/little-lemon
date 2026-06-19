@@ -35,7 +35,7 @@ class UserVm @Inject constructor(
             return false
         }
 
-        if (password.length < 6) {
+        if (password.length < 8) {
             return false
         }
 
