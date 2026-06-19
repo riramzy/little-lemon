@@ -49,7 +49,7 @@ fun LoginScreen(
     LoginScreenContent(
         navController = navController,
         login = userVm::login,
-        fullName = userVm.getFullName() ?: ""
+        fullName = userVm.getFullName()
     )
 
 }
@@ -57,8 +57,8 @@ fun LoginScreen(
 @Composable
 fun LoginScreenContent(
     navController: NavController,
-    login: (String, String) -> Unit,
-    fullName: String
+    login: (String, String) -> Boolean,
+    fullName: String?
 ) {
     val context = LocalContext.current
 
@@ -181,18 +181,18 @@ fun LoginScreenContent(
                             username.isBlank() || password.isBlank() -> {
                                 Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
                             }
-
-                            username.isNotBlank() && password.isNotBlank() -> {
-                                login(
-                                    username,
-                                    password
-                                )
-                                Toast.makeText(context, "Welcome $fullName", Toast.LENGTH_SHORT).show()
-                                navController.navigate(Screen.Home.route)
-                            }
-
                             else -> {
-                                Toast.makeText(context, "Invalid username or password", Toast.LENGTH_SHORT).show()
+                                val loginSuccess = login(username, password)
+
+                                if (loginSuccess) {
+                                    val fullName = fullName ?: username
+                                    Toast.makeText(context, "Welcome $fullName", Toast.LENGTH_SHORT).show()
+                                    navController.navigate(Screen.Home.route) {
+                                        popUpTo(Screen.Login.route) { inclusive = true }
+                                    }
+                                } else {
+                                    Toast.makeText(context, "Invalid username or password", Toast.LENGTH_SHORT).show()
+                                }
                             }
                         }
                     }
@@ -225,7 +225,7 @@ fun LoginScreenPreview() {
     LittleLemonTheme {
         LoginScreenContent(
             navController = NavController(LocalContext.current),
-            login = { _, _ -> },
+            login = { _, _ -> true },
             fullName = "Ramzy Habel"
         )
     }
@@ -237,7 +237,7 @@ fun LoginScreenDarkPreview() {
     LittleLemonTheme {
         LoginScreenContent(
             navController = NavController(LocalContext.current),
-            login = { _, _ -> },
+            login = { _, _ -> true },
             fullName = "Ramzy Habel"
         )
     }
