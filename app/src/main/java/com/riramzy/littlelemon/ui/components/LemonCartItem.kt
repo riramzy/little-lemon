@@ -36,6 +36,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.riramzy.littlelemon.R
 import com.riramzy.littlelemon.data.local.cart.LocalCartItem
 import com.riramzy.littlelemon.ui.theme.LittleLemonTheme
 import com.riramzy.littlelemon.utils.dishesImagesMap
@@ -90,7 +91,9 @@ fun LemonCartItem(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Image(
-                        painter = painterResource(id = dishesImagesMap.getValue(item.id)),
+                        painter = painterResource(
+                            id = dishesImagesMap[item.id] ?: R.drawable.greek_salad
+                        ),
                         modifier = Modifier
                             .padding(start = 15.dp)
                             .clip(CircleShape)

@@ -76,7 +76,7 @@ fun ItemDetailsScreen(
     cartVm: CartVm = hiltViewModel()
 ) {
     val item by detailsVm.menuItem.collectAsState()
-    val cartItems by cartVm.cartItems.collectAsState() // Or your state flow
+    val cartItems by cartVm.cartItems.collectAsState()
     val existingCartItem = cartItems.firstOrNull { it.id == itemId }
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -88,9 +88,7 @@ fun ItemDetailsScreen(
 
     ItemDetailsScreenContent(
         navController = navController,
-        itemId = itemId,
         item = item,
-        cartItems = cartItems,
         existingCartItem = existingCartItem,
         snackbarHostState = snackbarHostState,
         scope = scope,
@@ -103,9 +101,7 @@ fun ItemDetailsScreen(
 @Composable
 fun ItemDetailsScreenContent(
     navController: NavController,
-    itemId: Int,
     item: LocalMenuItem?,
-    cartItems: List<LocalCartItem>,
     existingCartItem: LocalCartItem?,
     snackbarHostState: SnackbarHostState,
     scope: CoroutineScope,
@@ -131,41 +127,31 @@ fun ItemDetailsScreenContent(
         },
         floatingActionButton = {
             LemonNavigationBar(
-                isActionEnabled = true,
+                isActionEnabled = (item != null),
                 onActionText = "Add",
                 onActionClicked = {
-                    val product = item!!
+                    item?.let { product ->
+                        if (existingCartItem == null) {
+                            addToCart(product.toCartItems().copy(quantity = itemQty))
+                        } else {
+                            updateQuantity(product.id, existingCartItem.quantity + itemQty)
+                        }
+                        scope.launch {
+                            val result = snackbarHostState.showSnackbar(
+                                message = "${product.title} added ($itemQty)",
+                                actionLabel = "Undo",
+                                duration = SnackbarDuration.Short
+                            )
 
-                    if (existingCartItem == null) {
-                        // first time adding this item
-                        addToCart(
-                            product.toCartItems().copy(quantity = itemQty)
-                        )
-                    } else {
-                        // item already in cart → increase quantity
-                        updateQuantity(
-                            product.id,
-                            existingCartItem.quantity + itemQty
-                        )
-                    }
-
-                    scope.launch {
-                        val result = snackbarHostState.showSnackbar(
-                            message = "${product.title} added ($itemQty)",
-                            actionLabel = "Undo",
-                            duration = SnackbarDuration.Short
-                        )
-
-                        if (result == SnackbarResult.ActionPerformed) {
-                            if (existingCartItem == null) {
-                                // Remove newly added item
-                                removeFromCart(product.id)
-                            } else {
-                                // Undo = revert added quantity
-                                updateQuantity(
-                                    product.id,
-                                    existingCartItem.quantity - itemQty
-                                )
+                            if (result == SnackbarResult.ActionPerformed) {
+                                if (existingCartItem == null) {
+                                    removeFromCart(product.id)
+                                } else {
+                                    updateQuantity(
+                                        product.id,
+                                        existingCartItem.quantity - itemQty
+                                    )
+                                }
                             }
                         }
                     }
@@ -527,7 +513,6 @@ fun ItemDetailsScreenPreview() {
     LittleLemonTheme {
         ItemDetailsScreenContent(
             navController = NavController(LocalContext.current),
-            itemId = 1,
             item = LocalMenuItem(
                 id = 1,
                 title = "Greek Salad",
@@ -536,7 +521,6 @@ fun ItemDetailsScreenPreview() {
                 image = "R.drawable.lemon_dessert",
                 category = "Mains"
             ),
-            cartItems = emptyList(),
             existingCartItem = LocalCartItem(
                 id = 2,
                 title = "Greek Salad",
@@ -561,7 +545,6 @@ fun ItemDetailsScreenDarkPreview() {
     LittleLemonTheme {
         ItemDetailsScreenContent(
             navController = NavController(LocalContext.current),
-            itemId = 1,
             item = LocalMenuItem(
                 id = 1,
                 title = "Greek Salad",
@@ -570,7 +553,6 @@ fun ItemDetailsScreenDarkPreview() {
                 image = "R.drawable.lemon_dessert",
                 category = "Mains"
             ),
-            cartItems = emptyList(),
             existingCartItem = LocalCartItem(
                 id = 2,
                 title = "Greek Salad",
