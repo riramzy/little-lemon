@@ -1,10 +1,11 @@
 package com.riramzy.littlelemon.data.preferences
 
-import android.content.Context
+import android.content.SharedPreferences
+import androidx.core.content.edit
 
-class UserPreferences(context: Context) {
-    private val sharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-
+class UserPreferences(
+    private val sharedPreferences: SharedPreferences
+) {
     companion object {
         private const val KEY_IS_LOGGED_IN = "is_logged_in"
         private const val KEY_ONBOARDING_DONE = "onboarding_done"
@@ -21,11 +22,11 @@ class UserPreferences(context: Context) {
     }
 
     fun saveProfilePicture(uri: String) {
-        sharedPreferences.edit().putString(KEY_PROFILE_PICTURE, uri).apply()
+        sharedPreferences.edit { putString(KEY_PROFILE_PICTURE, uri) }
     }
 
     fun setLoggedIn(isLoggedIn: Boolean) {
-        sharedPreferences.edit().putBoolean(KEY_IS_LOGGED_IN, isLoggedIn).apply()
+        sharedPreferences.edit { putBoolean(KEY_IS_LOGGED_IN, isLoggedIn) }
     }
 
     fun isLoggedIn(): Boolean {
@@ -39,45 +40,48 @@ class UserPreferences(context: Context) {
         email: String,
         password: String,
     ) {
-        sharedPreferences.edit()
-            .putString(KEY_USERNAME, username)
-            .putString(KEY_FIRST_NAME, firstName)
-            .putString(KEY_LAST_NAME, lastName)
-            .putString(KEY_EMAIL, email)
-            .putString(KEY_PASSWORD, password)
-            .apply()
+        val hashedPassword = hashPassword(password)
+
+        sharedPreferences.edit {
+            putString(KEY_USERNAME, username)
+                .putString(KEY_FIRST_NAME, firstName)
+                .putString(KEY_LAST_NAME, lastName)
+                .putString(KEY_EMAIL, email)
+                .putString(KEY_PASSWORD, hashedPassword)
+        }
     }
 
     fun validateLogin(username: String, password: String): Boolean {
-        val savedEmail = sharedPreferences.getString(KEY_USERNAME, null)
-        val savedPassword = sharedPreferences.getString(KEY_PASSWORD, null)
-        return username == savedEmail && password == savedPassword
+        val savedUsername = sharedPreferences.getString(KEY_USERNAME, null)
+        val savedPasswordHash = sharedPreferences.getString(KEY_PASSWORD, null)
+        return username == savedUsername && hashPassword(password) == savedPasswordHash
     }
 
     fun getFirstName(): String? = sharedPreferences.getString(KEY_FIRST_NAME, null)
 
     fun editFirstName(firstName: String) {
-        sharedPreferences.edit().putString(KEY_FIRST_NAME, firstName).apply()
+        sharedPreferences.edit { putString(KEY_FIRST_NAME, firstName) }
     }
     fun getLastName(): String? = sharedPreferences.getString(KEY_LAST_NAME, null)
 
     fun editLastName(lastName: String) {
-        sharedPreferences.edit().putString(KEY_LAST_NAME, lastName).apply()
+        sharedPreferences.edit { putString(KEY_LAST_NAME, lastName) }
     }
-    fun getFullName(): String? = "${getFirstName()} ${getLastName()}"
+
+    fun getFullName(): String = "${getFirstName()} ${getLastName()}"
     fun getEmail(): String? = sharedPreferences.getString(KEY_EMAIL, null)
 
     fun editEmail(email: String) {
-        sharedPreferences.edit().putString(KEY_EMAIL, email).apply()
+        sharedPreferences.edit { putString(KEY_EMAIL, email) }
     }
     fun getUsername(): String? = sharedPreferences.getString(KEY_USERNAME, null)
 
     fun editUsername(username: String) {
-        sharedPreferences.edit().putString(KEY_USERNAME, username).apply()
+        sharedPreferences.edit { putString(KEY_USERNAME, username) }
     }
 
     fun setOnboardingDone(onboardingDone: Boolean) {
-        sharedPreferences.edit().putBoolean(KEY_ONBOARDING_DONE, onboardingDone).apply()
+        sharedPreferences.edit { putBoolean(KEY_ONBOARDING_DONE, onboardingDone) }
     }
 
     fun isOnboardingDone(): Boolean {
@@ -85,6 +89,12 @@ class UserPreferences(context: Context) {
     }
 
     fun clearAll() {
-        sharedPreferences.edit().clear().apply()
+        sharedPreferences.edit { clear() }
     }
+}
+
+private fun hashPassword(password: String): String {
+    val digest = java.security.MessageDigest.getInstance("SHA-256")
+    val hashBytes = digest.digest(password.toByteArray(Charsets.UTF_8))
+    return hashBytes.joinToString("") { "%02x".format(it) }
 }
