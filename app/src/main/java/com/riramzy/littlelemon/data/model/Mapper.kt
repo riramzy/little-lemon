@@ -4,12 +4,11 @@ import com.riramzy.littlelemon.data.local.cart.LocalCartItem
 import com.riramzy.littlelemon.data.local.menu.LocalMenuItem
 import com.riramzy.littlelemon.data.remote.NetworkMenuItem
 
-//Converts between network and local models using extension functions
 fun NetworkMenuItem.toEntity(): LocalMenuItem = LocalMenuItem(
     id = this.id,
     title = this.title,
     description = this.description,
-    price = this.price.toDouble(),
+    price = this.price.toDoubleOrNull() ?: 0.0,
     image = this.image,
     category = this.category
 )
