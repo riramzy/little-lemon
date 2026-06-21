@@ -72,12 +72,24 @@ class UserRepo(
         password: String
     ): Result<Unit> {
         return try {
-            firebaseAuth.signInWithEmailAndPassword(email, password)
+            val authResult = firebaseAuth.signInWithEmailAndPassword(email, password)
                 .await()
+            val uid = authResult.user?.uid ?: throw Exception("User ID is null")
 
-            prefs.setLoggedIn(true)
+            val document = firestore.collection("users").document(uid).get().await()
+            if (document.exists()) {
+                val username = document.getString("username") ?: ""
+                val firstName = document.getString("firstName") ?: ""
+                val lastName = document.getString("lastName") ?: ""
+                val userEmail = document.getString("email") ?: email
 
-            Result.success(Unit)
+                prefs.register(username, firstName, lastName, userEmail)
+                prefs.setLoggedIn(true)
+                Result.success(Unit)
+            } else {
+                firebaseAuth.signOut()
+                Result.failure(Exception("User profile not found in database."))
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }

@@ -61,10 +61,24 @@ class UserVm @Inject constructor(
         }
     }
 
-    fun login(username: String, password: String) {
+    fun login(
+        email: String,
+        password: String
+    ) {
         viewModelScope.launch {
             _userState.value = UserState.Loading
-            val result = userRepo.login(username, password)
+
+            if (email.isBlank() || password.isBlank()) {
+                _userState.value = UserState.Error("Please fill in all fields")
+                return@launch
+            }
+
+            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                _userState.value = UserState.Error("Please enter a valid email address")
+                return@launch
+            }
+
+            val result = userRepo.login(email, password)
             if (result.isSuccess) {
                 _userState.value = UserState.Success
             } else {
@@ -129,5 +143,9 @@ class UserVm @Inject constructor(
 
     fun getProfilePicture(): String? {
         return userRepo.getProfilePicture()
+    }
+
+    fun resetState() {
+        _userState.value = UserState.Idle
     }
 }

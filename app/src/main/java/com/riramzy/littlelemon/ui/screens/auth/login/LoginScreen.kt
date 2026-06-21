@@ -1,4 +1,4 @@
-package com.riramzy.littlelemon.ui.screens.login
+package com.riramzy.littlelemon.ui.screens.auth.login
 
 import android.content.res.Configuration
 import android.widget.Toast
@@ -15,11 +15,13 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,16 +31,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.riramzy.littlelemon.R
 import com.riramzy.littlelemon.ui.components.GreenLemonButton
 import com.riramzy.littlelemon.ui.components.LemonInputField
+import com.riramzy.littlelemon.ui.screens.auth.UserState
+import com.riramzy.littlelemon.ui.screens.auth.UserVm
 import com.riramzy.littlelemon.ui.theme.LittleLemonTheme
-import com.riramzy.littlelemon.ui.viewmodel.UserVm
 import com.riramzy.littlelemon.utils.Screen
 
 @Composable
@@ -46,10 +52,16 @@ fun LoginScreen(
     navController: NavController,
     userVm: UserVm = hiltViewModel(),
 ) {
+    val state by userVm.userState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        userVm.resetState()
+    }
+
     LoginScreenContent(
         navController = navController,
         login = userVm::login,
-        fullName = userVm.getFullName()
+        state = state,
     )
 
 }
@@ -57,13 +69,15 @@ fun LoginScreen(
 @Composable
 fun LoginScreenContent(
     navController: NavController,
-    login: (String, String) -> Boolean,
-    fullName: String?
+    login: (String, String) -> Unit,
+    state: UserState,
 ) {
     val context = LocalContext.current
 
-    var username by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    val isLoading = state is UserState.Loading
 
     Column(
         modifier = Modifier
@@ -134,9 +148,15 @@ fun LoginScreenContent(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 LemonInputField(
-                    requiredText = "Username:",
-                    value = username,
-                    onValueChange = { username = it },
+                    requiredText = "Email:",
+                    value = email,
+                    onValueChange = { email = it },
+                    isReadOnly = isLoading,
+                    isMultiline = false,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Next
+                    ),
                     modifier = Modifier
                         .padding(top = 40.dp)
                         .fillMaxWidth(),
@@ -147,6 +167,12 @@ fun LoginScreenContent(
                     value = password,
                     onValueChange = { password = it },
                     isPasswordField = true,
+                    isReadOnly = isLoading,
+                    isMultiline = false,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done
+                    ),
                     modifier = Modifier
                         .padding(top = 14.dp)
                         .fillMaxWidth(),
@@ -167,32 +193,16 @@ fun LoginScreenContent(
                 )
 
                 GreenLemonButton(
-                    text = "Login",
+                    text = if (isLoading) "Logging in..." else "Login",
                     modifier = Modifier
                         .padding(top = 24.dp)
                         .fillMaxWidth(),
-                    color = if (isSystemInDarkTheme()) {
-                        MaterialTheme.colorScheme.onSecondary
-                    } else {
-                        MaterialTheme.colorScheme.secondaryContainer
-                    },
                     onClick = {
-                        when {
-                            username.isBlank() || password.isBlank() -> {
+                        if (!isLoading) { // <-- Debounce double clicks
+                            if (email.isBlank() || password.isBlank()) {
                                 Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
-                            }
-                            else -> {
-                                val loginSuccess = login(username, password)
-
-                                if (loginSuccess) {
-                                    val fullName = fullName ?: username
-                                    Toast.makeText(context, "Welcome $fullName", Toast.LENGTH_SHORT).show()
-                                    navController.navigate(Screen.Home.route) {
-                                        popUpTo(Screen.Login.route) { inclusive = true }
-                                    }
-                                } else {
-                                    Toast.makeText(context, "Invalid username or password", Toast.LENGTH_SHORT).show()
-                                }
+                            } else {
+                                login(email, password)
                             }
                         }
                     }
@@ -225,8 +235,8 @@ fun LoginScreenPreview() {
     LittleLemonTheme {
         LoginScreenContent(
             navController = NavController(LocalContext.current),
-            login = { _, _ -> true },
-            fullName = "Ramzy Habel"
+            login = { _, _ -> },
+            state = UserState.Idle,
         )
     }
 }
@@ -237,8 +247,8 @@ fun LoginScreenDarkPreview() {
     LittleLemonTheme {
         LoginScreenContent(
             navController = NavController(LocalContext.current),
-            login = { _, _ -> true },
-            fullName = "Ramzy Habel"
+            login = { _, _ -> },
+            state = UserState.Idle,
         )
     }
 }

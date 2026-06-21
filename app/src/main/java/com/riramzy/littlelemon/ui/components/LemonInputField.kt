@@ -48,6 +48,7 @@ fun LemonInputField(
     onValueChange: (String) -> Unit = {},
     isPasswordField: Boolean = false,
     isReadOnly: Boolean = false,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     isMultiline: Boolean = true,
 ) {
     var isClicked by remember { mutableStateOf(false) }
@@ -104,12 +105,6 @@ fun LemonInputField(
                 PasswordVisualTransformation()
             } else {
                 VisualTransformation.None
-            }
-
-            val keyboardOptions = if (isPasswordField) {
-                KeyboardOptions.Default
-            } else {
-                KeyboardOptions.Default
             }
 
             BasicTextField(
