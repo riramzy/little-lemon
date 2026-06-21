@@ -7,8 +7,6 @@ import com.riramzy.littlelemon.data.model.toEntity
 import com.riramzy.littlelemon.data.remote.NetworkClient
 import kotlinx.coroutines.flow.Flow
 
-//Repository class that handles data operations for the menu
-
 class MenuRepo(private val dao: LocalMenuDao) {
     fun getLocalMenu(): Flow<List<LocalMenuItem>> {
         return dao.getAllLocalMenuItems()
@@ -28,11 +26,8 @@ class MenuRepo(private val dao: LocalMenuDao) {
         val networkMenu = NetworkClient.fetchMenu()
 
         networkMenu?.menu?.let { items ->
-            //Convert NetworkMenuItem to LocalMenuItem
             val entities = items.map { it.toEntity() }
-
-            dao.deleteLocalMenuItems()
-            dao.insertIntoLocalMenuItems(entities)
+            dao.refreshMenu(entities)
             Log.d("MenuRepo", "Inserted ${entities.size} items into the database")
         }
     }
