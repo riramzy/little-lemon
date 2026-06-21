@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy.Companion.REPLACE
 import androidx.room.Query
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 
 //Room database DAO interface that defines the database operations
@@ -24,4 +25,10 @@ interface LocalMenuDao {
 
     @Query("SELECT COUNT(*) FROM menu_items")
     suspend fun getLocalMenuCount(): Int
+
+    @Transaction
+    suspend fun refreshMenu(items: List<LocalMenuItem>) {
+        deleteLocalMenuItems()
+        insertIntoLocalMenuItems(items)
+    }
 }
