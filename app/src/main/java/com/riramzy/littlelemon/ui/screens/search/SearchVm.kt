@@ -27,7 +27,8 @@ class SearchVm @Inject constructor(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery = _searchQuery.asStateFlow()
     private val initialCategory = savedStateHandle.get<String>("category")
-    private val _categoryFilter = MutableStateFlow<String?>(initialCategory)
+    private val _categoryFilter = MutableStateFlow(initialCategory)
+    val categoryFilter = _categoryFilter.asStateFlow()
 
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     val searchedItems = combine(
