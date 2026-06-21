@@ -89,24 +89,43 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     // Coil
-    implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation(libs.coil.compose)
 
-    //Icons
+    // Icons
     implementation("androidx.compose.material:material-icons-core:1.6.8")
     implementation("androidx.compose.material:material-icons-extended:1.6.8")
 
-    //Navigation
+    // Navigation
     implementation(libs.androidx.navigation.compose)
 
-    //Google Firebase Services
+    // Firebase Services
     implementation("com.google.firebase:firebase-auth:23.1.0")
     implementation("com.google.android.gms:play-services-auth:21.2.0")
+
+    // Firebase BoM (Bill of Materials)
+    implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
+
+    // Firebase SDKs
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.google.firebase:firebase-functions-ktx")
+    implementation("com.google.firebase:firebase-messaging-ktx")
+
+    // Kotlin Coroutines Play Services Support (Enables await() on Firebase Tasks)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
+
+    // Security (for EncryptedSharedPreferences)
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+
+    // Stripe Android SDK (for payment sheet integration)
+    implementation("com.stripe:stripe-android:20.40.0")
 
     // Hilt Core
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
+    // Android Security
     implementation("androidx.security:security-crypto:1.0.0")
 
     // Testing
