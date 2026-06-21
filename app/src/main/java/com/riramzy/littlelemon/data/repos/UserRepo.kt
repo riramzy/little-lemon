@@ -1,90 +1,138 @@
 package com.riramzy.littlelemon.data.repos
 
+import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.riramzy.littlelemon.data.preferences.UserPreferences
+import com.riramzy.littlelemon.utils.UserStatus
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
 
 class UserRepo(
-    private val userPreferences: UserPreferences,
+    private val prefs: UserPreferences,
+    private val firebaseAuth: FirebaseAuth,
+    private val firestore: FirebaseFirestore
 ) {
-    fun login(username: String, password: String): Boolean {
-        val isValid = userPreferences.validateLogin(username, password)
-        if (isValid) {
-            userPreferences.setLoggedIn(true)
+    val authState: Flow<UserStatus> = callbackFlow {
+        val listener = FirebaseAuth.AuthStateListener { auth ->
+            val user = auth.currentUser
+
+            if (user == null) {
+                trySend(UserStatus.Unauthenticated)
+            } else {
+                trySend(UserStatus.Authenticated(user.uid, user.email ?: ""))
+            }
         }
-        return isValid
+
+        firebaseAuth.addAuthStateListener(listener)
+        awaitClose { firebaseAuth.removeAuthStateListener(listener) }
     }
 
-    fun logout() {
-        userPreferences.setLoggedIn(false)
-    }
+    fun isLoggedIn(): Boolean = firebaseAuth.currentUser != null
 
-    fun deleteAccount() {
-        userPreferences.clearAll()
-        userPreferences.setLoggedIn(false)
-    }
+    fun getUid(): String? = firebaseAuth.currentUser?.uid
 
-    fun isLoggedIn(): Boolean {
-        return userPreferences.isLoggedIn()
-    }
-
-
-    fun isOnboardingDone(): Boolean {
-        return userPreferences.isOnboardingDone()
-    }
-
-    fun setOnboardingDone(onboardingDone: Boolean) {
-        userPreferences.setOnboardingDone(onboardingDone)
-    }
-
-    fun register(
+    suspend fun register(
         username: String,
         firstName: String,
         lastName: String,
         email: String,
         password: String,
-    ): Boolean {
-        if (
-            username.isBlank() || firstName.isBlank() || lastName.isBlank() || email.isBlank() || password.isBlank()
-        ) {
-            return false
-        }
+    ): Result<Unit> {
+        return try {
+            val result = firebaseAuth.createUserWithEmailAndPassword(email, password)
+                .await()
+            val uid = result.user?.uid ?: throw Exception("User ID is null")
 
-        userPreferences.editUsername(username)
-        userPreferences.register(username, firstName, lastName, email, password)
-        userPreferences.setLoggedIn(true)
-        return true
+            val profile = hashMapOf(
+                "uid" to uid,
+                "firstName" to firstName,
+                "lastName" to lastName,
+                "email" to email,
+                "username" to username,
+                "createdAt" to Timestamp.now()
+            )
+
+            firestore.collection("users").document(uid).set(profile)
+                .await()
+
+            prefs.register(username, firstName, lastName, email)
+            prefs.setLoggedIn(true)
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
-    fun getFirstName(): String? = userPreferences.getFirstName()
+    suspend fun login(
+        email: String,
+        password: String
+    ): Result<Unit> {
+        return try {
+            firebaseAuth.signInWithEmailAndPassword(email, password)
+                .await()
+
+            prefs.setLoggedIn(true)
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    fun logout() {
+        firebaseAuth.signOut()
+        prefs.clearAll()
+        prefs.setLoggedIn(false)
+    }
+
+    fun deleteAccount() {
+        prefs.clearAll()
+        prefs.setLoggedIn(false)
+    }
+
+    fun isOnboardingDone(): Boolean {
+        return prefs.isOnboardingDone()
+    }
+
+    fun setOnboardingDone(onboardingDone: Boolean) {
+        prefs.setOnboardingDone(onboardingDone)
+    }
+
+    fun getFirstName(): String? = prefs.getFirstName()
 
     fun editFirstName(firstName: String) {
-        userPreferences.editFirstName(firstName)
+        prefs.editFirstName(firstName)
     }
 
-    fun getLastName(): String? = userPreferences.getLastName()
+    fun getLastName(): String? = prefs.getLastName()
 
     fun editLastName(lastName: String) {
-        userPreferences.editLastName(lastName)
+        prefs.editLastName(lastName)
     }
 
-    fun getEmail(): String? = userPreferences.getEmail()
+    fun getEmail(): String? = prefs.getEmail()
 
     fun editEmail(email: String) {
-        userPreferences.editEmail(email)
+        prefs.editEmail(email)
     }
 
-    fun getUsername(): String? = userPreferences.getUsername()
+    fun getUsername(): String? = prefs.getUsername()
 
     fun editUsername(username: String) {
-        userPreferences.editUsername(username)
+        prefs.editUsername(username)
     }
 
-    fun getFullName(): String? = userPreferences.getFullName()
+    fun getFullName(): String = prefs.getFullName()
 
     fun saveProfilePicture(uri: String) {
-        userPreferences.saveProfilePicture(uri)
+        prefs.saveProfilePicture(uri)
     }
 
     fun getProfilePicture(): String? {
-        return userPreferences.getProfilePicture()
+        return prefs.getProfilePicture()
     }
 }

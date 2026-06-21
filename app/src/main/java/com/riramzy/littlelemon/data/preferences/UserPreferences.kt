@@ -10,7 +10,6 @@ class UserPreferences(
         private const val KEY_IS_LOGGED_IN = "is_logged_in"
         private const val KEY_ONBOARDING_DONE = "onboarding_done"
         private const val KEY_USERNAME = "username"
-        private const val KEY_PASSWORD = "password"
         private const val KEY_FIRST_NAME = "first_name"
         private const val KEY_LAST_NAME = "last_name"
         private const val KEY_EMAIL = "email"
@@ -38,23 +37,18 @@ class UserPreferences(
         firstName: String,
         lastName: String,
         email: String,
-        password: String,
     ) {
-        val hashedPassword = hashPassword(password)
-
         sharedPreferences.edit {
             putString(KEY_USERNAME, username)
                 .putString(KEY_FIRST_NAME, firstName)
                 .putString(KEY_LAST_NAME, lastName)
                 .putString(KEY_EMAIL, email)
-                .putString(KEY_PASSWORD, hashedPassword)
         }
     }
 
-    fun validateLogin(username: String, password: String): Boolean {
+    fun validateLogin(username: String): Boolean {
         val savedUsername = sharedPreferences.getString(KEY_USERNAME, null)
-        val savedPasswordHash = sharedPreferences.getString(KEY_PASSWORD, null)
-        return username == savedUsername && hashPassword(password) == savedPasswordHash
+        return username == savedUsername
     }
 
     fun getFirstName(): String? = sharedPreferences.getString(KEY_FIRST_NAME, null)
@@ -91,10 +85,4 @@ class UserPreferences(
     fun clearAll() {
         sharedPreferences.edit { clear() }
     }
-}
-
-private fun hashPassword(password: String): String {
-    val digest = java.security.MessageDigest.getInstance("SHA-256")
-    val hashBytes = digest.digest(password.toByteArray(Charsets.UTF_8))
-    return hashBytes.joinToString("") { "%02x".format(it) }
 }

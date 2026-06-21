@@ -1,5 +1,7 @@
 package com.riramzy.littlelemon.di
 
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.riramzy.littlelemon.data.local.cart.LocalCartDao
 import com.riramzy.littlelemon.data.local.menu.LocalMenuDao
 import com.riramzy.littlelemon.data.local.orders.LocalOrdersDao
@@ -53,7 +55,11 @@ object ReposModule {
 
     @Singleton
     @Provides
-    fun provideUserRepo(prefs: UserPreferences): UserRepo {
-        return UserRepo(prefs)
+    fun provideUserRepo(
+        prefs: UserPreferences,
+        firebaseAuth: FirebaseAuth,
+        firestore: FirebaseFirestore
+    ): UserRepo {
+        return UserRepo(prefs, firebaseAuth, firestore)
     }
 }
