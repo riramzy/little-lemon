@@ -101,8 +101,6 @@ fun PaymentScreen(
         cardYear = cardYear,
         cardCvv = cardCvv,
     )
-
-
 }
 
 @Composable
@@ -150,7 +148,7 @@ fun PaymentScreenContent(
         floatingActionButton = {
             LemonNavigationBar(
                 isActionEnabled = true,
-                onActionText = if (isForReservation) "Confirm" else if (isForCart) "Submit" else "",
+                onActionText = if (isForReservation) "Confirm" else if (isForCart) "Submit" else "Else",
                 onActionClicked = {
                     val onNext = if (isForReservation) onNextClickedReservation else onNextClickedCart
                     onNextClicked(onNext)
@@ -193,6 +191,7 @@ fun PaymentScreenContent(
                 isForReservation = isForReservation,
                 isForCart = isForCart
             )
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth(),

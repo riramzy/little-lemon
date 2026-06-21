@@ -3,7 +3,7 @@ package com.riramzy.littlelemon.ui.screens.payment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.riramzy.littlelemon.data.repos.ReservationsRepo
-import com.riramzy.littlelemon.ui.viewmodel.UserVm
+import com.riramzy.littlelemon.data.repos.UserRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,31 +16,29 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PaymentVm @Inject constructor(
-    userVm: UserVm,
+    userRepo: UserRepo,
     private val reservationsRepo: ReservationsRepo
 ) : ViewModel() {
-
-    // Event channel for showing toasts
     private val _toastMessage = MutableSharedFlow<String>()
     val toastMessage = _toastMessage.asSharedFlow()
 
-    // User Information State
-    private val _firstName = MutableStateFlow(if (userVm.isLoggedIn()) userVm.getFirstName() ?: "" else "")
+    private val _firstName =
+        MutableStateFlow(if (userRepo.isLoggedIn()) userRepo.getFirstName() ?: "" else "")
     val firstName = _firstName.asStateFlow()
 
-    private val _lastName = MutableStateFlow(if (userVm.isLoggedIn()) userVm.getLastName() ?: "" else "")
+    private val _lastName =
+        MutableStateFlow(if (userRepo.isLoggedIn()) userRepo.getLastName() ?: "" else "")
     val lastName = _lastName.asStateFlow()
 
-    private val _email = MutableStateFlow(if (userVm.isLoggedIn()) userVm.getEmail() ?: "" else "")
+    private val _email =
+        MutableStateFlow(if (userRepo.isLoggedIn()) userRepo.getEmail() ?: "" else "")
     val email = _email.asStateFlow()
 
     private val _phoneNumber = MutableStateFlow("")
     val phoneNumber = _phoneNumber.asStateFlow()
 
-    // Payment Method State
     val paymentMethod: StateFlow<String?> = reservationsRepo.paymentMethod
 
-    // Card Information State
     private val _cardNumber = MutableStateFlow("")
     val cardNumber = _cardNumber.asStateFlow()
 
@@ -54,13 +52,17 @@ class PaymentVm @Inject constructor(
     val cardCvv = _cardCvv.asStateFlow()
 
     fun onFirstNameChange(value: String) { _firstName.update { value } }
+
     fun onLastNameChange(value: String) { _lastName.update { value } }
+
     fun onEmailChange(value: String) { _email.update { value } }
+
     fun onPhoneNumberChange(value: String) {
         if (value.all(Char::isDigit) && value.length <= 11) {
             _phoneNumber.update { value }
         }
     }
+
     fun onPaymentMethodChange(value: String) {
         reservationsRepo.setPaymentMethod(value)
     }

@@ -1,5 +1,6 @@
 package com.riramzy.littlelemon.ui.screens.search
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.riramzy.littlelemon.data.repos.SearchRepo
@@ -16,25 +17,25 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class SearchVm @Inject constructor(
-    private val searchRepo: SearchRepo
+    private val searchRepo: SearchRepo,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val _searchQuery = MutableStateFlow("")
     val searchQuery = _searchQuery.asStateFlow()
-
-    private val _categoryFilter = MutableStateFlow<String?>(null)
-    val categoryFilter = _categoryFilter.asStateFlow()
+    private val initialCategory = savedStateHandle.get<String>("category")
+    private val _categoryFilter = MutableStateFlow<String?>(initialCategory)
 
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     val searchedItems = combine(
-        _searchQuery.debounce(300),
+        _searchQuery.debounce(300.milliseconds),
         _categoryFilter
     ) { query, category ->
         query to category
     }.flatMapLatest { (query, category) ->
-
         searchRepo.getAllMenuItems().map { items ->
             items
                 .let { list ->
