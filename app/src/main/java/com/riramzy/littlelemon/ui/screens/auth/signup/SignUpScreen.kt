@@ -77,6 +77,7 @@ fun SignUpScreen(
     }
 
     SignUpScreenContent(
+        navController = navController,
         state = state,
         register = userVm::register
     )
@@ -84,6 +85,7 @@ fun SignUpScreen(
 
 @Composable
 fun SignUpScreenContent(
+    navController: NavController,
     state: UserState,
     register: (String, String, String, String, String) -> Unit,
 ) {
@@ -276,6 +278,7 @@ fun SignUpScreenContent(
 
                                 else -> {
                                     register(username, firstName, lastName, email, password)
+                                    navController.navigate(Screen.Login.route)
                                 }
                             }
                         }
@@ -291,6 +294,7 @@ fun SignUpScreenContent(
 fun SignUpScreenPreview() {
     LittleLemonTheme {
         SignUpScreenContent(
+            navController = NavController(LocalContext.current),
             state = UserState.Idle,
             register = { _, _, _, _, _ -> }
         )
@@ -302,6 +306,7 @@ fun SignUpScreenPreview() {
 fun SignUpScreenDarkPreview() {
     LittleLemonTheme {
         SignUpScreenContent(
+            navController = NavController(LocalContext.current),
             state = UserState.Idle,
             register = { _, _, _, _, _ -> }
         )

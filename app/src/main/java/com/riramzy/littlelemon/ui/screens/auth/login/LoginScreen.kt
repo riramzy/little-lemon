@@ -63,7 +63,6 @@ fun LoginScreen(
         login = userVm::login,
         state = state,
     )
-
 }
 
 @Composable
@@ -198,11 +197,12 @@ fun LoginScreenContent(
                         .padding(top = 24.dp)
                         .fillMaxWidth(),
                     onClick = {
-                        if (!isLoading) { // <-- Debounce double clicks
+                        if (!isLoading) {
                             if (email.isBlank() || password.isBlank()) {
                                 Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
                             } else {
                                 login(email, password)
+                                navController.navigate(Screen.Home.route)
                             }
                         }
                     }
