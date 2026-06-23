@@ -13,7 +13,6 @@ import androidx.compose.material3.FabPosition
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -24,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.riramzy.littlelemon.data.local.menu.LocalMenuItem
 import com.riramzy.littlelemon.ui.components.ItemOverview
 import com.riramzy.littlelemon.ui.components.LemonGenrePill
 import com.riramzy.littlelemon.ui.components.LemonNavigationBar
@@ -34,14 +34,9 @@ import com.riramzy.littlelemon.utils.Screen
 @Composable
 fun SearchScreen(
     navController: NavHostController,
-    category: String?,
     searchVm: SearchVm = hiltViewModel()
 ) {
-    val categoriesFilters = listOf(
-        "Starters",
-        "Mains",
-        "Desserts",
-    )
+    val categoriesFilters = listOf("Starters", "Mains", "Desserts")
 
     val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
@@ -50,21 +45,35 @@ fun SearchScreen(
     val searchItems by searchVm.searchedItems.collectAsState()
     val selectedCategory by searchVm.categoryFilter.collectAsState()
 
-    /**
-     * Apply category ONLY once when coming from Home
-     */
-    LaunchedEffect(Unit) {
-        if (!category.isNullOrBlank() && selectedCategory == null) {
-            searchVm.searchByCategory(category)
-        }
-    }
+    SearchScreenContent(
+        navController = navController,
+        searchQuery = searchQuery,
+        onSearchQueryChange = searchVm::onSearchQueryChange,
+        currentRoute = currentRoute,
+        categoriesFilters = categoriesFilters,
+        category = selectedCategory,
+        searchItems = searchItems,
+        searchByCategory = searchVm::searchByCategory
+    )
+}
 
+@Composable
+fun SearchScreenContent(
+    navController: NavHostController,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    currentRoute: String,
+    categoriesFilters: List<String>,
+    category: String?,
+    searchItems: List<LocalMenuItem>,
+    searchByCategory: (String?) -> Unit,
+) {
     Scaffold(
         topBar = {
             TopAppBar(
                 modifier = Modifier.padding(vertical = 10.dp, horizontal = 15.dp),
                 searchQuery = searchQuery,
-                onSearchQueryChange = searchVm::onSearchQueryChange
+                onSearchQueryChange = onSearchQueryChange,
             )
         },
         floatingActionButton = {
@@ -91,22 +100,19 @@ fun SearchScreen(
             modifier = Modifier.padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            /** Category Filters */
             LazyRow(
                 modifier = Modifier
                     .padding(start = 15.dp, end = 15.dp, top = 15.dp)
                     .fillMaxWidth()
             ) {
                 items(categoriesFilters) { filterCategory ->
-                    val isSelected =
-                        filterCategory.equals(selectedCategory, ignoreCase = true)
+                    val isSelected = filterCategory.equals(category, ignoreCase = true)
 
                     LemonGenrePill(
                         genre = filterCategory,
                         isSelected = isSelected,
                         onGenreClicked = {
-                            searchVm.searchByCategory(
+                            searchByCategory(
                                 if (isSelected) null else filterCategory
                             )
                         },
@@ -115,7 +121,6 @@ fun SearchScreen(
                 }
             }
 
-            /** Search Results */
             LazyColumn(
                 modifier = Modifier.padding(
                     start = 15.dp,
@@ -146,9 +151,15 @@ fun SearchScreen(
 @Composable
 fun SearchScreenPreview() {
     LittleLemonTheme {
-        SearchScreen(
+        SearchScreenContent(
             navController = rememberNavController(),
-            category = "starters"
+            searchQuery = "",
+            onSearchQueryChange = { },
+            currentRoute = Screen.Home.route,
+            categoriesFilters = listOf("Starters", "Mains", "Desserts"),
+            category = "starters",
+            searchItems = emptyList(),
+            searchByCategory = { }
         )
     }
 }
@@ -157,9 +168,15 @@ fun SearchScreenPreview() {
 @Composable
 fun SearchScreenDarkPreview() {
     LittleLemonTheme {
-        SearchScreen(
+        SearchScreenContent(
             navController = rememberNavController(),
-            category = null
+            searchQuery = "",
+            onSearchQueryChange = { },
+            currentRoute = Screen.Home.route,
+            categoriesFilters = listOf("Starters", "Mains", "Desserts"),
+            category = "starters",
+            searchItems = emptyList(),
+            searchByCategory = { }
         )
     }
 }

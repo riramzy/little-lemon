@@ -38,24 +38,19 @@ import com.riramzy.littlelemon.ui.components.LemonNavigationBar
 import com.riramzy.littlelemon.ui.components.LemonSection
 import com.riramzy.littlelemon.ui.components.LemonSpecialOffers
 import com.riramzy.littlelemon.ui.components.TopAppBar
-import com.riramzy.littlelemon.ui.screens.search.SearchVm
 import com.riramzy.littlelemon.ui.theme.LittleLemonTheme
 import com.riramzy.littlelemon.utils.Screen
 
 @Composable
 fun HomeScreen(
     navController: NavController,
-    homeVm: HomeVm = hiltViewModel(),
-    searchVm: SearchVm = hiltViewModel()
+    homeVm: HomeVm = hiltViewModel()
 ) {
     val menuItems = homeVm.menuItems.collectAsState().value
-    val searchQuery by searchVm.searchQuery.collectAsState()
 
     HomeScreenContent(
         navController = navController,
         menuItems = menuItems,
-        searchQuery = searchQuery,
-        onSearchQueryChange = searchVm::onSearchQueryChange
     )
 
 }
@@ -64,8 +59,6 @@ fun HomeScreen(
 fun HomeScreenContent(
     navController: NavController,
     menuItems: List<LocalMenuItem>,
-    searchQuery: String,
-    onSearchQueryChange: (String) -> Unit,
 ) {
     val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
@@ -78,10 +71,8 @@ fun HomeScreenContent(
                         vertical = 10.dp,
                         horizontal = 15.dp
                     ),
-                searchQuery = searchQuery,
-                onSearchQueryChange = {
-                    onSearchQueryChange(it)
-                },
+                searchQuery = "",
+                isSearchRequired = true,
                 onSearchBarClicked = {
                     navController.navigate(Screen.Search.route)
                 }
@@ -275,8 +266,6 @@ fun HomeScreenPreview() {
         HomeScreenContent(
             navController = rememberNavController(),
             menuItems = emptyList(),
-            searchQuery = "",
-            onSearchQueryChange = {}
         )
     }
 }
@@ -288,8 +277,6 @@ fun HomeScreenDarkPreview() {
         HomeScreenContent(
             navController = rememberNavController(),
             menuItems = emptyList(),
-            searchQuery = "",
-            onSearchQueryChange = {}
         )
     }
 }
