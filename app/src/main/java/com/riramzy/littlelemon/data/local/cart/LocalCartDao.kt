@@ -12,16 +12,16 @@ interface LocalCartDao {
     fun getAllLocalCartItems(): Flow<List<LocalCartItem>>
 
     @Query("UPDATE cart_items SET quantity = :quantity WHERE id = :itemId")
-    fun updateQuantity(itemId: Int, quantity: Int)
+    suspend fun updateQuantity(itemId: Int, quantity: Int)
 
     @Query("SELECT * FROM cart_items WHERE id = :itemId")
     fun getItemById(itemId: Int): LocalCartItem
 
     @Insert(onConflict = REPLACE)
-    fun insertIntoLocalCartItem(item: LocalCartItem)
+    suspend fun insertIntoLocalCartItem(item: LocalCartItem)
 
     @Query("DELETE FROM cart_items WHERE id = :itemId")
-    fun deleteLocalCartItem(itemId: Int)
+    suspend fun deleteLocalCartItem(itemId: Int)
 
     @Query("SELECT COUNT(*) FROM cart_items")
     fun getLocalCartCount(): Int
