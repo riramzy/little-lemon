@@ -10,9 +10,6 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
-//Builds and configures Ktor HTTP client with JSON support
-//Fetch menu from the server
-
 object NetworkClient {
     val httpClient = HttpClient(Android) {
         install(ContentNegotiation) {
