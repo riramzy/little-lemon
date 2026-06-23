@@ -101,7 +101,14 @@ class UserRepo(
         prefs.setLoggedIn(false)
     }
 
-    fun deleteAccount() {
+    suspend fun deleteAccount(): Result<Unit> = runCatching {
+        val user = firebaseAuth.currentUser ?: throw Exception("No user authenticated")
+        val uid = user.uid
+
+        firestore.collection("users").document(uid).delete().await()
+
+        user.delete().await()
+
         prefs.clearAll()
         prefs.setLoggedIn(false)
     }

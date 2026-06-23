@@ -4,32 +4,35 @@ import android.util.Log
 import com.riramzy.littlelemon.data.local.menu.LocalMenuDao
 import com.riramzy.littlelemon.data.local.menu.LocalMenuItem
 import com.riramzy.littlelemon.data.model.toEntity
-import com.riramzy.littlelemon.data.remote.NetworkClient
+import com.riramzy.littlelemon.data.remote.MenuApiService
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class MenuRepo(private val dao: LocalMenuDao) {
+class MenuRepo @Inject constructor(
+    private val menuDao: LocalMenuDao,
+    private val apiService: MenuApiService
+) {
     fun getLocalMenu(): Flow<List<LocalMenuItem>> {
-        return dao.getAllLocalMenuItems()
+        return menuDao.getAllLocalMenuItems()
     }
 
     suspend fun getItemById(itemId: Int): LocalMenuItem {
-        return dao.getItemById(itemId)
+        return menuDao.getItemById(itemId)
     }
 
     suspend fun refreshMenuIfNeeded() {
-        val localCount = dao.getLocalMenuCount()
+        val localCount = menuDao.getLocalMenuCount()
         if (localCount == 0) {
             refreshMenu()
         }
     }
-    suspend fun refreshMenu() {
-        val networkMenu = NetworkClient.fetchMenu()
 
-        networkMenu?.menu?.let { items ->
+    suspend fun refreshMenu() {
+        val networkMenu = apiService.fetchMenu()
+        networkMenu.menu.let { items ->
             val entities = items.map { it.toEntity() }
-            dao.refreshMenu(entities)
+            menuDao.refreshMenu(entities)
             Log.d("MenuRepo", "Inserted ${entities.size} items into the database")
         }
     }
-
 }
