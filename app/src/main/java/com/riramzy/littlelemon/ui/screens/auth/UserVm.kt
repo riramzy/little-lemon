@@ -1,6 +1,5 @@
 package com.riramzy.littlelemon.ui.screens.auth
 
-import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.riramzy.littlelemon.data.repos.UserRepo
@@ -45,6 +44,8 @@ class UserVm @Inject constructor(
     val email: StateFlow<String?> = userRepo.emailFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
+    private val EMAIL_REGEX = Regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
+
     val profilePicture: StateFlow<String?> = userRepo.profilePictureFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
@@ -75,7 +76,7 @@ class UserVm @Inject constructor(
                 return@launch
             }
 
-            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            if (EMAIL_REGEX.matches(email).not()) {
                 _userState.value = UserState.Error("Please enter a valid email address")
                 return@launch
             }
@@ -108,7 +109,7 @@ class UserVm @Inject constructor(
                 return@launch
             }
 
-            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            if (EMAIL_REGEX.matches(email).not()) {
                 _userState.value = UserState.Error("Please enter a valid email address")
                 return@launch
             }
@@ -131,11 +132,12 @@ class UserVm @Inject constructor(
 
     fun deleteAccount(onSuccess: () -> Unit = {}) {
         viewModelScope.launch {
-            try {
-                userRepo.deleteAccount()
+            val result = userRepo.deleteAccount()
+            if (result.isSuccess) {
                 onSuccess()
-            } catch (e: Exception) {
-                _userState.value = UserState.Error(e.message ?: "Failed to delete account")
+            } else {
+                _userState.value =
+                    UserState.Error(result.exceptionOrNull()?.message ?: "Failed to delete account")
             }
         }
     }

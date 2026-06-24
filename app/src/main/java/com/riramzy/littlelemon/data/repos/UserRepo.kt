@@ -4,10 +4,7 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.riramzy.littlelemon.data.preferences.UserPreferences
-import com.riramzy.littlelemon.utils.UserStatus
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 class UserRepo(
@@ -15,23 +12,14 @@ class UserRepo(
     private val firebaseAuth: FirebaseAuth,
     private val firestore: FirebaseFirestore
 ) {
-    val authState: Flow<UserStatus> = callbackFlow {
-        val listener = FirebaseAuth.AuthStateListener { auth ->
-            val user = auth.currentUser
-
-            if (user == null) {
-                trySend(UserStatus.Unauthenticated)
-            } else {
-                trySend(UserStatus.Authenticated(user.uid, user.email ?: ""))
-            }
-        }
-
-        firebaseAuth.addAuthStateListener(listener)
-        awaitClose { firebaseAuth.removeAuthStateListener(listener) }
-    }
-
+    val isLoggedInFlow: Flow<Boolean> = prefs.isLoggedInFlow
+    val isOnboardingDoneFlow: Flow<Boolean> = prefs.isOnboardingDoneFlow
+    val usernameFlow: Flow<String?> = prefs.usernameFlow
+    val firstNameFlow: Flow<String?> = prefs.firstNameFlow
+    val lastNameFlow: Flow<String?> = prefs.lastNameFlow
+    val emailFlow: Flow<String?> = prefs.emailFlow
+    val profilePictureFlow: Flow<String?> = prefs.profilePictureFlow
     fun isLoggedIn(): Boolean = firebaseAuth.currentUser != null
-
     fun getUid(): String? = firebaseAuth.currentUser?.uid
 
     suspend fun register(
@@ -55,8 +43,10 @@ class UserRepo(
                 "createdAt" to Timestamp.now()
             )
 
-            firestore.collection("users").document(uid).set(profile)
-                .await()
+            runCatching {
+                firestore.collection("users").document(uid).set(profile)
+                    .await()
+            }
 
             prefs.register(username, firstName, lastName, email)
             prefs.setLoggedIn(true)
@@ -76,8 +66,12 @@ class UserRepo(
                 .await()
             val uid = authResult.user?.uid ?: throw Exception("User ID is null")
 
-            val document = firestore.collection("users").document(uid).get().await()
-            if (document.exists()) {
+            val documentResult = runCatching {
+                firestore.collection("users").document(uid).get().await()
+            }
+            val document = documentResult.getOrNull()
+
+            if (document != null && document.exists()) {
                 val username = document.getString("username") ?: ""
                 val firstName = document.getString("firstName") ?: ""
                 val lastName = document.getString("lastName") ?: ""
@@ -87,15 +81,27 @@ class UserRepo(
                 prefs.setLoggedIn(true)
                 Result.success(Unit)
             } else {
-                firebaseAuth.signOut()
-                Result.failure(Exception("User profile not found in database."))
+                if (documentResult.isFailure) {
+                    val localUsername = email.substringBefore("@")
+                    prefs.register(
+                        localUsername,
+                        localUsername.replaceFirstChar { it.uppercase() },
+                        "",
+                        email
+                    )
+                    prefs.setLoggedIn(true)
+                    Result.success(Unit)
+                } else {
+                    firebaseAuth.signOut()
+                    Result.failure(Exception("User profile not found in database."))
+                }
             }
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    fun logout() {
+    suspend fun logout() {
         firebaseAuth.signOut()
         prefs.clearAll()
         prefs.setLoggedIn(false)
@@ -113,45 +119,47 @@ class UserRepo(
         prefs.setLoggedIn(false)
     }
 
-    fun isOnboardingDone(): Boolean {
+    suspend fun isOnboardingDone(): Boolean {
         return prefs.isOnboardingDone()
     }
 
-    fun setOnboardingDone(onboardingDone: Boolean) {
+    suspend fun setOnboardingDone(onboardingDone: Boolean) {
         prefs.setOnboardingDone(onboardingDone)
     }
 
-    fun getFirstName(): String? = prefs.getFirstName()
+    suspend fun getFirstName(): String? = prefs.getFirstName()
 
-    fun editFirstName(firstName: String) {
+    suspend fun editFirstName(firstName: String) {
         prefs.editFirstName(firstName)
     }
 
-    fun getLastName(): String? = prefs.getLastName()
+    suspend fun getLastName(): String? = prefs.getLastName()
 
-    fun editLastName(lastName: String) {
+    suspend fun editLastName(lastName: String) {
         prefs.editLastName(lastName)
     }
 
-    fun getEmail(): String? = prefs.getEmail()
+    suspend fun getEmail(): String? = prefs.getEmail()
 
-    fun editEmail(email: String) {
+    suspend fun editEmail(email: String) {
         prefs.editEmail(email)
     }
 
-    fun getUsername(): String? = prefs.getUsername()
+    suspend fun getUsername(): String? = prefs.getUsername()
 
-    fun editUsername(username: String) {
+    suspend fun editUsername(username: String) {
         prefs.editUsername(username)
     }
 
-    fun getFullName(): String = prefs.getFullName()
+    suspend fun getFullName(): String {
+        return prefs.getFullName(getFirstName(), getLastName())
+    }
 
-    fun saveProfilePicture(uri: String) {
+    suspend fun saveProfilePicture(uri: String) {
         prefs.saveProfilePicture(uri)
     }
 
-    fun getProfilePicture(): String? {
+    suspend fun getProfilePicture(): String? {
         return prefs.getProfilePicture()
     }
 }
