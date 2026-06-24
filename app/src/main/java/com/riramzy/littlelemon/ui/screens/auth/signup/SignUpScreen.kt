@@ -1,7 +1,6 @@
 package com.riramzy.littlelemon.ui.screens.auth.signup
 
 import android.content.res.Configuration
-import android.util.Patterns
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -14,8 +13,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -24,7 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,7 +60,7 @@ fun SignUpScreen(
     }
 
     LaunchedEffect(state) {
-        when (state) {
+        when (val currentState = state) {
             is UserState.Success -> {
                 Toast.makeText(context, "Registration successful!", Toast.LENGTH_LONG).show()
                 navController.navigate(Screen.Home.route) {
@@ -68,8 +69,7 @@ fun SignUpScreen(
             }
 
             is UserState.Error -> {
-                Toast.makeText(context, (state as UserState.Error).message, Toast.LENGTH_LONG)
-                    .show()
+                Toast.makeText(context, currentState.message, Toast.LENGTH_LONG).show()
             }
 
             else -> {}
@@ -77,7 +77,6 @@ fun SignUpScreen(
     }
 
     SignUpScreenContent(
-        navController = navController,
         state = state,
         register = userVm::register
     )
@@ -85,17 +84,14 @@ fun SignUpScreen(
 
 @Composable
 fun SignUpScreenContent(
-    navController: NavController,
     state: UserState,
     register: (String, String, String, String, String) -> Unit,
 ) {
-    val context = LocalContext.current
-
-    var username by remember { mutableStateOf("") }
-    var firstName by remember { mutableStateOf("") }
-    var lastName by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    var username by rememberSaveable { mutableStateOf("") }
+    var firstName by rememberSaveable { mutableStateOf("") }
+    var lastName by rememberSaveable { mutableStateOf("") }
+    var email by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
 
     val isLoading = state is UserState.Loading
 
@@ -163,7 +159,8 @@ fun SignUpScreenContent(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(20.dp),
+                    .padding(20.dp)
+                    .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -248,40 +245,9 @@ fun SignUpScreenContent(
                     modifier = Modifier
                         .padding(top = 50.dp)
                         .fillMaxWidth(),
+                    enabled = !isLoading,
                     onClick = {
-                        if (!isLoading) {
-                            val isEmailValid = Patterns.EMAIL_ADDRESS.matcher(email).matches()
-                            when {
-                                username.isBlank() || firstName.isBlank() || lastName.isBlank() || email.isBlank() || password.isBlank() -> {
-                                    Toast.makeText(
-                                        context,
-                                        "Please fill all fields.",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                }
-
-                                !isEmailValid -> {
-                                    Toast.makeText(
-                                        context,
-                                        "Invalid email format.",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                }
-
-                                password.length < 8 -> {
-                                    Toast.makeText(
-                                        context,
-                                        "Password must be at least 8 characters.",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                }
-
-                                else -> {
-                                    register(username, firstName, lastName, email, password)
-                                    navController.navigate(Screen.Login.route)
-                                }
-                            }
-                        }
+                        register(username, firstName, lastName, email, password)
                     }
                 )
             }
@@ -294,7 +260,6 @@ fun SignUpScreenContent(
 fun SignUpScreenPreview() {
     LittleLemonTheme {
         SignUpScreenContent(
-            navController = NavController(LocalContext.current),
             state = UserState.Idle,
             register = { _, _, _, _, _ -> }
         )
@@ -306,7 +271,6 @@ fun SignUpScreenPreview() {
 fun SignUpScreenDarkPreview() {
     LittleLemonTheme {
         SignUpScreenContent(
-            navController = NavController(LocalContext.current),
             state = UserState.Idle,
             register = { _, _, _, _, _ -> }
         )

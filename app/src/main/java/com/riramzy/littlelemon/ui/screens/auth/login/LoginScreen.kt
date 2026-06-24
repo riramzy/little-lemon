@@ -14,8 +14,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -24,7 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,10 +54,28 @@ fun LoginScreen(
     navController: NavController,
     userVm: UserVm = hiltViewModel(),
 ) {
+    val context = LocalContext.current
     val state by userVm.userState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         userVm.resetState()
+    }
+
+    LaunchedEffect(state) {
+        when (val currentState = state) {
+            is UserState.Success -> {
+                navController.navigate(Screen.Home.route) {
+                    popUpTo(Screen.Login.route) { inclusive = true }
+                }
+            }
+
+            is UserState.Error -> {
+                Toast.makeText(context, currentState.message, Toast.LENGTH_SHORT).show()
+                userVm.resetState()
+            }
+
+            else -> {}
+        }
     }
 
     LoginScreenContent(
@@ -73,8 +93,8 @@ fun LoginScreenContent(
 ) {
     val context = LocalContext.current
 
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    var email by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
 
     val isLoading = state is UserState.Loading
 
@@ -142,7 +162,8 @@ fun LoginScreenContent(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(20.dp),
+                    .padding(20.dp)
+                    .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -196,13 +217,13 @@ fun LoginScreenContent(
                     modifier = Modifier
                         .padding(top = 24.dp)
                         .fillMaxWidth(),
+                    enabled = !isLoading,
                     onClick = {
                         if (!isLoading) {
                             if (email.isBlank() || password.isBlank()) {
                                 Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
                             } else {
                                 login(email, password)
-                                navController.navigate(Screen.Home.route)
                             }
                         }
                     }
