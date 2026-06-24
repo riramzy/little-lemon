@@ -7,8 +7,8 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -37,6 +37,7 @@ fun YellowLemonButton(
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.primaryContainer,
     textColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    enabled: Boolean = true,
     borderColor: Color = Color.Transparent,
     imageInButton: Int? = null,
     onClick: () -> Unit = {}
@@ -45,6 +46,7 @@ fun YellowLemonButton(
         text = text,
         color = color,
         textColor = textColor,
+        enabled = enabled,
         onClick = onClick,
         borderColor = borderColor,
         imageInButton = imageInButton,
@@ -58,6 +60,7 @@ fun GreenLemonButton(
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.secondaryContainer,
     textColor: Color = MaterialTheme.colorScheme.onSecondaryContainer,
+    enabled: Boolean = true,
     borderColor: Color = Color.Transparent,
     imageInButton: Int? = null,
     onClick: () -> Unit = {}
@@ -66,6 +69,7 @@ fun GreenLemonButton(
         text = text,
         color = color,
         textColor = textColor,
+        enabled = enabled,
         onClick = onClick,
         borderColor = borderColor,
         imageInButton = imageInButton,
@@ -75,13 +79,14 @@ fun GreenLemonButton(
 
 @Composable
 fun LemonButton(
+    modifier: Modifier = Modifier,
     text: String,
     color: Color,
     textColor: Color,
+    enabled: Boolean = true,
     onClick: () -> Unit,
     borderColor: Color = Color.Transparent,
     imageInButton: Int? = null,
-    modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -92,9 +97,9 @@ fun LemonButton(
         onClick = {
             onClick()
         },
-        enabled = true,
+        enabled = enabled,
         modifier = modifier
-            .width(355.dp)
+            .fillMaxWidth()
             .wrapContentHeight()
             .scale(scale),
         colors = ButtonDefaults.buttonColors(
@@ -129,7 +134,6 @@ fun LemonButton(
             Text(
                 text = text,
                 style = Typography.titleSmall,
-                modifier = Modifier.weight(0.3f),
                 textAlign = TextAlign.Center
             )
         }
