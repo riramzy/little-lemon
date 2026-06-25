@@ -2,8 +2,6 @@ package com.riramzy.littlelemon.ui.components
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,7 +14,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -33,7 +30,7 @@ fun TopAppBar(
     isSearchRequired: Boolean = true,
     searchQuery: String = "",
     onSearchQueryChange: (String) -> Unit = {},
-    onSearchBarClicked: () -> Unit = {}
+    onSearch: (() -> Unit)? = null
 ) {
     Column(
         modifier = modifier
@@ -69,7 +66,8 @@ fun TopAppBar(
                     Image(
                         painter = painterResource(R.drawable.notifications_icon),
                         contentDescription = "Notifications Icon",
-                        modifier = Modifier.width(32.dp)
+                        modifier = Modifier
+                            .width(32.dp)
                             .height(32.dp),
                         colorFilter = if (isSystemInDarkTheme()) {
                             ColorFilter.tint(MaterialTheme.colorScheme.tertiaryContainer)
@@ -84,14 +82,9 @@ fun TopAppBar(
             SearchBar(
                 searchQuery = searchQuery,
                 onSearchQueryChange = onSearchQueryChange,
+                onSearch = onSearch,
                 modifier = Modifier
                     .padding(top = 20.dp)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null
-                    ) {
-                        onSearchBarClicked()
-                    }
             )
         }
     }

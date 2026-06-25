@@ -15,12 +15,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.riramzy.littlelemon.data.local.menu.LocalMenuItem
@@ -36,14 +38,14 @@ fun SearchScreen(
     navController: NavHostController,
     searchVm: SearchVm = hiltViewModel()
 ) {
-    val categoriesFilters = listOf("Starters", "Mains", "Desserts")
+    val categoriesFilters = remember { listOf("Starters", "Mains", "Desserts") }
 
     val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
 
-    val searchQuery by searchVm.searchQuery.collectAsState()
-    val searchItems by searchVm.searchedItems.collectAsState()
-    val selectedCategory by searchVm.categoryFilter.collectAsState()
+    val searchQuery by searchVm.searchQuery.collectAsStateWithLifecycle()
+    val searchItems by searchVm.searchedItems.collectAsStateWithLifecycle()
+    val selectedCategory by searchVm.categoryFilter.collectAsStateWithLifecycle()
 
     SearchScreenContent(
         navController = navController,
@@ -105,7 +107,10 @@ fun SearchScreenContent(
                     .padding(start = 15.dp, end = 15.dp, top = 15.dp)
                     .fillMaxWidth()
             ) {
-                items(categoriesFilters) { filterCategory ->
+                items(
+                    items = categoriesFilters,
+                    key = { it }
+                ) { filterCategory ->
                     val isSelected = filterCategory.equals(category, ignoreCase = true)
 
                     LemonGenrePill(
@@ -128,7 +133,10 @@ fun SearchScreenContent(
                     top = 15.dp
                 )
             ) {
-                items(searchItems) { item ->
+                items(
+                    items = searchItems,
+                    key = { it.id }
+                ) { item ->
                     ItemOverview(
                         itemName = item.title,
                         itemDescription = item.description,

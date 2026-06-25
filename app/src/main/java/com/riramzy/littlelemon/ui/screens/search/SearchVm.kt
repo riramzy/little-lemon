@@ -7,69 +7,75 @@ import com.riramzy.littlelemon.data.repos.SearchRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class SearchVm @Inject constructor(
     private val searchRepo: SearchRepo,
-    savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-    private val _searchQuery = MutableStateFlow("")
-    val searchQuery = _searchQuery.asStateFlow()
-    private val initialCategory = savedStateHandle.get<String>("category")
-    private val _categoryFilter = MutableStateFlow(initialCategory)
-    val categoryFilter = _categoryFilter.asStateFlow()
+    companion object {
+        private const val KEY_SEARCH_STATE = "search_state"
+    }
 
-    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
-    val searchedItems = combine(
-        _searchQuery.debounce(300.milliseconds),
-        _categoryFilter
-    ) { query, category ->
-        query to category
-    }.flatMapLatest { (query, category) ->
-        searchRepo.getAllMenuItems().map { items ->
-            items
-                .let { list ->
-                    if (category.isNullOrBlank()) list
-                    else list.filter { it.category.equals(category, true) }
-                }
-                .let { list ->
-                    if (query.isBlank()) list
-                    else list.filter {
-                        it.title.contains(query, ignoreCase = true)
-                    }
-                }
-        }
-
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5_000),
-        emptyList()
+    private val _searchState = savedStateHandle.getStateFlow(
+        KEY_SEARCH_STATE,
+        SearchState(
+            query = savedStateHandle.get<String>("query") ?: "",
+            category = savedStateHandle.get<String>("category")
+        )
     )
 
-    fun onSearchQueryChange(query: String) {
-        _searchQuery.value = query
-        if (query.isNotBlank()) {
-            _categoryFilter.update { null }
+    val searchQuery: StateFlow<String> = _searchState.map { it.query }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, "")
+
+    val categoryFilter: StateFlow<String?> = _searchState.map { it.category }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
+    val searchedItems = _searchState
+        .debounce { state ->
+            if (state.isQueryTriggered && state.query.isNotEmpty()) {
+                300.milliseconds
+            } else {
+                0.milliseconds
+            }
         }
+        .flatMapLatest { state ->
+            searchRepo.getFilteredMenuItems(state.query, state.category)
+        }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5_0000),
+            emptyList()
+        )
+
+    fun onSearchQueryChange(query: String) {
+        val currentState = _searchState.value
+
+        savedStateHandle[KEY_SEARCH_STATE] = currentState.copy(
+            query = query,
+            category = if (query.isBlank()) null else currentState.category,
+            isQueryTriggered = true
+        )
     }
 
     fun searchByCategory(category: String?) {
-        _categoryFilter.value = category
+        savedStateHandle[KEY_SEARCH_STATE] = SearchState(
+            query = "",
+            category = category,
+            isQueryTriggered = false
+        )
     }
 
     fun clearFilters() {
-        _searchQuery.value = ""
-        _categoryFilter.value = null
+        savedStateHandle[KEY_SEARCH_STATE] = SearchState()
     }
 }

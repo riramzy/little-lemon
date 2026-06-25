@@ -17,7 +17,9 @@ sealed class Screen(val route: String) {
     object Checkout : Screen("checkout")
     object CartPayment: Screen("cart_payment")
     object ReservationPayment: Screen("reservation_payment")
-    object Search : Screen("search")
+    object Search : Screen("search/{query}") {
+        fun createRoute(query: String) = "search/$query"
+    }
     object CategorySearch : Screen("category_search/{category}") {
         fun createRoute(category: String) = "category_search/$category"
     }

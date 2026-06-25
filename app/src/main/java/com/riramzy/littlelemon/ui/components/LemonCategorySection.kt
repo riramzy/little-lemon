@@ -35,17 +35,13 @@ fun LemonCategorySection(
         Text(
             title,
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.ExtraBold,
-            modifier = Modifier.padding(
-                start = 15.dp
-            )
+            fontWeight = FontWeight.ExtraBold
         )
 
         Text(
             subTitle,
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(
-                start = 15.dp,
                 bottom = 20.dp
             )
         )
@@ -53,7 +49,6 @@ fun LemonCategorySection(
         Column(
             verticalArrangement = Arrangement.spacedBy(15.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(start = 15.dp)
         ) {
             val itemsToShow = remember(menuItems, isCategory) {
                 if (isCategory) menuItems.distinctBy { it.category } else menuItems

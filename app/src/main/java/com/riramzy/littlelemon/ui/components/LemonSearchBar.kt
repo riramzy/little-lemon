@@ -42,6 +42,7 @@ fun SearchBar(
     modifier: Modifier = Modifier,
     searchQuery: String = "",
     onSearchQueryChange: (String) -> Unit = {},
+    onSearch: (() -> Unit)? = null
 ) {
     val requiredText = "Search"
     val focusManager = LocalFocusManager.current
@@ -113,7 +114,12 @@ fun SearchBar(
                         }
                     ),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
+                    keyboardActions = KeyboardActions(
+                        onSearch = {
+                            focusManager.clearFocus()
+                            onSearch?.invoke()
+                        }
+                    ),
                     decorationBox = { innerTextField ->
                         Box(
                             modifier = Modifier
@@ -153,7 +159,7 @@ fun SearchBar(
                             .clickable {
                                 onSearchQueryChange("")
                             },
-                        tint = MaterialTheme.colorScheme.secondaryContainer
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }

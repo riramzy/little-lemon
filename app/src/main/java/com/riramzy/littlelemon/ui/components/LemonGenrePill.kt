@@ -2,15 +2,17 @@ package com.riramzy.littlelemon.ui.components
 
 import android.content.res.Configuration
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
@@ -33,7 +35,7 @@ fun LemonGenrePill(
     Card(
         modifier = modifier
             .widthIn(min = 75.dp)
-            .heightIn(min = 39.dp)
+            .wrapContentHeight()
             .semantics { selected = isSelected; role = Role.Tab },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
@@ -68,14 +70,19 @@ fun LemonGenrePill(
             onGenreClicked()
         }
     ) {
-        Text(
-            text = genre,
+        Box(
             modifier = Modifier
-                .padding(8.dp),
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.ExtraBold,
-            textAlign = TextAlign.Center
-        )
+                .padding(8.dp)
+                .widthIn(min = 75.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = genre,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.ExtraBold,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
 
