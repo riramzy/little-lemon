@@ -2,10 +2,9 @@ package com.riramzy.littlelemon.ui.components
 
 import android.content.res.Configuration
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -14,6 +13,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -26,11 +29,12 @@ fun LemonGenrePill(
     isSelected: Boolean = false,
     genre: String = "Dessert",
     onGenreClicked: () -> Unit = {}
-    ) {
+) {
     Card(
         modifier = modifier
-            .width(75.dp)
-            .height(39.dp),
+            .widthIn(min = 75.dp)
+            .heightIn(min = 39.dp)
+            .semantics { selected = isSelected; role = Role.Tab },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isSystemInDarkTheme()) {
@@ -67,8 +71,7 @@ fun LemonGenrePill(
         Text(
             text = genre,
             modifier = Modifier
-                .padding(8.dp)
-                .fillMaxSize(),
+                .padding(8.dp),
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.ExtraBold,
             textAlign = TextAlign.Center

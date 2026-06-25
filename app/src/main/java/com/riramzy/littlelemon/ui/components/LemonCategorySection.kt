@@ -1,5 +1,6 @@
 package com.riramzy.littlelemon.ui.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -7,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -49,15 +51,17 @@ fun LemonCategorySection(
         )
 
         Column(
-            verticalArrangement = Arrangement.spacedBy(15.dp), // Use spacedBy for consistent spacing
+            verticalArrangement = Arrangement.spacedBy(15.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(start = 15.dp)
         ) {
-            val itemsToShow = if (isCategory) menuItems.distinctBy { it.category } else menuItems
+            val itemsToShow = remember(menuItems, isCategory) {
+                if (isCategory) menuItems.distinctBy { it.category } else menuItems
+            }
 
             itemsToShow.forEach { item ->
                 ItemCard(
-                    isCategory = true,
+                    isCategory = isCategory,
                     itemText = if (isCategory) {
                         item.category.replaceFirstChar { it.uppercase() }
                     } else {
@@ -78,8 +82,34 @@ fun LemonCategorySection(
 @Preview
 @Composable
 fun LemonCategorySectionPreview() {
-    LittleLemonTheme() {
-        Surface() {
+    LittleLemonTheme {
+        Surface {
+            LemonCategorySection(
+                menuItems = listOf(
+                    LocalMenuItem(
+                        id = 1,
+                        title = "Greek Salad",
+                        description = "The famous greek salad of crispy lettuce, peppers, olives, our Chicago...",
+                        price = 12.99,
+                        category = "starters",
+                        image = "",
+                    )
+                ),
+                title = "Shop by Category",
+                subTitle = "Find what you want quickly",
+                isCategory = true,
+                onItemClicked = {},
+                modifier = Modifier.padding(20.dp)
+            )
+        }
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)
+@Composable
+fun LemonCategorySectionDarkPreview() {
+    LittleLemonTheme {
+        Surface {
             LemonCategorySection(
                 menuItems = listOf(
                     LocalMenuItem(
