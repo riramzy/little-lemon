@@ -15,4 +15,13 @@ interface LocalSearchDao {
 
     @Query("SELECT * FROM menu_items WHERE category = :category")
     fun searchMenuItemsByCategory(category: String): Flow<List<LocalMenuItem>>
+
+    @Query(
+        """
+        SELECT * FROM menu_items 
+        WHERE (:category IS NULL OR :category = '' OR category = :category)
+          AND (:name IS NULL OR :name = '' OR title LIKE '%' || :name || '%')
+    """
+    )
+    fun getFilteredMenuItems(name: String?, category: String?): Flow<List<LocalMenuItem>>
 }
