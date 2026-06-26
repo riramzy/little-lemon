@@ -5,9 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.riramzy.littlelemon.data.local.menu.LocalMenuItem
 import com.riramzy.littlelemon.data.repos.MenuRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -15,14 +15,19 @@ import javax.inject.Inject
 class HomeVm @Inject constructor(
     private val menuRepo: MenuRepo
 ): ViewModel() {
-    private val _menuItems = MutableStateFlow<List<LocalMenuItem>>(emptyList())
-    val menuItems: StateFlow<List<LocalMenuItem>> = _menuItems
+    val menuItems: StateFlow<List<LocalMenuItem>> = menuRepo.getLocalMenu()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = emptyList()
+        )
 
     init {
-        viewModelScope.launch(Dispatchers.IO) {
-            menuRepo.refreshMenuIfNeeded()
-            menuRepo.getLocalMenu().collect { items ->
-                _menuItems.value = items
+        viewModelScope.launch {
+            try {
+                menuRepo.refreshMenuIfNeeded()
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }

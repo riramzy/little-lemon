@@ -16,12 +16,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -41,7 +41,6 @@ fun LemonAboutUs(
             .fillMaxWidth()
             .wrapContentHeight()
     ) {
-        //Logo
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
@@ -50,9 +49,9 @@ fun LemonAboutUs(
                 .height(50.dp)
                 .background(
                     if (isSystemInDarkTheme()) {
-                        MaterialTheme.colorScheme.tertiaryContainer
+                        MaterialTheme.colorScheme.primary
                     } else {
-                        MaterialTheme.colorScheme.tertiaryContainer
+                        MaterialTheme.colorScheme.primaryContainer.copy(0.3f)
                     }
                 ),
         ) {
@@ -67,30 +66,20 @@ fun LemonAboutUs(
             )
         }
 
-        //About Us
         Text(
             text = stringResource(R.string.hero_section_description),
             style = MaterialTheme.typography.bodyMedium,
-            color = if (isSystemInDarkTheme()) {
-                Color.White
-            } else {
-                Color.Black
-            },
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(bottom = 20.dp)
         )
 
-        //Hours
         Column(
             modifier = Modifier.padding(bottom = 20.dp)
         ) {
             Text(
                 text = "Hours",
                 style = MaterialTheme.typography.titleLarge,
-                color = if (isSystemInDarkTheme()) {
-                    Color.White
-                } else {
-                    Color.Black
-                },
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(bottom = 10.dp)
             )
 
@@ -99,24 +88,15 @@ fun LemonAboutUs(
                         "Fri-Sat: 11am - 10pm\n" +
                         "Sunday: 12pm - 8pm",
                 style = MaterialTheme.typography.bodyMedium,
-                color = if (isSystemInDarkTheme()) {
-                    Color.White
-                } else {
-                    Color.Black
-                },
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
 
-        //Follow Us
         Column {
             Text(
                 text = "Follow Us",
                 style = MaterialTheme.typography.titleLarge,
-                color = if (isSystemInDarkTheme()) {
-                    Color.White
-                } else {
-                    Color.Black
-                },
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(bottom = 10.dp)
             )
 
@@ -137,7 +117,7 @@ fun LemonAboutUs(
                 ) {
                     Image(
                         painter = painterResource(R.drawable.facebook),
-                        contentDescription = "Time Icon",
+                        contentDescription = "Facebook page link",
                         modifier = Modifier
                             .size(20.dp)
                     )
@@ -159,7 +139,7 @@ fun LemonAboutUs(
                 ) {
                     Image(
                         painter = painterResource(R.drawable.instagram),
-                        contentDescription = "Time Icon",
+                        contentDescription = "Instagram profile link",
                         modifier = Modifier
                             .size(18.dp)
                     )
@@ -181,7 +161,7 @@ fun LemonAboutUs(
                 ) {
                     Image(
                         painter = painterResource(R.drawable.x),
-                        contentDescription = "Time Icon",
+                        contentDescription = "X account link",
                         modifier = Modifier
                             .size(15.dp)
                     )
@@ -192,10 +172,25 @@ fun LemonAboutUs(
     }
 }
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(showBackground = true)
 @Composable
 fun LemonAboutUsPreview() {
     LittleLemonTheme {
-        LemonAboutUs()
+        Surface {
+            LemonAboutUs()
+        }
+    }
+}
+
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL,
+    showBackground = true, showSystemUi = false
+)
+@Composable
+fun LemonAboutUsDarkPreview() {
+    LittleLemonTheme {
+        Surface {
+            LemonAboutUs()
+        }
     }
 }

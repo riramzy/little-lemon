@@ -7,9 +7,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -18,7 +16,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -43,36 +40,22 @@ fun LemonSpecialOffers(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
-            .padding(start = 15.dp)
             .fillMaxWidth()
-            .height(200.dp)
+            .wrapContentHeight()
     ) {
         Card(
             shape = MaterialTheme.shapes.large,
-            modifier = Modifier
-                .padding(
-                    end = 15.dp,
-                    bottom = 15.dp
-                )
-                .fillMaxWidth()
-                .wrapContentHeight(),
             border = BorderStroke(
                 width = 1.dp,
-                color = MaterialTheme.colorScheme.tertiaryContainer,
+                color = MaterialTheme.colorScheme.onBackground,
             ),
             colors = CardDefaults.cardColors(
-                containerColor = if (isSystemInDarkTheme()) {
-                    MaterialTheme.colorScheme.background
-
-                } else {
-                    Color.White
-                },
+                containerColor = MaterialTheme.colorScheme.background,
             )
         ) {
             Column(
                 modifier = Modifier
-                    .padding(20.dp)
-                    .fillMaxSize(),
+                    .padding(20.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.Start
             ) {
@@ -122,14 +105,12 @@ fun LemonSpecialOffers(
 @Composable
 fun LemonSpecialOffersPreview() {
     LittleLemonTheme {
-        Surface {
-            LemonSpecialOffers(
-                icon = R.drawable.percentage,
-                iconColor = Color.Cyan,
-                title = "20% Off",
-                description = "First-time customers get 20% off their entire order"
-            )
-        }
+        LemonSpecialOffers(
+            icon = R.drawable.percentage,
+            iconColor = Color.Cyan,
+            title = "20% Off",
+            description = "First-time customers get 20% off their entire order"
+        )
     }
 }
 
@@ -137,13 +118,11 @@ fun LemonSpecialOffersPreview() {
 @Composable
 fun LemonSpecialOffersDarkPreview() {
     LittleLemonTheme {
-        Surface {
-            LemonSpecialOffers(
-                icon = R.drawable.percentage,
-                iconColor = Color.Cyan,
-                title = "20% Off",
-                description = "First-time customers get 20% off their entire order"
-            )
-        }
+        LemonSpecialOffers(
+            icon = R.drawable.percentage,
+            iconColor = Color.Cyan,
+            title = "20% Off",
+            description = "First-time customers get 20% off their entire order"
+        )
     }
 }

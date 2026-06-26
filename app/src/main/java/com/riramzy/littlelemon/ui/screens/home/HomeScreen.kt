@@ -17,16 +17,22 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.riramzy.littlelemon.R
@@ -40,13 +46,16 @@ import com.riramzy.littlelemon.ui.components.LemonSpecialOffers
 import com.riramzy.littlelemon.ui.components.TopAppBar
 import com.riramzy.littlelemon.ui.theme.LittleLemonTheme
 import com.riramzy.littlelemon.utils.Screen
+import com.riramzy.littlelemon.utils.dishesImagesMap
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @Composable
 fun HomeScreen(
     navController: NavController,
     homeVm: HomeVm = hiltViewModel()
 ) {
-    val menuItems = homeVm.menuItems.collectAsState().value
+    val menuItems = homeVm.menuItems.collectAsStateWithLifecycle().value
 
     HomeScreenContent(
         navController = navController,
@@ -62,6 +71,7 @@ fun HomeScreenContent(
 ) {
     val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
+    var searchQuery by rememberSaveable { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -71,11 +81,16 @@ fun HomeScreenContent(
                         vertical = 10.dp,
                         horizontal = 15.dp
                     ),
-                searchQuery = "",
+                searchQuery = searchQuery,
+                onSearchQueryChange = { searchQuery = it },
+                onSearch = {
+                    if (searchQuery.isNotBlank()) {
+                        val encodedQuery =
+                            URLEncoder.encode(searchQuery, StandardCharsets.UTF_8.toString())
+                        navController.navigate(Screen.Search.createRoute(encodedQuery))
+                    }
+                },
                 isSearchRequired = true,
-                onSearchBarClicked = {
-                    navController.navigate(Screen.Search.route)
-                }
             )
         },
         floatingActionButton = {
@@ -96,11 +111,7 @@ fun HomeScreenContent(
             )
         },
         floatingActionButtonPosition = FabPosition.Center,
-        containerColor = if (isSystemInDarkTheme()) {
-            MaterialTheme.colorScheme.background
-        } else {
-            Color.White
-        },
+        containerColor = MaterialTheme.colorScheme.background,
         modifier = Modifier
             .statusBarsPadding()
     ) { innerPadding ->
@@ -116,7 +127,8 @@ fun HomeScreenContent(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 15.dp),
+                        .padding(horizontal = 15.dp)
+                        .clearAndSetSemantics { contentDescription = "Welcome to Little Lemon!" },
                     contentAlignment = Alignment.CenterStart
                 ) {
                     Text(
@@ -127,11 +139,11 @@ fun HomeScreenContent(
                             fontFamily = MaterialTheme.typography.headlineLarge.fontFamily,
                             fontWeight = MaterialTheme.typography.headlineLarge.fontWeight,
                             drawStyle = Stroke(
-                                width = 5f,
+                                width = 8f,
                             ),
                         ),
                         color = if (isSystemInDarkTheme()) {
-                            MaterialTheme.colorScheme.tertiaryContainer
+                            MaterialTheme.colorScheme.onPrimaryContainer
                         } else {
                             MaterialTheme.colorScheme.secondaryContainer
                         },
@@ -140,7 +152,11 @@ fun HomeScreenContent(
                     Text(
                         text = "Welcome to Little Lemon!",
                         style = MaterialTheme.typography.headlineLarge,
-                        color = MaterialTheme.colorScheme.primaryContainer,
+                        color = if (isSystemInDarkTheme()) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.primaryContainer
+                        },
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -168,7 +184,6 @@ fun HomeScreenContent(
                 )
             }
 
-            //Categories Section
             item {
                 LemonCategorySection(
                     menuItems = menuItems,
@@ -180,12 +195,12 @@ fun HomeScreenContent(
                     },
                     modifier = Modifier.padding(
                         bottom = 20.dp,
-                        end = 15.dp
+                        end = 15.dp,
+                        start = 15.dp
                     )
                 )
             }
 
-            //Famous Dishes Section
             item {
                 LemonSection(
                     menuItems = menuItems,
@@ -199,7 +214,6 @@ fun HomeScreenContent(
                 )
             }
 
-            //Special Offers Section
             item {
                 Column(
                     modifier = Modifier.padding(top = 15.dp),
@@ -227,26 +241,28 @@ fun HomeScreenContent(
                         icon = R.drawable.percentage,
                         iconColor = Color.Cyan,
                         title = "20% Off",
-                        description = "First-time customers get 20% off their entire order"
+                        description = "First-time customers get 20% off their entire order",
+                        modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp)
                     )
 
                     LemonSpecialOffers(
                         icon = R.drawable.quick_icon,
                         iconColor = Color.Green,
                         title = "Happy Hour",
-                        description = "Special prices on drinks and appetizers 3-6pm daily"
+                        description = "Special prices on drinks and appetizers 3-6pm daily",
+                        modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp)
                     )
 
                     LemonSpecialOffers(
                         icon = R.drawable.gift,
                         iconColor = Color.Magenta,
                         title = "Family Deal",
-                        description = "Order for 4 or more and get a free dessert platter"
+                        description = "Order for 4 or more and get a free dessert platter",
+                        modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp)
                     )
                 }
             }
 
-            //About Us
             item {
                 LemonAboutUs(
                     modifier = Modifier.padding(
@@ -259,24 +275,42 @@ fun HomeScreenContent(
     }
 }
 
-@Preview
+@Preview(device = "id:pixel_9")
 @Composable
 fun HomeScreenPreview() {
     LittleLemonTheme {
         HomeScreenContent(
             navController = rememberNavController(),
-            menuItems = emptyList(),
+            menuItems = listOf(
+                LocalMenuItem(
+                    id = 1,
+                    title = "Greek Salad",
+                    description = "The famous greek salad of crispy lettuce, peppers, olives, our Chicago...",
+                    price = 12.99,
+                    category = "starters",
+                    image = dishesImagesMap[1].toString()
+                )
+            ),
         )
     }
 }
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, device = "id:pixel_9")
 @Composable
 fun HomeScreenDarkPreview() {
     LittleLemonTheme {
         HomeScreenContent(
             navController = rememberNavController(),
-            menuItems = emptyList(),
+            menuItems = listOf(
+                LocalMenuItem(
+                    id = 1,
+                    title = "Greek Salad",
+                    description = "The famous greek salad of crispy lettuce, peppers, olives, our Chicago...",
+                    price = 12.99,
+                    category = "starters",
+                    image = dishesImagesMap[1].toString()
+                )
+            ),
         )
     }
 }
