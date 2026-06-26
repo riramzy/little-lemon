@@ -24,7 +24,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -197,7 +196,6 @@ fun LemonNavigationBar(
                 modifier = Modifier
                     .height(64.dp)
                     .padding(start = 6.dp),
-                    //.wrapContentWidth(),
                 onClick = onActionClicked,
                 shape = RoundedCornerShape(100.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -207,10 +205,9 @@ fun LemonNavigationBar(
                         MaterialTheme.colorScheme.primaryContainer
                     },
                     contentColor = if (isSystemInDarkTheme()) {
-                        MaterialTheme.colorScheme.onTertiary
+                        MaterialTheme.colorScheme.onPrimary
                     } else {
-                        //MaterialTheme.colorScheme.tertiaryContainer
-                        Color.White
+                        MaterialTheme.colorScheme.onPrimaryContainer
                     }
                 )
             ) {
