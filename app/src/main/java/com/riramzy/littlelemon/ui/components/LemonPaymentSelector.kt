@@ -4,7 +4,6 @@ import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,11 +18,11 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -40,8 +39,6 @@ fun LemonPaymentSelector(
     isSelected: Boolean = false,
     onClick: () -> Unit = {}
 ) {
-    //var isPressed: Boolean by remember { mutableStateOf(false) }
-
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -53,28 +50,12 @@ fun LemonPaymentSelector(
                 .height(35.dp)
                 .padding(end = 8.dp),
             colors = CardDefaults.cardColors(
-                containerColor = if (isSystemInDarkTheme()) {
-                    MaterialTheme.colorScheme.onTertiary
-                } else {
-                    MaterialTheme.colorScheme.tertiaryContainer
-                },
-                contentColor = if (isSystemInDarkTheme()) {
-                    Color.White
-                } else {
-                    Color.Black
-                }
+                containerColor = MaterialTheme.colorScheme.surfaceContainer
             ),
-            border = if (isSystemInDarkTheme()) {
-                BorderStroke(
-                    1.dp,
-                    MaterialTheme.colorScheme.secondary
-                )
-            } else {
-                BorderStroke(
-                    1.dp,
-                    MaterialTheme.colorScheme.secondaryContainer
-                )
-            },
+            border = BorderStroke(
+                1.dp,
+                MaterialTheme.colorScheme.onSurface
+            ),
             shape = RoundedCornerShape(16.dp),
             onClick = {
                 onClick()
@@ -88,6 +69,7 @@ fun LemonPaymentSelector(
                 modifier = Modifier.fillMaxWidth()
             )
         }
+
         Row(
             modifier = Modifier
                 .weight(3f)
@@ -103,26 +85,19 @@ fun LemonPaymentSelector(
             ) {
                 Text(
                     text = title,
-                    color = if (isSystemInDarkTheme()) {
-                        Color.White
-                    } else {
-                        Color.Black
-                    }
+                    color = MaterialTheme.colorScheme.onSurface
                 )
+
                 Text(
                     text = subtitle,
-                    color = if (isSystemInDarkTheme()) {
-                        Color.White
-                    } else {
-                        Color.Black
-                    }
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
             if (isSelected) {
                 Icon(
                     imageVector = Icons.Filled.CheckCircle,
-                    tint = Color.Blue,
-                    contentDescription = "Check",
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    contentDescription = "Select",
                 )
             }
         }
@@ -133,38 +108,48 @@ fun LemonPaymentSelector(
 @Composable
 fun LemonPaymentSelectorPreview() {
     LittleLemonTheme {
-        Column {
-            LemonPaymentSelector(
-                title = "Mastercard",
-                subtitle = "So, we can charge you",
-                picture = R.drawable.mastercard_logo
-            )
-            LemonPaymentSelector(
-                title = "Visa",
-                subtitle = "Yes, we can charge as well",
-                picture = R.drawable.visa_logo
-            )
+        Surface(
+            color = MaterialTheme.colorScheme.background,
+        ) {
+            Column(
+                modifier = Modifier.padding(15.dp)
+            ) {
+                LemonPaymentSelector(
+                    title = "Mastercard",
+                    subtitle = "So, we can charge you",
+                    picture = R.drawable.mastercard_logo
+                )
+                LemonPaymentSelector(
+                    title = "Visa",
+                    subtitle = "Yes, we can charge as well",
+                    picture = R.drawable.visa_logo
+                )
+            }
         }
-
     }
 }
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
 fun LemonPaymentSelectorDarkPreview() {
     LittleLemonTheme {
-        Column {
-            LemonPaymentSelector(
-                title = "Mastercard",
-                subtitle = "So, we can charge you",
-                picture = R.drawable.mastercard_logo
-            )
-            LemonPaymentSelector(
-                title = "Visa",
-                subtitle = "Yes, we can charge as well",
-                picture = R.drawable.visa_logo
-            )
+        Surface(
+            color = MaterialTheme.colorScheme.background,
+        ) {
+            Column(
+                modifier = Modifier.padding(15.dp)
+            ) {
+                LemonPaymentSelector(
+                    title = "Mastercard",
+                    subtitle = "So, we can charge you",
+                    picture = R.drawable.mastercard_logo
+                )
+                LemonPaymentSelector(
+                    title = "Visa",
+                    subtitle = "Yes, we can charge as well",
+                    picture = R.drawable.visa_logo
+                )
+            }
         }
-
     }
 }

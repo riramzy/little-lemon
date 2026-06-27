@@ -1,15 +1,18 @@
 package com.riramzy.littlelemon.ui.screens.confirmation
 
 import android.content.res.Configuration
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -23,7 +26,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,19 +35,21 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.riramzy.littlelemon.data.local.cart.LocalCartItem
 import com.riramzy.littlelemon.ui.components.LemonCutlerySelector
 import com.riramzy.littlelemon.ui.components.LemonInputField
 import com.riramzy.littlelemon.ui.components.LemonNavigationBar
 import com.riramzy.littlelemon.ui.components.TopAppBar
+import com.riramzy.littlelemon.ui.screens.auth.UserVm
 import com.riramzy.littlelemon.ui.screens.cart.CartVm
 import com.riramzy.littlelemon.ui.screens.orders.OrdersVm
 import com.riramzy.littlelemon.ui.screens.reservation.ReservationVm
 import com.riramzy.littlelemon.ui.theme.LittleLemonTheme
-import com.riramzy.littlelemon.ui.viewmodel.UserVm
 import com.riramzy.littlelemon.utils.Screen
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ConfirmationScreen(
     reservationVm: ReservationVm = hiltViewModel(),
@@ -56,22 +60,24 @@ fun ConfirmationScreen(
     isCart: Boolean = true,
     isReservation: Boolean = false,
 ) {
-    val cartItems = cartVm.cartItems.collectAsState().value
+    val formState by reservationVm.reservationFormState.collectAsStateWithLifecycle()
 
-    val userName = userVm.getFullName()
-    val orderId by reservationVm.orderId.collectAsState()
-    val paymentType by reservationVm.selectedPaymentMethod.collectAsState()
-    val phoneNumber by reservationVm.phoneNumber.collectAsState()
+    val cartItems by cartVm.cartItems.collectAsStateWithLifecycle()
 
-    val selectedTime = reservationVm.selectedTime.value
-    val selectedDuration = reservationVm.selectedDuration.value
-    val selectedNumberOfDiners = reservationVm.selectedNumberOfDiners.value
-    val selectedDate = reservationVm.selectedDate.value
+    val userName by userVm.fullName.collectAsStateWithLifecycle()
+    val orderId by reservationVm.orderId.collectAsStateWithLifecycle()
+    val paymentType by reservationVm.selectedPaymentMethod.collectAsStateWithLifecycle()
+    val phoneNumber by reservationVm.phoneNumber.collectAsStateWithLifecycle()
+
+    val selectedTime = formState.selectedTime
+    val selectedDuration = formState.selectedDuration
+    val selectedNumberOfDiners = formState.selectedNumberOfDiners
+    val selectedDate = formState.selectedDate
 
     ConfirmationScreenContent(
         navController = navController,
         cartItems = cartItems,
-        userName = userName ?: "Ramzy",
+        userName = userName,
         orderId = orderId ?: "12",
         paymentType = paymentType.toString(),
         phoneNumber = phoneNumber ?: "01286909899",
@@ -82,7 +88,8 @@ fun ConfirmationScreen(
         isCart = isCart,
         isReservation = isReservation,
         placeOrder = ordersVm::placeOrder,
-        clearCart = cartVm::clearCart
+        clearCart = cartVm::clearCart,
+        confirmReservation = { reservationVm.confirmReservation(paymentType ?: "Mastercard") }
     )
 }
 
@@ -100,11 +107,15 @@ fun ConfirmationScreenContent(
     selectedDuration: String,
     isCart: Boolean,
     isReservation: Boolean,
-    placeOrder: (List<LocalCartItem>) -> Unit,
+    placeOrder: (List<LocalCartItem>, String) -> Unit,
     clearCart: () -> Unit,
+    confirmReservation: () -> Unit = {}
 ) {
-    val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
+    val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsStateWithLifecycle(
+        null
+    )
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -122,10 +133,11 @@ fun ConfirmationScreenContent(
                 onActionText = "Confirm",
                 onActionClicked = {
                     if (isCart) {
-                        placeOrder(cartItems)
+                        placeOrder(cartItems, paymentType)
                         clearCart()
                         navController.navigate(Screen.Orders.route)
                     } else {
+                        confirmReservation()
                         navController.navigate(Screen.Reservations.route)
                     }
                 },
@@ -145,11 +157,7 @@ fun ConfirmationScreenContent(
             )
         },
         floatingActionButtonPosition = FabPosition.Center,
-        containerColor = if (isSystemInDarkTheme()) {
-            MaterialTheme.colorScheme.background
-        } else {
-            Color.White
-        },
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         modifier = Modifier
             .statusBarsPadding()
     ) { innerPadding ->
@@ -158,7 +166,10 @@ fun ConfirmationScreenContent(
                 .padding(innerPadding)
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(25.dp)
+            verticalArrangement = Arrangement.spacedBy(25.dp),
+            contentPadding = PaddingValues(
+                bottom = innerPadding.calculateBottomPadding() + 100.dp
+            )
         ) {
             item {
                 LemonCutlerySelector(
@@ -167,6 +178,7 @@ fun ConfirmationScreenContent(
                     )
                 )
             }
+
             item {
                 ReservationDetailsCard(
                     modifier = Modifier.padding(
@@ -185,6 +197,7 @@ fun ConfirmationScreenContent(
                     selectedNumberOfDiners = selectedNumberOfDiners
                 )
             }
+
             item {
                 AdditionalNotes(
                     modifier = Modifier.padding(
@@ -213,117 +226,96 @@ fun ReservationDetailsCard(
 ) {
     Card(
         modifier = modifier
-            .height(450.dp),
+            .fillMaxWidth()
+            .wrapContentHeight(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSystemInDarkTheme()) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.primaryContainer
-            }
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
         )
     ) {
         Column(
             modifier = Modifier.padding(15.dp)
         ) {
             Text(
-                text = if (isCart) "Your Order is Placed!".uppercase() else if (isReservation) "Your Reservation is accepted!".uppercase() else TODO(),
+                text = if (isCart) "Your Order is Placed!".uppercase() else if (isReservation) "Your Reservation is accepted!".uppercase() else "Confirmation".uppercase(),
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(bottom = 15.dp)
             )
-            LazyColumn(
+
+            Column(
                 modifier = Modifier
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                item {
-                    LemonInputField(
-                        requiredText = "Order ID",
-                        value = orderId,
-                        isReadOnly = true
-                    )
-                }
+                LemonInputField(
+                    requiredText = "Order ID",
+                    value = orderId,
+                    isReadOnly = true
+                )
 
-                item {
-                    LemonInputField(
-                        requiredText = "Name",
-                        value = userName.split(" ").joinToString(" ") {
-                            it.replaceFirstChar { c -> c.uppercase() }
-                        },
-                        isReadOnly = true
-                    )
-                }
+                LemonInputField(
+                    requiredText = "Name",
+                    value = userName.split(" ").joinToString(" ") {
+                        it.replaceFirstChar { c -> c.uppercase() }
+                    },
+                    isReadOnly = true
+                )
 
-                item {
-                    LemonInputField(
-                        requiredText = "Phone number",
-                        isReadOnly = true,
-                        value = phoneNumber
-                    )
-                }
+                LemonInputField(
+                    requiredText = "Phone number",
+                    isReadOnly = true,
+                    value = phoneNumber
+                )
 
                 if (isReservation) {
-                    item {
-                        LemonInputField(
-                            requiredText = "At",
-                            isReadOnly = true,
-                            value = selectedTime,
-                        )
-                    }
-
-                    item {
-                        LemonInputField(
-                            requiredText = "For",
-                            isReadOnly = true,
-                            value = selectedNumberOfDiners,
-                        )
-                    }
-
-                    item {
-                        LemonInputField(
-                            requiredText = "Date",
-                            isReadOnly = true,
-                            value = selectedDate,
-                        )
-                    }
-
-                    item {
-                        LemonInputField(
-                            requiredText = "Duration",
-                            isReadOnly = true,
-                            value = selectedDuration,
-                        )
-                    }
-                }
-
-                item {
                     LemonInputField(
-                        requiredText = "Payment type",
+                        requiredText = "At",
                         isReadOnly = true,
-                        value = paymentType
+                        value = selectedTime,
+                    )
+
+                    LemonInputField(
+                        requiredText = "For",
+                        isReadOnly = true,
+                        value = selectedNumberOfDiners,
+                    )
+
+                    LemonInputField(
+                        requiredText = "Date",
+                        isReadOnly = true,
+                        value = selectedDate,
+                    )
+
+                    LemonInputField(
+                        requiredText = "Duration",
+                        isReadOnly = true,
+                        value = selectedDuration,
                     )
                 }
 
+                LemonInputField(
+                    requiredText = "Payment type",
+                    isReadOnly = true,
+                    value = paymentType
+                )
+
                 if (isCart) {
-                    item {
-                        LemonInputField(
-                            requiredText = "Items",
-                            isReadOnly = true,
-                            value = cartItems.joinToString(separator = "\n") { cartItem ->
-                                "${cartItem.quantity}x ${cartItem.title}"
-                            },
-                            isMultiline = true
-                        )
-                    }
+                    LemonInputField(
+                        requiredText = "Items",
+                        isReadOnly = true,
+                        value = cartItems.joinToString(separator = "\n") { cartItem ->
+                            "${cartItem.quantity}x ${cartItem.title}"
+                        },
+                        isMultiline = true
+                    )
                 }
 
-                item {
-                    LemonInputField(
-                        requiredText = "Total",
-                        isReadOnly = true,
-                        value = "%.2f".format(cartItems.sumOf { it.price * it.quantity } + 5)                    )
-                }
+                LemonInputField(
+                    requiredText = "Total",
+                    isReadOnly = true,
+                    value = if (isReservation) "0.00" else "%.2f".format(cartItems.sumOf { it.price * it.quantity } + 5)
+                )
             }
         }
     }
@@ -353,23 +345,12 @@ fun AdditionalNotes(
                 .height(70.dp),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(
-                containerColor = if (isSystemInDarkTheme()) {
-                    MaterialTheme.colorScheme.onTertiary
-                } else {
-                    Color.White
-                }
+                containerColor = MaterialTheme.colorScheme.surfaceContainer
             ),
-            border = if (isSystemInDarkTheme()) {
-                BorderStroke(
-                    width = 2.dp,
-                    color = MaterialTheme.colorScheme.tertiaryContainer
-                )
-            } else {
-                BorderStroke(
-                    width = 2.dp,
-                    color = MaterialTheme.colorScheme.secondaryContainer
-                )
-            }
+            border = BorderStroke(
+                width = 2.dp,
+                color = MaterialTheme.colorScheme.onSurface
+            )
         ) {
             TextField(
                 value = "",
@@ -409,7 +390,7 @@ fun ConfirmationScreenPreview() {
             selectedDuration = "3 hours",
             isCart = true,
             isReservation = false,
-            placeOrder = {},
+            placeOrder = { _, _ -> },
             clearCart = {}
         )
     }
@@ -432,7 +413,7 @@ fun ConfirmationScreenDarkPreview() {
             selectedDuration = "3 hours",
             isCart = true,
             isReservation = false,
-            placeOrder = {},
+            placeOrder = { _, _ -> },
             clearCart = {}
         )
     }

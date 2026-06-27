@@ -1,8 +1,9 @@
 package com.riramzy.littlelemon.ui.screens.payment
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.os.Build
 import android.widget.Toast
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,16 +21,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.riramzy.littlelemon.R
@@ -38,10 +38,12 @@ import com.riramzy.littlelemon.ui.components.LemonNavigationBar
 import com.riramzy.littlelemon.ui.components.LemonPaymentSelector
 import com.riramzy.littlelemon.ui.components.LemonSubInputField
 import com.riramzy.littlelemon.ui.components.TopAppBar
+import com.riramzy.littlelemon.ui.screens.auth.UserVm
+import com.riramzy.littlelemon.ui.screens.reservation.ReservationVm
 import com.riramzy.littlelemon.ui.theme.LittleLemonTheme
-import com.riramzy.littlelemon.ui.viewmodel.UserVm
 import com.riramzy.littlelemon.utils.Screen
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun PaymentScreen(
     onNextClickedCart: () -> Unit = {},
@@ -50,24 +52,23 @@ fun PaymentScreen(
     isForReservation: Boolean = false,
     isForCart: Boolean = true,
     paymentVm: PaymentVm = hiltViewModel(),
-    userVm: UserVm = hiltViewModel()
+    userVm: UserVm = hiltViewModel(),
+    reservationVm: ReservationVm = hiltViewModel()
 ) {
     val context = LocalContext.current
 
-    val isLogged = userVm.isLoggedIn()
+    val isLogged by userVm.isLoggedIn.collectAsStateWithLifecycle()
 
-    // Collect state from the ViewModel
-    val firstName by paymentVm.firstName.collectAsState()
-    val lastName by paymentVm.lastName.collectAsState()
-    val email by paymentVm.email.collectAsState()
-    val phoneNumber by paymentVm.phoneNumber.collectAsState()
-    val paymentMethod by paymentVm.paymentMethod.collectAsState()
-    val cardNumber by paymentVm.cardNumber.collectAsState()
-    val cardMonth by paymentVm.cardMonth.collectAsState()
-    val cardYear by paymentVm.cardYear.collectAsState()
-    val cardCvv by paymentVm.cardCvv.collectAsState()
+    val firstName by paymentVm.firstName.collectAsStateWithLifecycle()
+    val lastName by paymentVm.lastName.collectAsStateWithLifecycle()
+    val email by paymentVm.email.collectAsStateWithLifecycle()
+    val phoneNumber by paymentVm.phoneNumber.collectAsStateWithLifecycle()
+    val paymentMethod by paymentVm.paymentMethod.collectAsStateWithLifecycle()
+    val cardNumber by paymentVm.cardNumber.collectAsStateWithLifecycle()
+    val cardMonth by paymentVm.cardMonth.collectAsStateWithLifecycle()
+    val cardYear by paymentVm.cardYear.collectAsStateWithLifecycle()
+    val cardCvv by paymentVm.cardCvv.collectAsStateWithLifecycle()
 
-    // Listen for toast messages
     LaunchedEffect(Unit) {
         paymentVm.toastMessage.collect { message ->
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
@@ -87,6 +88,9 @@ fun PaymentScreen(
         onCardMonthChange = paymentVm::onCardMonthChange,
         onCardYearChange = paymentVm::onCardYearChange,
         onCardCvvChange = paymentVm::onCardCvvChange,
+        setOrderId = reservationVm::setOrderId,
+        setPhoneNumber = reservationVm::setPhoneNumber,
+        setPaymentMethod = reservationVm::setPaymentMethod,
         navController = navController,
         isForReservation = isForReservation,
         isForCart = isForCart,
@@ -105,7 +109,7 @@ fun PaymentScreen(
 
 @Composable
 fun PaymentScreenContent(
-    onNextClicked: (() -> Unit) -> Unit,
+    onNextClicked: ((orderId: String, phoneNumber: String) -> Unit) -> Unit,
     onNextClickedCart: () -> Unit,
     onNextClickedReservation: () -> Unit,
     onFirstNameChange: (String) -> Unit,
@@ -117,6 +121,9 @@ fun PaymentScreenContent(
     onCardMonthChange: (String) -> Unit,
     onCardYearChange: (String) -> Unit,
     onCardCvvChange: (String) -> Unit,
+    setOrderId: (String) -> Unit = {},
+    setPhoneNumber: (String) -> Unit = {},
+    setPaymentMethod: (String) -> Unit = {},
     navController: NavController,
     isForReservation: Boolean,
     isForCart: Boolean,
@@ -131,7 +138,9 @@ fun PaymentScreenContent(
     cardYear: String,
     cardCvv: String
 ) {
-    val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
+    val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsStateWithLifecycle(
+        null
+    )
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
 
     Scaffold(
@@ -150,8 +159,16 @@ fun PaymentScreenContent(
                 isActionEnabled = true,
                 onActionText = if (isForReservation) "Confirm" else if (isForCart) "Submit" else "Else",
                 onActionClicked = {
-                    val onNext = if (isForReservation) onNextClickedReservation else onNextClickedCart
-                    onNextClicked(onNext)
+                    onNextClicked { orderId, phone ->
+                        if (isForReservation) {
+                            setOrderId(orderId)
+                            setPhoneNumber(phone)
+                            paymentMethod?.let { setPaymentMethod(it) }
+                            onNextClickedReservation()
+                        } else {
+                            onNextClickedCart()
+                        }
+                    }
                 },
                 onHomeClicked = {
                     navController.navigate(Screen.Home.route)
@@ -169,11 +186,7 @@ fun PaymentScreenContent(
             )
         },
         floatingActionButtonPosition = FabPosition.Center,
-        containerColor = if (isSystemInDarkTheme()) {
-            MaterialTheme.colorScheme.background
-        } else {
-            Color.White
-        },
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         modifier = Modifier
             .statusBarsPadding()
             .imePadding()
@@ -217,6 +230,7 @@ fun PaymentScreenContent(
                         onPhoneNumberChange = onPhoneNumberChange
                     )
                 }
+
                 item {
                     Column(
                         modifier = Modifier
@@ -233,6 +247,7 @@ fun PaymentScreenContent(
                                 .fillMaxWidth()
                                 .padding(bottom = 20.dp)
                         )
+
                         LemonPaymentSelector(
                             title = "Mastercard",
                             subtitle = "So, we can charge you",
@@ -243,6 +258,7 @@ fun PaymentScreenContent(
                                 bottom = 15.dp
                             )
                         )
+
                         LemonPaymentSelector(
                             title = "Visa",
                             subtitle = "Yes, we can charge as well",
@@ -253,6 +269,7 @@ fun PaymentScreenContent(
                                 bottom = 15.dp
                             )
                         )
+
                         if (isForCart) {
                             LemonPaymentSelector(
                                 title = "Cash On Delivery",
@@ -264,6 +281,7 @@ fun PaymentScreenContent(
                         }
                     }
                 }
+
                 if (paymentMethod != "Cash On Delivery") {
                     item {
                         CardInformation(
@@ -306,11 +324,14 @@ fun PaymentHeadline(
             },
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.ExtraBold,
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.fillMaxWidth()
         )
+
         Text(
             text = "Payment Details",
             style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
                 .fillMaxWidth()
@@ -341,10 +362,12 @@ fun UserInformation(
         Text(
             text = "Your Information",
             style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 20.dp)
         )
+
         LemonInputField(
             requiredText = "First Name",
             value = firstName.replaceFirstChar { it.uppercase() },
@@ -353,6 +376,7 @@ fun UserInformation(
             modifier = Modifier
                 .padding(bottom = 15.dp)
         )
+
         LemonInputField(
             requiredText = "Last Name",
             value = lastName.replaceFirstChar { it.uppercase() },
@@ -361,6 +385,7 @@ fun UserInformation(
             modifier = Modifier
                 .padding(bottom = 15.dp)
         )
+
         LemonInputField(
             requiredText = "Email",
             value = email,
@@ -369,6 +394,7 @@ fun UserInformation(
             modifier = Modifier
                 .padding(bottom = 15.dp)
         )
+
         LemonInputField(
             requiredText = "Phone Number",
             value = phoneNumber,
@@ -403,6 +429,7 @@ fun CardInformation(
             modifier = Modifier
                 .padding(bottom = 15.dp)
         )
+
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -415,6 +442,7 @@ fun CardInformation(
                     .weight(1f)
                     .padding(end = 6.dp)
             )
+
             LemonSubInputField(
                 requiredText = "Year",
                 value = year,
@@ -423,6 +451,7 @@ fun CardInformation(
                     .weight(1f)
                     .padding(end = 6.dp)
             )
+
             LemonSubInputField(
                 requiredText = "CVV",
                 value = cvv,
