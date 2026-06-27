@@ -17,7 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -38,42 +37,35 @@ fun LemonDurationSelector(
         colors = CardDefaults.cardColors(
             containerColor = if (isSystemInDarkTheme()) {
                 if (isSelected) {
-                    MaterialTheme.colorScheme.secondary
+                    MaterialTheme.colorScheme.primary
                 } else {
-                    MaterialTheme.colorScheme.background
+                    MaterialTheme.colorScheme.surfaceContainer
                 }
             } else {
                 if (isSelected) {
-                    MaterialTheme.colorScheme.secondaryContainer
+                    MaterialTheme.colorScheme.primary
                 } else {
-                    Color.White
+                    MaterialTheme.colorScheme.surfaceContainer
                 }
             },
             contentColor = if (isSystemInDarkTheme()) {
                 if (isSelected) {
-                    MaterialTheme.colorScheme.onTertiary
+                    MaterialTheme.colorScheme.onPrimary
                 } else {
-                    MaterialTheme.colorScheme.secondary
+                    MaterialTheme.colorScheme.primary
                 }
             } else {
                 if (isSelected) {
-                    Color.White
+                    MaterialTheme.colorScheme.surfaceContainer
                 } else {
-                    MaterialTheme.colorScheme.secondaryContainer
+                    MaterialTheme.colorScheme.primary
                 }
             }
         ),
-        border = if (isSystemInDarkTheme()) {
-            BorderStroke(
-                width = 2.dp,
-                color = MaterialTheme.colorScheme.secondary
-            )
-        } else {
-            BorderStroke(
-                width = 2.dp,
-                color = MaterialTheme.colorScheme.secondaryContainer
-            )
-        },
+        border = BorderStroke(
+            width = 2.dp,
+            color = MaterialTheme.colorScheme.primary
+        ),
         onClick = {
             onClick()
         }

@@ -43,8 +43,8 @@ fun LemonReservationCard(
     time: String = "19:00",
     duration: String = "3 hours",
     numberOfDiners: String = "3",
+    paymentMethod: String = "Cash",
     totalPrice: Double = 50.00,
-    paymentMethod: String = "Mastercard",
     reservationId: Int = 123456
 ) {
     Card(
@@ -110,7 +110,7 @@ fun LemonReservationCard(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "$$totalPrice",
+                            text = "$${"%.2f".format(totalPrice)}",
                             style = MaterialTheme.typography.bodyMedium,
                             fontSize = 14.sp,
                         )
@@ -129,6 +129,7 @@ fun LemonReservationCard(
                     icon = R.drawable.profile_icon,
                     modifier = Modifier.padding(bottom = 5.dp)
                 )
+
                 ReservationItemDetails(
                     title = "Date",
                     entry = date,
@@ -141,16 +142,25 @@ fun LemonReservationCard(
                     icon = R.drawable.time,
                     modifier = Modifier.padding(bottom = 5.dp)
                 )
+
                 ReservationItemDetails(
                     title = "Duration",
                     entry = duration,
                     icon = R.drawable.duration,
                     modifier = Modifier.padding(bottom = 5.dp)
                 )
+
                 ReservationItemDetails(
                     title = "Number of diners",
                     entry = numberOfDiners,
                     icon = R.drawable.people,
+                    modifier = Modifier.padding(bottom = 5.dp)
+                )
+
+                ReservationItemDetails(
+                    title = "Payment method",
+                    entry = paymentMethod,
+                    icon = R.drawable.payment_method,
                 )
             }
         }
@@ -237,7 +247,7 @@ fun ReservationItemDetails(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
 fun LemonReservationCardPreview() {
-    LittleLemonTheme() {
+    LittleLemonTheme {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -253,7 +263,7 @@ fun LemonReservationCardPreview() {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun LemonReservationCardDarkPreview() {
-    LittleLemonTheme() {
+    LittleLemonTheme {
         Row(
             modifier = Modifier
                 .fillMaxWidth()

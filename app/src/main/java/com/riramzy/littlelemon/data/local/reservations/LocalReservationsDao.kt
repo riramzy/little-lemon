@@ -12,7 +12,7 @@ interface LocalReservationsDao {
     fun getAllLocalReservations(): Flow<List<LocalReservation>>
 
     @Query("SELECT * FROM reservations WHERE id = :id")
-    fun getReservationById(id: Int): Flow<LocalReservation>
+    fun getReservationById(id: Int): Flow<LocalReservation?>
 
     @Query("SELECT COUNT(*) FROM reservations")
     suspend fun getLocalReservationsCount(): Int

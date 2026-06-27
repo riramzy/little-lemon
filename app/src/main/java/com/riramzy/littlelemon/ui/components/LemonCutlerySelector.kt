@@ -1,5 +1,6 @@
 package com.riramzy.littlelemon.ui.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,6 +31,7 @@ fun LemonCutlerySelector(
             text = "Cutlery",
             style = MaterialTheme.typography.labelLarge,
             textAlign = TextAlign.Start,
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.fillMaxWidth()
         )
         Row(
@@ -42,8 +45,9 @@ fun LemonCutlerySelector(
                 text = "Help reduce plastic waste. only \n" +
                         "Only ask for cutlery if you need it.",
                 style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
 
-                )
             RadioButton(
                 selected = false,
                 onClick = { /*TODO*/ }
@@ -52,11 +56,25 @@ fun LemonCutlerySelector(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun LemonCutlerySelectorPreview() {
     LittleLemonTheme {
-        LemonCutlerySelector()
+        Surface {
+            LemonCutlerySelector(modifier = Modifier.padding(15.dp))
+        }
     }
 }
 
+@Preview(
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+)
+@Composable
+fun LemonCutlerySelectorDarkPreview() {
+    LittleLemonTheme {
+        Surface {
+            LemonCutlerySelector(modifier = Modifier.padding(15.dp))
+        }
+    }
+}

@@ -1,6 +1,8 @@
 package com.riramzy.littlelemon.ui.screens.reservation
 
 import android.content.res.Configuration
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -19,7 +21,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -27,6 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.riramzy.littlelemon.R
@@ -38,13 +40,13 @@ import com.riramzy.littlelemon.ui.components.YellowLemonButton
 import com.riramzy.littlelemon.ui.theme.LittleLemonTheme
 import com.riramzy.littlelemon.utils.Screen
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ReservationsScreen(
     navController: NavController,
     reservationVm: ReservationVm = hiltViewModel()
 ) {
-    //Collect reservations with items
-    val reservations = reservationVm.reservations.collectAsState().value
+    val reservations = reservationVm.reservations.collectAsStateWithLifecycle().value
 
     ReservationScreenContent(
         navController = navController,
@@ -53,7 +55,6 @@ fun ReservationsScreen(
             reservationVm.clearReservations()
         }
     )
-
 }
 
 @Composable
@@ -81,6 +82,7 @@ fun ReservationScreenContent(
                         text = "Reservations",
                         style = MaterialTheme.typography.titleLarge,
                         fontSize = 26.sp,
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Black,
                         modifier = Modifier
                             .padding(
@@ -115,11 +117,7 @@ fun ReservationScreenContent(
             )
         },
         floatingActionButtonPosition = FabPosition.Center,
-        containerColor = if (isSystemInDarkTheme()) {
-            MaterialTheme.colorScheme.background
-        } else {
-            Color.White
-        },
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         modifier = Modifier
             .statusBarsPadding()
     ) { innerPadding ->
@@ -132,7 +130,7 @@ fun ReservationScreenContent(
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.waiting_reservation),
-                    contentDescription = "Empty Cart",
+                    contentDescription = "Empty Reservations",
                 )
 
                 Text(
@@ -140,6 +138,7 @@ fun ReservationScreenContent(
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.titleLarge,
                     fontSize = 26.sp,
+                    color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier
                         .padding(vertical = 15.dp)
                 )
@@ -158,7 +157,8 @@ fun ReservationScreenContent(
                     },
                     onClick = {
                         navController.navigate(Screen.ReservationTableDetails.route)
-                    }
+                    },
+                    modifier = Modifier.padding(horizontal = 15.dp)
                 )
             }
         } else {
@@ -197,7 +197,17 @@ fun ReservationsScreenPreview() {
     LittleLemonTheme {
         ReservationScreenContent(
             navController = rememberNavController(),
-            reservations = emptyList()
+            reservations = listOf(
+                LocalReservation(
+                    id = 0,
+                    nameOfReserver = "Ramzy Ibrahim",
+                    date = "25 JUN 2026",
+                    time = "20:00",
+                    duration = "2 hours",
+                    numberOfDiners = "4",
+                    createdAt = System.currentTimeMillis()
+                )
+            )
         )
     }
 }
@@ -208,7 +218,17 @@ fun ReservationScreenDarkPreview() {
     LittleLemonTheme {
         ReservationScreenContent(
             navController = rememberNavController(),
-            reservations = emptyList()
+            reservations = listOf(
+                LocalReservation(
+                    id = 0,
+                    nameOfReserver = "Ramzy Ibrahim",
+                    date = "25 JUN 2026",
+                    time = "20:00",
+                    duration = "2 hours",
+                    numberOfDiners = "4",
+                    createdAt = System.currentTimeMillis()
+                )
+            )
         )
     }
 }

@@ -4,7 +4,6 @@ import android.content.res.Configuration
 import android.os.Build
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,15 +23,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.riramzy.littlelemon.data.local.reservations.LocalReservation
 import com.riramzy.littlelemon.ui.components.LemonDateSelector
 import com.riramzy.littlelemon.ui.components.LemonDurationSelector
 import com.riramzy.littlelemon.ui.components.LemonNavigationBar
@@ -53,11 +51,31 @@ import java.util.Locale
 fun ReservationTableDetailsScreen(
     reservationVm: ReservationVm = hiltViewModel(),
     navController: NavHostController,
-    ) {
+) {
+    val formState by reservationVm.reservationFormState.collectAsStateWithLifecycle()
+
+    ReservationTableDetailsScreenContent(
+        navController = navController,
+        formState = formState,
+        updateDate = reservationVm::updateDate,
+        updateTime = reservationVm::updateTime,
+        updateDuration = reservationVm::updateDuration,
+        updateNumberOfDiners = reservationVm::updateNumberOfDiners
+    )
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun ReservationTableDetailsScreenContent(
+    navController: NavHostController,
+    formState: ReservationFormState,
+    updateDate: (LocalDate) -> Unit = {},
+    updateTime: (LocalTime) -> Unit = {},
+    updateDuration: (String) -> Unit = {},
+    updateNumberOfDiners: (Int) -> Unit = {}
+) {
     val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
-    val firstName = reservationVm.firstName.collectAsState().value
-    val lastName = reservationVm.lastName.collectAsState().value
 
     val context = LocalContext.current
 
@@ -78,10 +96,10 @@ fun ReservationTableDetailsScreen(
                 onActionText = "Next",
                 onActionClicked = {
                     if (
-                        reservationVm.selectedDate.value == null ||
-                        reservationVm.selectedTime.value == null ||
-                        reservationVm.selectedDuration.value == null ||
-                        reservationVm.selectedNumberOfDiners.value == null
+                        formState.selectedDate == null ||
+                        formState.selectedTime == null ||
+                        formState.selectedDuration == null ||
+                        formState.selectedNumberOfDiners == null
                     ) {
                         Toast.makeText(
                             context,
@@ -89,17 +107,6 @@ fun ReservationTableDetailsScreen(
                             Toast.LENGTH_SHORT
                         ).show()
                     } else {
-                        reservationVm.insertReservation(
-                            LocalReservation(
-                                date = reservationVm.selectedDate.value.toString(),
-                                time = reservationVm.selectedTime.value.toString(),
-                                duration = reservationVm.selectedDuration.value.toString(),
-                                numberOfDiners = reservationVm.selectedNumberOfDiners.value.toString(),
-                                createdAt = System.currentTimeMillis(),
-                                nameOfReserver = "${firstName.replaceFirstChar { it.uppercase() }} ${lastName.replaceFirstChar { it.uppercase() }}",
-
-                                )
-                        )
                         navController.navigate(Screen.ReservationPayment.route)
                     }
                 },
@@ -119,11 +126,7 @@ fun ReservationTableDetailsScreen(
             )
         },
         floatingActionButtonPosition = FabPosition.Center,
-        containerColor = if (isSystemInDarkTheme()) {
-            MaterialTheme.colorScheme.background
-        } else {
-            Color.White
-        },
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         modifier = Modifier
             .statusBarsPadding()
     ) { innerPadding ->
@@ -146,7 +149,8 @@ fun ReservationTableDetailsScreen(
                     modifier = Modifier.padding(
                         horizontal = 15.dp
                     ),
-                    vm = reservationVm
+                    date = formState.selectedDate ?: LocalDate.now(),
+                    updateDate = updateDate
                 )
             }
             item {
@@ -154,7 +158,8 @@ fun ReservationTableDetailsScreen(
                     modifier = Modifier.padding(
                         horizontal = 15.dp
                     ),
-                    vm = reservationVm
+                    time = formState.selectedTime ?: LocalTime.now(),
+                    updateTimes = updateTime
                 )
             }
             item {
@@ -162,7 +167,8 @@ fun ReservationTableDetailsScreen(
                     modifier = Modifier.padding(
                         horizontal = 15.dp
                     ),
-                    vm = reservationVm
+                    duration = formState.selectedDuration,
+                    updateDuration = updateDuration
                 )
             }
             item {
@@ -170,7 +176,8 @@ fun ReservationTableDetailsScreen(
                     modifier = Modifier.padding(
                         horizontal = 15.dp
                     ),
-                    vm = reservationVm
+                    diners = formState.selectedNumberOfDiners ?: 1,
+                    updateNumberOfDiners = updateNumberOfDiners
                 )
             }
         }
@@ -191,12 +198,15 @@ fun DetailsHeadline(
             text = "Table Reservation".uppercase(),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.ExtraBold,
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.fillMaxWidth()
         )
+
         Text(
             text = "Table Details",
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 15.dp)
@@ -208,7 +218,8 @@ fun DetailsHeadline(
 @Composable
 fun DatePicker(
     modifier: Modifier = Modifier,
-    vm: ReservationVm
+    date: LocalDate,
+    updateDate: (LocalDate) -> Unit
 ) {
     val currentMonth = YearMonth.now()
     val currentDay = MonthDay.now().dayOfMonth
@@ -216,8 +227,6 @@ fun DatePicker(
     val monthDays = (currentDay..daysInMonth).map { day ->
         MonthDay.of(currentMonth.month, day)
     }
-
-    val selectedDate = vm.selectedDate.value
 
     Column(
         modifier = modifier
@@ -235,6 +244,7 @@ fun DatePicker(
             Text(
                 text = "Choose date",
                 style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
                 text = currentMonth.month.getDisplayName(
@@ -242,17 +252,18 @@ fun DatePicker(
                     Locale.getDefault()
                 ),
                 style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface,
             )
         }
 
         LazyRow {
             items(monthDays) { day ->
-                val isSelected = selectedDate?.dayOfMonth == day.dayOfMonth
+                val isSelected = date.dayOfMonth == day.dayOfMonth
                 LemonDateSelector(
                     day = day,
                     isSelected = isSelected,
                     onClick = {
-                        vm.selectedDate.value = LocalDate.of(LocalDate.now().year, day.month, day.dayOfMonth)
+                        updateDate(LocalDate.of(LocalDate.now().year, day.month, day.dayOfMonth))
                     },
                     modifier = Modifier.padding(end = 15.dp)
                 )
@@ -265,10 +276,9 @@ fun DatePicker(
 @Composable
 fun TimePicker(
     modifier: Modifier = Modifier,
-    vm: ReservationVm
+    time: LocalTime,
+    updateTimes: (LocalTime) -> Unit
 ) {
-    val selectedTime = vm.selectedTime.value
-
     fun generateTimeSlots(openingTime: LocalTime, closingTime: LocalTime, intervalMinutes: Long): List<LocalTime> {
         val timeSlots = mutableListOf<LocalTime>()
         var currentTime = openingTime
@@ -299,17 +309,18 @@ fun TimePicker(
             Text(
                 text = "Choose time",
                 style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface,
             )
         }
 
         LazyRow {
-            items(timeSlots) { time ->
-                val isSelected = selectedTime == time
+            items(timeSlots) { timeIndex ->
+                val isSelected = time == timeIndex
                 LemonTimeSelector(
-                    time = time,
+                    time = timeIndex,
                     isSelected = isSelected,
                     onClick = {
-                        vm.selectedTime.value = time
+                        updateTimes(timeIndex)
                     },
                     modifier = Modifier.padding(end = 15.dp)
                 )
@@ -321,7 +332,8 @@ fun TimePicker(
 @Composable
 fun DurationPicker(
     modifier: Modifier = Modifier,
-    vm: ReservationVm
+    duration: String? = null,
+    updateDuration: (String) -> Unit
 ) {
     val durations = listOf(
         "1  hour",
@@ -346,16 +358,17 @@ fun DurationPicker(
             Text(
                 text = "Choose duration",
                 style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface,
             )
         }
 
         LazyRow {
-            items(durations) { duration ->
-                val isSelected = vm.selectedDuration.value == duration
+            items(durations) { durationIndex ->
+                val isSelected = duration == durationIndex
                 LemonDurationSelector(
-                    duration = duration,
+                    duration = durationIndex,
                     onClick = {
-                        vm.selectedDuration.value = duration
+                        updateDuration(durationIndex)
                     },
                     isSelected = isSelected,
                     modifier = Modifier.padding(end = 15.dp)
@@ -368,7 +381,8 @@ fun DurationPicker(
 @Composable
 fun NumberOfDinerPicker(
     modifier: Modifier = Modifier,
-    vm: ReservationVm
+    diners: Int,
+    updateNumberOfDiners: (Int) -> Unit,
 ) {
     val numberOfDiners = listOf(
         "1",
@@ -399,16 +413,17 @@ fun NumberOfDinerPicker(
             Text(
                 text = "Choose number of diners",
                 style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface,
             )
         }
 
         LazyRow {
-            items(numberOfDiners) { diners ->
-                val isSelected = vm.selectedNumberOfDiners.value.toString() == diners
+            items(numberOfDiners) { dinersIndex ->
+                val isSelected = diners.toString() == dinersIndex
                 LemonNumberOfDinersSelector(
-                    numberOfDiners = diners,
+                    numberOfDiners = dinersIndex,
                     onClick = {
-                        vm.selectedNumberOfDiners.value = diners.toInt()
+                        updateNumberOfDiners(dinersIndex.toInt())
                     },
                     isSelected = isSelected,
                     modifier = Modifier.padding(end = 15.dp)
@@ -423,8 +438,9 @@ fun NumberOfDinerPicker(
 @Composable
 fun ReservationTableDetailsScreenPreview() {
     LittleLemonTheme {
-        ReservationTableDetailsScreen(
-            navController = rememberNavController()
+        ReservationTableDetailsScreenContent(
+            navController = rememberNavController(),
+            formState = ReservationFormState(),
         )
     }
 }
@@ -434,8 +450,9 @@ fun ReservationTableDetailsScreenPreview() {
 @Composable
 fun ReservationTableDetailsScreenDarkPreview() {
     LittleLemonTheme {
-        ReservationTableDetailsScreen(
-            navController = rememberNavController()
+        ReservationTableDetailsScreenContent(
+            navController = rememberNavController(),
+            formState = ReservationFormState(),
         )
     }
 }

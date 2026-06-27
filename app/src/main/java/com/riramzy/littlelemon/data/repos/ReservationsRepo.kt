@@ -12,7 +12,7 @@ class ReservationsRepo @Inject constructor(
         return dao.getAllLocalReservations()
     }
 
-    fun getReservationById(id: Int): Flow<LocalReservation> {
+    fun getReservationById(id: Int): Flow<LocalReservation?> {
         return dao.getReservationById(id)
     }
 
