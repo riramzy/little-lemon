@@ -13,7 +13,6 @@ import com.riramzy.littlelemon.data.local.reservations.LocalReservation
 import com.riramzy.littlelemon.data.local.reservations.LocalReservationsDao
 import com.riramzy.littlelemon.data.local.search.LocalSearchDao
 
-//Room database instance that builds the database
 @Database(
     entities = [
         LocalMenuItem::class,
@@ -22,7 +21,8 @@ import com.riramzy.littlelemon.data.local.search.LocalSearchDao
         LocalOrderItem::class,
         LocalReservation::class,
     ],
-    version = 20
+    version = 21,
+    exportSchema = false
 )
 abstract class LocalDatabase: RoomDatabase() {
     abstract fun localMenuDao(): LocalMenuDao
