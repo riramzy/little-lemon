@@ -2,21 +2,17 @@ package com.riramzy.littlelemon.ui.components
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,55 +32,26 @@ fun TopAppBar(
         modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight(),
-        verticalArrangement = Arrangement.SpaceBetween,
+        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(
+        Image(
+            painter = painterResource(R.drawable.little_lemon_logo),
+            contentDescription = "Little Lemon Logo",
+            contentScale = ContentScale.Fit,
+            alignment = Alignment.CenterStart,
             modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                painter = if (isSystemInDarkTheme()) {
-                    painterResource(R.drawable.little_lemon_logo)
-                } else {
-                    painterResource(R.drawable.little_lemon_logo)
-                },
-                contentDescription = "Little Lemon Logo",
-                modifier = Modifier
-                    .width(145.dp)
-                    .height(32.dp)
-                    .padding(start = 10.dp),
-                contentScale = ContentScale.Fit,
-                alignment = Alignment.CenterStart,
-            )
-            Row {
-                IconButton(
-                    onClick = { /*TODO*/ }
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.notifications_icon),
-                        contentDescription = "Notifications Icon",
-                        modifier = Modifier
-                            .width(32.dp)
-                            .height(32.dp),
-                        colorFilter = if (isSystemInDarkTheme()) {
-                            ColorFilter.tint(MaterialTheme.colorScheme.tertiaryContainer)
-                        } else {
-                            ColorFilter.tint(MaterialTheme.colorScheme.secondaryContainer)
-                        }
-                    )
-                }
-            }
-        }
+                .padding(vertical = 4.dp)
+                .height(45.dp),
+        )
+
         if (isSearchRequired) {
             SearchBar(
                 searchQuery = searchQuery,
                 onSearchQueryChange = onSearchQueryChange,
                 onSearch = onSearch,
                 modifier = Modifier
-                    .padding(top = 20.dp)
+                    .padding(top = 15.dp)
             )
         }
     }
@@ -94,14 +61,22 @@ fun TopAppBar(
 @Composable
 fun TopAppBarPreview() {
     LittleLemonTheme {
-        TopAppBar()
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceContainer
+        ) {
+            TopAppBar(modifier = Modifier.padding(10.dp))
+        }
     }
 }
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = false)
 @Composable
 fun TopAppBarDarkPreview() {
     LittleLemonTheme {
-        TopAppBar()
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceContainer
+        ) {
+            TopAppBar(modifier = Modifier.padding(10.dp))
+        }
     }
 }

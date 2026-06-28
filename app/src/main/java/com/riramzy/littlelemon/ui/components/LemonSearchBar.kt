@@ -1,10 +1,8 @@
 package com.riramzy.littlelemon.ui.components
 
 import android.content.res.Configuration
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -53,20 +51,8 @@ fun SearchBar(
             .heightIn(min = 50.dp),
         shape = RoundedCornerShape(100.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSystemInDarkTheme()) {
-                MaterialTheme.colorScheme.onTertiary
-            } else {
-                MaterialTheme.colorScheme.tertiaryContainer
-            },
+            containerColor = MaterialTheme.colorScheme.surface
         ),
-        border = BorderStroke(
-            0.5.dp,
-            if (isSystemInDarkTheme()) {
-                MaterialTheme.colorScheme.tertiary
-            } else {
-                MaterialTheme.colorScheme.onTertiaryContainer
-            }
-        )
     ) {
         Row(
             modifier = Modifier
@@ -100,18 +86,10 @@ fun SearchBar(
                     },
                     singleLine = true,
                     textStyle = MaterialTheme.typography.bodyMedium.copy(
-                        color = if (isSystemInDarkTheme()) {
-                            MaterialTheme.colorScheme.tertiary
-                        } else {
-                            MaterialTheme.colorScheme.onTertiaryContainer
-                        }
+                        color = MaterialTheme.colorScheme.onSurface
                     ),
                     cursorBrush = SolidColor(
-                        if (isSystemInDarkTheme()) {
-                            MaterialTheme.colorScheme.tertiary
-                        } else {
-                            MaterialTheme.colorScheme.onTertiaryContainer
-                        }
+                        MaterialTheme.colorScheme.primary
                     ),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     keyboardActions = KeyboardActions(
@@ -132,11 +110,7 @@ fun SearchBar(
                                 Text(
                                     text = requiredText,
                                     style = MaterialTheme.typography.bodyMedium.copy(
-                                        color = if (isSystemInDarkTheme()) {
-                                            MaterialTheme.colorScheme.tertiary
-                                        } else {
-                                            MaterialTheme.colorScheme.onTertiaryContainer
-                                        }
+                                        color = MaterialTheme.colorScheme.onSurface
                                     )
                                 )
                             }

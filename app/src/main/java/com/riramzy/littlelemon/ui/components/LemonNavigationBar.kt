@@ -2,7 +2,6 @@ package com.riramzy.littlelemon.ui.components
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -56,16 +55,8 @@ fun LemonNavigationBar(
                 .wrapContentSize(),
             shape = RoundedCornerShape(100.dp),
             colors = cardColors(
-                containerColor = if (isSystemInDarkTheme()) {
-                    MaterialTheme.colorScheme.onTertiary
-                } else {
-                    MaterialTheme.colorScheme.tertiaryContainer
-                },
-                contentColor = if (isSystemInDarkTheme()) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.primaryContainer
-                }
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.primary
             )
         ) {
             Row {
@@ -81,11 +72,7 @@ fun LemonNavigationBar(
                                 Modifier
                                     .clip(CircleShape)
                                     .background(
-                                        if (isSystemInDarkTheme()) {
-                                            MaterialTheme.colorScheme.primary.copy(0.2f)
-                                        } else {
-                                            MaterialTheme.colorScheme.primaryContainer.copy(0.2f)
-                                        }
+                                        MaterialTheme.colorScheme.primary.copy(0.2f)
                                     )
                             } else {
                                 Modifier
@@ -111,11 +98,7 @@ fun LemonNavigationBar(
                                 Modifier
                                     .clip(CircleShape)
                                     .background(
-                                        if (isSystemInDarkTheme()) {
-                                            MaterialTheme.colorScheme.primary.copy(0.2f)
-                                        } else {
-                                            MaterialTheme.colorScheme.primaryContainer.copy(0.2f)
-                                        }
+                                        MaterialTheme.colorScheme.primary.copy(0.2f)
                                     )
                             } else {
                                 Modifier
@@ -141,11 +124,7 @@ fun LemonNavigationBar(
                                 Modifier
                                     .clip(CircleShape)
                                     .background(
-                                        if (isSystemInDarkTheme()) {
-                                            MaterialTheme.colorScheme.primary.copy(0.2f)
-                                        } else {
-                                            MaterialTheme.colorScheme.primaryContainer.copy(0.2f)
-                                        }
+                                        MaterialTheme.colorScheme.primary.copy(0.2f)
                                     )
                             } else {
                                 Modifier
@@ -171,11 +150,7 @@ fun LemonNavigationBar(
                                 Modifier
                                     .clip(CircleShape)
                                     .background(
-                                        if (isSystemInDarkTheme()) {
-                                            MaterialTheme.colorScheme.primary.copy(0.2f)
-                                        } else {
-                                            MaterialTheme.colorScheme.primaryContainer.copy(0.2f)
-                                        }
+                                        MaterialTheme.colorScheme.primary.copy(0.2f)
                                     )
                             } else {
                                 Modifier
@@ -199,16 +174,8 @@ fun LemonNavigationBar(
                 onClick = onActionClicked,
                 shape = RoundedCornerShape(100.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isSystemInDarkTheme()) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.primaryContainer
-                    },
-                    contentColor = if (isSystemInDarkTheme()) {
-                        MaterialTheme.colorScheme.onPrimary
-                    } else {
-                        MaterialTheme.colorScheme.onPrimaryContainer
-                    }
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 )
             ) {
                 Text(
