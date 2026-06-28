@@ -1,8 +1,6 @@
 package com.riramzy.littlelemon.ui.screens.home
 
 import android.content.res.Configuration
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,14 +18,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -111,7 +104,7 @@ fun HomeScreenContent(
             )
         },
         floatingActionButtonPosition = FabPosition.Center,
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         modifier = Modifier
             .statusBarsPadding()
     ) { innerPadding ->
@@ -124,42 +117,15 @@ fun HomeScreenContent(
             )
         ) {
             item {
-                Box(
+                Text(
+                    text = "Welcome to Little Lemon!",
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Black,
+                    color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 15.dp)
-                        .clearAndSetSemantics { contentDescription = "Welcome to Little Lemon!" },
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Text(
-                        text = "Welcome to Little Lemon!",
-                        style = TextStyle(
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            fontSize = MaterialTheme.typography.headlineLarge.fontSize,
-                            fontFamily = MaterialTheme.typography.headlineLarge.fontFamily,
-                            fontWeight = MaterialTheme.typography.headlineLarge.fontWeight,
-                            drawStyle = Stroke(
-                                width = 8f,
-                            ),
-                        ),
-                        color = if (isSystemInDarkTheme()) {
-                            MaterialTheme.colorScheme.onPrimaryContainer
-                        } else {
-                            MaterialTheme.colorScheme.secondaryContainer
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Text(
-                        text = "Welcome to Little Lemon!",
-                        style = MaterialTheme.typography.headlineLarge,
-                        color = if (isSystemInDarkTheme()) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.primaryContainer
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
+                )
             }
 
             item {
@@ -239,7 +205,7 @@ fun HomeScreenContent(
 
                     LemonSpecialOffers(
                         icon = R.drawable.percentage,
-                        iconColor = Color.Cyan,
+                        iconColor = Color.Red,
                         title = "20% Off",
                         description = "First-time customers get 20% off their entire order",
                         modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp)
@@ -247,7 +213,7 @@ fun HomeScreenContent(
 
                     LemonSpecialOffers(
                         icon = R.drawable.quick_icon,
-                        iconColor = Color.Green,
+                        iconColor = Color.Blue,
                         title = "Happy Hour",
                         description = "Special prices on drinks and appetizers 3-6pm daily",
                         modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp)

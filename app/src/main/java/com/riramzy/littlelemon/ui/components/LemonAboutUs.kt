@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -69,7 +70,7 @@ fun LemonAboutUs(
         Text(
             text = stringResource(R.string.hero_section_description),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground,
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(bottom = 20.dp)
         )
 
@@ -79,7 +80,7 @@ fun LemonAboutUs(
             Text(
                 text = "Hours",
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onBackground,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(bottom = 10.dp)
             )
 
@@ -88,7 +89,7 @@ fun LemonAboutUs(
                         "Fri-Sat: 11am - 10pm\n" +
                         "Sunday: 12pm - 8pm",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
 
@@ -96,7 +97,7 @@ fun LemonAboutUs(
             Text(
                 text = "Follow Us",
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onBackground,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(bottom = 10.dp)
             )
 
@@ -109,15 +110,16 @@ fun LemonAboutUs(
                         .size(40.dp)
                         .background(
                             if (isSystemInDarkTheme()) {
-                                MaterialTheme.colorScheme.tertiaryContainer
+                                MaterialTheme.colorScheme.primary
                             } else {
-                                MaterialTheme.colorScheme.tertiaryContainer
+                                MaterialTheme.colorScheme.primaryContainer.copy(0.3f)
                             }
                         ),
                 ) {
                     Image(
                         painter = painterResource(R.drawable.facebook),
                         contentDescription = "Facebook page link",
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondaryContainer),
                         modifier = Modifier
                             .size(20.dp)
                     )
@@ -131,15 +133,16 @@ fun LemonAboutUs(
                         .size(40.dp)
                         .background(
                             if (isSystemInDarkTheme()) {
-                                MaterialTheme.colorScheme.tertiaryContainer
+                                MaterialTheme.colorScheme.primary
                             } else {
-                                MaterialTheme.colorScheme.tertiaryContainer
+                                MaterialTheme.colorScheme.primaryContainer.copy(0.3f)
                             }
                         ),
                 ) {
                     Image(
                         painter = painterResource(R.drawable.instagram),
                         contentDescription = "Instagram profile link",
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondaryContainer),
                         modifier = Modifier
                             .size(18.dp)
                     )
@@ -153,15 +156,16 @@ fun LemonAboutUs(
                         .size(40.dp)
                         .background(
                             if (isSystemInDarkTheme()) {
-                                MaterialTheme.colorScheme.tertiaryContainer
+                                MaterialTheme.colorScheme.primary
                             } else {
-                                MaterialTheme.colorScheme.tertiaryContainer
+                                MaterialTheme.colorScheme.primaryContainer.copy(0.3f)
                             }
                         ),
                 ) {
                     Image(
                         painter = painterResource(R.drawable.x),
                         contentDescription = "X account link",
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondaryContainer),
                         modifier = Modifier
                             .size(15.dp)
                     )
@@ -177,7 +181,7 @@ fun LemonAboutUs(
 fun LemonAboutUsPreview() {
     LittleLemonTheme {
         Surface {
-            LemonAboutUs()
+            LemonAboutUs(modifier = Modifier.padding(10.dp))
         }
     }
 }
@@ -190,7 +194,7 @@ fun LemonAboutUsPreview() {
 fun LemonAboutUsDarkPreview() {
     LittleLemonTheme {
         Surface {
-            LemonAboutUs()
+            LemonAboutUs(modifier = Modifier.padding(10.dp))
         }
     }
 }

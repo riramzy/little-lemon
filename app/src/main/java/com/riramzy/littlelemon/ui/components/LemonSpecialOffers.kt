@@ -47,10 +47,10 @@ fun LemonSpecialOffers(
             shape = MaterialTheme.shapes.large,
             border = BorderStroke(
                 width = 1.dp,
-                color = MaterialTheme.colorScheme.onBackground,
+                color = MaterialTheme.colorScheme.onSurface,
             ),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.background,
+                containerColor = MaterialTheme.colorScheme.surfaceContainer,
             )
         ) {
             Column(

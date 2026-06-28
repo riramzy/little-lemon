@@ -16,7 +16,7 @@ class MenuRepo @Inject constructor(
         return menuDao.getAllLocalMenuItems()
     }
 
-    suspend fun getItemById(itemId: Int): LocalMenuItem {
+    suspend fun getItemById(itemId: Int): LocalMenuItem? {
         return menuDao.getItemById(itemId)
     }
 
@@ -27,12 +27,19 @@ class MenuRepo @Inject constructor(
         }
     }
 
-    suspend fun refreshMenu() {
-        val networkMenu = apiService.fetchMenu()
-        networkMenu.menu.let { items ->
-            val entities = items.map { it.toEntity() }
-            menuDao.refreshMenu(entities)
-            Log.d("MenuRepo", "Inserted ${entities.size} items into the database")
+    suspend fun refreshMenu() = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+        try {
+            val networkMenu = apiService.fetchMenu()
+            networkMenu.menu.let { items ->
+                val entities =
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+                        items.map { it.toEntity() }
+                    }
+                menuDao.refreshMenu(entities)
+                Log.d("MenuRepo", "Inserted ${entities.size} items into the database")
+            }
+        } catch (e: Exception) {
+            Log.e("MenuRepo", "Error refreshing menu", e)
         }
     }
 }

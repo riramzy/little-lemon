@@ -15,7 +15,7 @@ interface LocalMenuDao {
     fun getAllLocalMenuItems(): Flow<List<LocalMenuItem>>
 
     @Query("SELECT * FROM menu_items WHERE id = :itemId")
-    suspend fun getItemById(itemId: Int): LocalMenuItem
+    suspend fun getItemById(itemId: Int): LocalMenuItem?
 
     @Insert(onConflict = REPLACE)
     suspend fun insertIntoLocalMenuItems(items: List<LocalMenuItem>)

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -43,36 +42,36 @@ fun HeroCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(250.dp),
+            .wrapContentHeight(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isSystemInDarkTheme()) {
                 MaterialTheme.colorScheme.primary
             } else {
-                MaterialTheme.colorScheme.secondaryContainer
+                MaterialTheme.colorScheme.primary
             },
             contentColor = if (isSystemInDarkTheme()) {
                 MaterialTheme.colorScheme.onPrimary
             } else {
-                MaterialTheme.colorScheme.onSecondaryContainer
+                MaterialTheme.colorScheme.onPrimary
             }
         )
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .wrapContentHeight(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(
                 modifier = Modifier
-                    .weight(1.1f)
-                    .padding(horizontal = 10.dp),
+                    .weight(1.1f),
                 verticalArrangement = Arrangement.SpaceAround
             ) {
                 Card(
                     modifier = Modifier
-                        .padding(bottom = 10.dp)
+                        .padding(bottom = 10.dp, start = 15.dp)
                         .wrapContentHeight()
                         .wrapContentWidth(),
                     shape = RoundedCornerShape(100.dp),
@@ -92,33 +91,35 @@ fun HeroCard(
                 Text(
                     text = descriptionText,
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(bottom = 10.dp),
+                    modifier = Modifier.padding(bottom = 10.dp, start = 15.dp),
                     overflow = TextOverflow.Ellipsis
                 )
 
                 YellowLemonButton(
                     text = buttonText,
                     color = if (isSystemInDarkTheme()) {
-                        MaterialTheme.colorScheme.secondaryContainer
+                        MaterialTheme.colorScheme.primaryContainer
                     } else {
                         MaterialTheme.colorScheme.primaryContainer
                     },
                     textColor = if (isSystemInDarkTheme()) {
-                        MaterialTheme.colorScheme.onSecondaryContainer
+                        MaterialTheme.colorScheme.onPrimaryContainer
                     } else {
                         MaterialTheme.colorScheme.onPrimaryContainer
                     },
-                    onClick = onReserveClicked
+                    onClick = onReserveClicked,
+                    modifier = Modifier.padding(start = 15.dp)
                 )
             }
 
             Image(
                 painter = painterResource(heroImage),
                 contentDescription = "Hero Image",
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .weight(1f)
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(20.dp))
+                    .padding(top = 10.dp)
             )
         }
     }
