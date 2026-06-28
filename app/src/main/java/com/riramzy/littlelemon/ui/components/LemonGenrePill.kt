@@ -1,7 +1,6 @@
 package com.riramzy.littlelemon.ui.components
 
 import android.content.res.Configuration
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -14,7 +13,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
@@ -39,31 +37,15 @@ fun LemonGenrePill(
             .semantics { selected = isSelected; role = Role.Tab },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSystemInDarkTheme()) {
-                if (isSelected) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onTertiary
-                }
+            containerColor = if (isSelected) {
+                MaterialTheme.colorScheme.primary
             } else {
-                if (isSelected) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.tertiaryContainer
-                }
+                MaterialTheme.colorScheme.surface
             },
-            contentColor = if (isSystemInDarkTheme()) {
-                if (isSelected) {
-                    MaterialTheme.colorScheme.onTertiary
-                } else {
-                    MaterialTheme.colorScheme.primary
-                }
+            contentColor = if (isSelected) {
+                MaterialTheme.colorScheme.onPrimary
             } else {
-                if (isSelected) {
-                    Color.White
-                } else {
-                    MaterialTheme.colorScheme.primary
-                }
+                MaterialTheme.colorScheme.onSurface
             }
         ),
         onClick = {

@@ -1,7 +1,6 @@
 package com.riramzy.littlelemon.ui.components
 
 import android.content.res.Configuration
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -9,9 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -42,8 +39,8 @@ fun ItemOverview(
 ) {
     Card(
         modifier = modifier
-            .height(110.dp)
-            .width(376.dp),
+            .wrapContentHeight()
+            .fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = if (isSystemInDarkTheme()) {
                 MaterialTheme.colorScheme.background
@@ -56,14 +53,7 @@ fun ItemOverview(
                 MaterialTheme.colorScheme.primary
             }
         ),
-        border = BorderStroke(
-            0.5.dp,
-            if (isSystemInDarkTheme()) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.primary
-            }
-        ),
+        elevation = CardDefaults.cardElevation(10.dp),
         shape = RoundedCornerShape(20.dp),
         onClick = {
             onItemClick()
@@ -72,7 +62,8 @@ fun ItemOverview(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(10.dp)
         ) {
             Column(

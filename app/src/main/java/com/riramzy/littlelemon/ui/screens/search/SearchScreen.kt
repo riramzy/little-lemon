@@ -88,7 +88,7 @@ fun SearchScreenContent(
             )
         },
         floatingActionButtonPosition = FabPosition.Center,
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         modifier = Modifier.statusBarsPadding()
     ) { innerPadding ->
 
