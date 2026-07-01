@@ -21,7 +21,7 @@ import com.riramzy.littlelemon.data.local.search.LocalSearchDao
         LocalOrderItem::class,
         LocalReservation::class,
     ],
-    version = 21,
+    version = 22,
     exportSchema = false
 )
 abstract class LocalDatabase: RoomDatabase() {

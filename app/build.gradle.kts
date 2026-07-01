@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.livedata)
+    implementation(libs.androidx.datastore.preferences)
 
     // Compose
     implementation(libs.androidx.activity.compose)
