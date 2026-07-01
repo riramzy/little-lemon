@@ -15,7 +15,7 @@ interface LocalCartDao {
     suspend fun updateQuantity(itemId: Int, quantity: Int)
 
     @Query("SELECT * FROM cart_items WHERE id = :itemId")
-    fun getItemById(itemId: Int): LocalCartItem
+    suspend fun getItemById(itemId: Int): LocalCartItem?
 
     @Insert(onConflict = REPLACE)
     suspend fun insertIntoLocalCartItem(item: LocalCartItem)
@@ -24,8 +24,8 @@ interface LocalCartDao {
     suspend fun deleteLocalCartItem(itemId: Int)
 
     @Query("SELECT COUNT(*) FROM cart_items")
-    fun getLocalCartCount(): Int
+    suspend fun getLocalCartCount(): Int
 
     @Query("DELETE FROM cart_items")
-    fun clearCart()
+    suspend fun clearCart()
 }

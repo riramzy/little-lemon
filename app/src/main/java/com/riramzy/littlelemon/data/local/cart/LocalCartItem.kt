@@ -14,5 +14,7 @@ data class LocalCartItem(
     @ColumnInfo(name = "image")
     val image: String,
     @ColumnInfo(name = "quantity")
-    val quantity: Int = 0
+    val quantity: Int = 0,
+    @ColumnInfo(name = "selected_addons")
+    val selectedAddOns: String = ""
 )

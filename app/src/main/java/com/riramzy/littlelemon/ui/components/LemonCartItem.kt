@@ -7,9 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -63,7 +61,7 @@ fun LemonCartItem(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(90.dp),
+                .wrapContentHeight(),
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(
                 containerColor = if (isSystemInDarkTheme()) {
@@ -80,7 +78,9 @@ fun LemonCartItem(
         ) {
             Row(
                 modifier = Modifier
-                    .fillMaxSize(),
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(vertical = 10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -112,10 +112,21 @@ fun LemonCartItem(
                             text = item.title,
                             style = MaterialTheme.typography.labelLarge
                         )
+
                         Text(
-                            text = "$${item.price}",
+                            text = "$${"%.2f".format(item.price)}",
                             style = MaterialTheme.typography.bodyMedium
                         )
+
+                        if (item.selectedAddOns.isNotEmpty()) {
+                            Text(
+                                text = "Add-ons: ${item.selectedAddOns}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                modifier = Modifier.padding(top = 2.dp)
+                            )
+                        }
+
                         Row(
                             modifier = Modifier.padding(top = 8.dp),
                             horizontalArrangement = Arrangement.Center,
@@ -132,11 +143,13 @@ fun LemonCartItem(
                                     contentDescription = null
                                 )
                             }
+
                             Text(
                                 text = item.quantity.toString(),
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier.padding(horizontal = 10.dp)
                             )
+
                             IconButton(
                                 onClick = {
                                     onAddClicked()

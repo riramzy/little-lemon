@@ -5,15 +5,15 @@ import com.riramzy.littlelemon.data.local.cart.LocalCartItem
 import kotlinx.coroutines.flow.Flow
 
 class CartRepo(private val dao: LocalCartDao) {
-    suspend fun getLocalCartItems(): Flow<List<LocalCartItem>> {
+    fun getLocalCartItems(): Flow<List<LocalCartItem>> {
         return dao.getAllLocalCartItems()
     }
 
-    fun updateQuantity(itemId: Int, quantity: Int) {
+    suspend fun updateQuantity(itemId: Int, quantity: Int) {
         dao.updateQuantity(itemId, quantity)
     }
 
-    suspend fun getCartItemById(itemId: Int): LocalCartItem {
+    suspend fun getCartItemById(itemId: Int): LocalCartItem? {
         return dao.getItemById(itemId)
     }
 

@@ -17,11 +17,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -30,6 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.riramzy.littlelemon.R
@@ -47,7 +46,7 @@ fun CartScreen(
     cartVm: CartVm = hiltViewModel(),
     navController: NavController
 ) {
-    val cartItems = cartVm.cartItems.collectAsState().value
+    val cartItems = cartVm.cartItems.collectAsStateWithLifecycle().value
 
     CartScreenContent(
         navController = navController,
@@ -67,7 +66,9 @@ fun CartScreenContent(
     increaseQuantity: (Int) -> Unit,
     decreaseQuantity: (Int) -> Unit,
 ) {
-    val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
+    val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsStateWithLifecycle(
+        null
+    )
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
 
     Scaffold(
@@ -106,11 +107,7 @@ fun CartScreenContent(
             }
         },
         floatingActionButtonPosition = FabPosition.Center,
-        containerColor = if (isSystemInDarkTheme()) {
-            MaterialTheme.colorScheme.background
-        } else {
-            Color.White
-        },
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         modifier = Modifier
             .statusBarsPadding()
     ) { innerPadding ->
@@ -129,12 +126,15 @@ fun CartScreenContent(
                     contentScale = ContentScale.Fit,
                     contentDescription = null
                 )
+
                 Text(
                     text = "Your cart is empty",
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.titleLarge,
-                    fontSize = 26.sp
+                    fontSize = 26.sp,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
+
                 YellowLemonButton(
                     text = "Continue Shopping Now!",
                     modifier = Modifier
@@ -185,13 +185,17 @@ fun CartScreenContent(
                                 text = "My Cart",
                                 style = MaterialTheme.typography.titleLarge,
                                 fontSize = 26.sp,
-                                fontWeight = FontWeight.Black
+                                fontWeight = FontWeight.Black,
+                                color = MaterialTheme.colorScheme.onSurface
                             )
+
                             Text(
                                 text = "${cartItems.size} items",
                                 style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
+
                         cartItems.forEach { item ->
                             LemonCartItem(
                                 item = item,
@@ -213,6 +217,7 @@ fun CartScreenContent(
                         }
                     }
                 }
+
                 item {
                     val subtotal = cartItems.sumOf { it.price * it.quantity }
                     TotalPrice(
@@ -236,7 +241,22 @@ fun CartScreenPreview() {
     LittleLemonTheme {
         CartScreenContent(
             navController = rememberNavController(),
-            cartItems = emptyList(),
+            cartItems = listOf(
+                LocalCartItem(
+                    id = 1,
+                    title = "Greek Salad",
+                    price = 10.0,
+                    image = "R.drawable.greek_salad",
+                    quantity = 1
+                ),
+                LocalCartItem(
+                    id = 2,
+                    title = "Lemon Desert",
+                    price = 10.0,
+                    image = "R.drawable.greek_salad",
+                    quantity = 1
+                )
+            ),
             removeFromCart = { },
             increaseQuantity = { },
             decreaseQuantity = { }
@@ -250,7 +270,22 @@ fun CartScreenDarkPreview() {
     LittleLemonTheme {
         CartScreenContent(
             navController = rememberNavController(),
-            cartItems = emptyList(),
+            cartItems = listOf(
+                LocalCartItem(
+                    id = 1,
+                    title = "Greek Salad",
+                    price = 10.0,
+                    image = "R.drawable.greek_salad",
+                    quantity = 1
+                ),
+                LocalCartItem(
+                    id = 2,
+                    title = "Lemon Desert",
+                    price = 10.0,
+                    image = "R.drawable.greek_salad",
+                    quantity = 1
+                )
+            ),
             removeFromCart = { },
             increaseQuantity = { },
             decreaseQuantity = { }
