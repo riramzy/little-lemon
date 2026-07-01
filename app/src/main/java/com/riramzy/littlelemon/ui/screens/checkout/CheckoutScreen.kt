@@ -1,7 +1,6 @@
 package com.riramzy.littlelemon.ui.screens.checkout
 
 import android.content.res.Configuration
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,17 +24,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.riramzy.littlelemon.data.local.cart.LocalCartItem
@@ -55,8 +53,8 @@ fun CheckoutScreen(
     homeVm: HomeVm = hiltViewModel(),
     navController: NavController
 ) {
-    val cartItems = cartVm.cartItems.collectAsState().value
-    val menuItems = homeVm.menuItems.collectAsState().value
+    val cartItems = cartVm.cartItems.collectAsStateWithLifecycle().value
+    val menuItems = homeVm.menuItems.collectAsStateWithLifecycle().value
 
     CheckoutScreenContent(
         navController = navController,
@@ -71,7 +69,9 @@ fun CheckoutScreenContent(
     cartItems: List<LocalCartItem>,
     menuItems: List<LocalMenuItem>
 ) {
-    val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
+    val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsStateWithLifecycle(
+        null
+    )
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
 
     Scaffold(
@@ -108,11 +108,7 @@ fun CheckoutScreenContent(
             )
         },
         floatingActionButtonPosition = FabPosition.Center,
-        containerColor = if (isSystemInDarkTheme()) {
-            MaterialTheme.colorScheme.background
-        } else {
-            Color.White
-        },
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         modifier = Modifier
             .statusBarsPadding()
     ) { innerPadding ->
@@ -137,6 +133,7 @@ fun CheckoutScreenContent(
                                 vertical = 15.dp
                             )
                     )
+
                     OrderSummary(
                         modifier = Modifier
                             .padding(
@@ -178,24 +175,6 @@ fun OrderSummary(
     modifier: Modifier = Modifier,
     cartItems: List<LocalCartItem> = emptyList()
 ) {
-    /*
-    val cartItems = listOf(
-        LocalCartItem(
-            id = 1,
-            title = "Greek Salad",
-            price = 12.99,
-            image = "",
-        ),
-        LocalCartItem(
-            id = 2,
-            title = "Bruschetta",
-            price = 12.99,
-            image = "",
-        )
-    )
-
-     */
-
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -208,17 +187,21 @@ fun OrderSummary(
             style = MaterialTheme.typography.labelLarge,
             fontSize = 24.sp,
             textAlign = TextAlign.Start,
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.fillMaxWidth()
         )
+
         Text(
             text = "Items",
             style = MaterialTheme.typography.labelLarge,
             fontSize = 20.sp,
             textAlign = TextAlign.Start,
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 20.dp)
         )
+
         Column(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -238,12 +221,15 @@ fun OrderSummary(
                         style = MaterialTheme.typography.labelSmall,
                         fontSize = 20.sp,
                         textAlign = TextAlign.Start,
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
+
                     Text(
                         text = "$${item.price}",
                         style = MaterialTheme.typography.labelSmall,
                         fontSize = 20.sp,
                         textAlign = TextAlign.End,
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                 }
             }
@@ -303,22 +289,14 @@ fun TotalPrice(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSystemInDarkTheme()) {
-                MaterialTheme.colorScheme.onTertiary
-            } else {
-                MaterialTheme.colorScheme.primaryContainer
-
-            },
-            contentColor = if (isSystemInDarkTheme()) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                Color.White
-            }
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
         ),
     ) {
         Column(
-            modifier = modifier
-                .fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(15.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -335,7 +313,7 @@ fun TotalPrice(
                     textAlign = TextAlign.Start,
                 )
                 Text(
-                    text = "$$subtotal",
+                    text = "$${"%.2f".format(subtotal)}",
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.End,
                 )
@@ -354,7 +332,7 @@ fun TotalPrice(
                     textAlign = TextAlign.Start,
                 )
                 Text(
-                    text = "$$delivery",
+                    text = "$${"%.2f".format(delivery)}",
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.End,
                 )
@@ -374,7 +352,7 @@ fun TotalPrice(
                         textAlign = TextAlign.Start,
                     )
                     Text(
-                        text = "$$service",
+                        text = "$${"%.2f".format(service)}",
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.End,
                     )
@@ -394,11 +372,12 @@ fun TotalPrice(
                     fontSize = 20.sp,
                     textAlign = TextAlign.Start,
                 )
+
                 Text(
                     text = if (isCart) {
-                        "$${subtotal + delivery}"
+                        "$${"%.2f".format(subtotal + delivery)}"
                     } else {
-                        "$${subtotal + delivery + service}"
+                        "$${"%.2f".format(subtotal + delivery + service)}"
                     },
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Black,
@@ -416,8 +395,40 @@ fun CheckoutScreenPreview() {
     LittleLemonTheme {
         CheckoutScreenContent(
             navController = rememberNavController(),
-            cartItems = emptyList(),
-            menuItems = emptyList()
+            cartItems = listOf(
+                LocalCartItem(
+                    id = 1,
+                    title = "Greek Salad",
+                    price = 10.0,
+                    image = "R.drawable.greek_salad",
+                    quantity = 1
+                ),
+                LocalCartItem(
+                    id = 2,
+                    title = "Lemon Desert",
+                    price = 10.0,
+                    image = "R.drawable.greek_salad",
+                    quantity = 1
+                )
+            ),
+            menuItems = listOf(
+                LocalMenuItem(
+                    id = 1,
+                    title = "Greek Salad",
+                    description = "The famous greek salad of crispy lettuce, peppers, olives and our",
+                    price = 10.0,
+                    image = "R.drawable.greek_salad",
+                    category = "Mains"
+                ),
+                LocalMenuItem(
+                    id = 2,
+                    title = "Lemon Desert",
+                    description = "Traditional homemade Italian Lemon Ricotta Cake.",
+                    price = 10.0,
+                    image = "R.drawable.lemon_dessert",
+                    category = "Dessert"
+                )
+            )
         )
     }
 }
@@ -428,8 +439,40 @@ fun CheckoutScreenDarkPreview() {
     LittleLemonTheme {
         CheckoutScreenContent(
             navController = rememberNavController(),
-            cartItems = emptyList(),
-            menuItems = emptyList()
+            cartItems = listOf(
+                LocalCartItem(
+                    id = 1,
+                    title = "Greek Salad",
+                    price = 10.0,
+                    image = "R.drawable.greek_salad",
+                    quantity = 1
+                ),
+                LocalCartItem(
+                    id = 2,
+                    title = "Lemon Desert",
+                    price = 10.0,
+                    image = "R.drawable.greek_salad",
+                    quantity = 1
+                )
+            ),
+            menuItems = listOf(
+                LocalMenuItem(
+                    id = 1,
+                    title = "Greek Salad",
+                    description = "The famous greek salad of crispy lettuce, peppers, olives and our",
+                    price = 10.0,
+                    image = "R.drawable.greek_salad",
+                    category = "Mains"
+                ),
+                LocalMenuItem(
+                    id = 2,
+                    title = "Lemon Desert",
+                    description = "Traditional homemade Italian Lemon Ricotta Cake.",
+                    price = 10.0,
+                    image = "R.drawable.lemon_dessert",
+                    category = "Dessert"
+                )
+            )
         )
     }
 }

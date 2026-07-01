@@ -305,7 +305,9 @@ fun ReservationDetailsCard(
                         requiredText = "Items",
                         isReadOnly = true,
                         value = cartItems.joinToString(separator = "\n") { cartItem ->
-                            "${cartItem.quantity}x ${cartItem.title}"
+                            val addOnSuffix =
+                                if (cartItem.selectedAddOns.isNotEmpty()) " (${cartItem.selectedAddOns})" else ""
+                            "${cartItem.quantity}x ${cartItem.title}$addOnSuffix"
                         },
                         isMultiline = true
                     )
