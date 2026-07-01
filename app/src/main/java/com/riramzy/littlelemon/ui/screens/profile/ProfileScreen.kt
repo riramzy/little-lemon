@@ -8,12 +8,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -41,7 +42,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -52,14 +52,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.riramzy.littlelemon.R
 import com.riramzy.littlelemon.ui.components.LemonNavigationBar
 import com.riramzy.littlelemon.ui.components.YellowLemonButton
+import com.riramzy.littlelemon.ui.screens.auth.UserVm
 import com.riramzy.littlelemon.ui.theme.LittleLemonTheme
-import com.riramzy.littlelemon.ui.viewmodel.UserVm
 import com.riramzy.littlelemon.utils.Screen
 
 @Composable
@@ -67,20 +68,26 @@ fun ProfileScreen(
     navController: NavController,
     userVm: UserVm = hiltViewModel()
 ) {
-    val username = userVm.getUsername()
-    val firstName = userVm.getFirstName()
-    val email = userVm.getEmail()
+    val username by userVm.username.collectAsStateWithLifecycle()
+    val firstName by userVm.firstName.collectAsStateWithLifecycle()
+    val email by userVm.email.collectAsStateWithLifecycle()
+    val profilePicture by userVm.profilePicture.collectAsStateWithLifecycle()
 
     ProfileScreenContent(
         navController = navController,
         username = username ?: "",
         firstName = firstName ?: "",
         email = email ?: "",
-        getProfilePicture = userVm.getProfilePicture(),
+        getProfilePicture = profilePicture,
         logout = userVm::logout,
-        deleteAccount = userVm::deleteAccount
+        deleteAccount = {
+            userVm.deleteAccount {
+                navController.navigate(Screen.Login.route) {
+                    popUpTo(Screen.Home.route) { inclusive = true }
+                }
+            }
+        }
     )
-
 }
 
 @Composable
@@ -98,10 +105,6 @@ fun ProfileScreenContent(
 
     var showLogoutDialog by remember { mutableStateOf(false) }
     var showDeleteAccountDialog by remember { mutableStateOf(false) }
-
-    var selectedImageUri by remember {
-        mutableStateOf(getProfilePicture?.toUri())
-    }
 
     if (showLogoutDialog) {
         AlertDialog(
@@ -248,11 +251,7 @@ fun ProfileScreenContent(
             )
         },
         floatingActionButtonPosition = FabPosition.Center,
-        containerColor = if (isSystemInDarkTheme()) {
-            MaterialTheme.colorScheme.background
-        } else {
-            Color.White
-        },
+        containerColor = MaterialTheme.colorScheme.surfaceContainer
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -283,7 +282,7 @@ fun ProfileScreenContent(
                             .size(100.dp)
                     ) {
                         AsyncImage(
-                            model = selectedImageUri,
+                            model = getProfilePicture?.toUri(),
                             contentDescription = "Profile Picture",
                             placeholder = painterResource(R.drawable.profile_picture),
                             error = painterResource(R.drawable.profile_picture),
@@ -295,189 +294,109 @@ fun ProfileScreenContent(
                     }
 
                     Text(
-                        text = firstName?.replaceFirstChar {
+                        text = firstName.replaceFirstChar {
                             it.uppercase()
-                        } ?: "Ramzy",
+                        },
                         style = MaterialTheme.typography.titleLarge,
                         fontSize = 26.sp,
+                        color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(
                             bottom = 10.dp,
                             top = 10.dp
                         )
                     )
-                    Text(
-                        text = username ?: "riramzy",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = if (isSystemInDarkTheme()) {
-                            Color.White.copy(0.5f)
-                        } else {
-                            Color.Black.copy(0.5f)
-                        }
 
-                    )
                     Text(
-                        text = email ?: "james.iredell@examplepetstore.com",
+                        text = username,
                         style = MaterialTheme.typography.titleSmall,
-                        color = if (isSystemInDarkTheme()) {
-                            Color.White.copy(0.5f)
-                        } else {
-                            Color.Black.copy(0.5f)
-                        }
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    Text(
+                        text = email,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
 
             item {
-                Box(
-                    modifier = Modifier
-                        .padding(
-                            bottom = 10.dp,
-                            start = 10.dp,
-                            end = 10.dp
-                        )
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    SectionHead(
-                        title = "Profile",
-                        icon = Icons.Default.Person,
-                        onClick = {
-                            navController.navigate(Screen.ProfileDetails.route)
-                        }
-                    )
-                }
+                SectionHead(
+                    title = "Profile",
+                    icon = Icons.Default.Person,
+                    onClick = {
+                        navController.navigate(Screen.ProfileDetails.route)
+                    },
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
             }
+
             item {
-                Box(
-                    modifier = Modifier
-                        .padding(
-                            bottom = 10.dp,
-                            start = 10.dp,
-                            end = 10.dp
-                        )
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    SectionHead(
-                        title = "Shipping Address",
-                        icon = Icons.Default.LocationOn,
-                    )
-                }
+                SectionHead(
+                    title = "Shipping Address",
+                    icon = Icons.Default.LocationOn,
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
             }
+
             item {
-                Box(
-                    modifier = Modifier
-                        .padding(
-                            bottom = 10.dp,
-                            start = 10.dp,
-                            end = 10.dp
-                        )
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    SectionHead(
-                        title = "Orders",
-                        icon = Icons.Default.History,
-                        onClick = {
-                            navController.navigate(Screen.Orders.route)
-                        }
-                    )
-                }
+                SectionHead(
+                    title = "Orders",
+                    icon = Icons.Default.History,
+                    onClick = {
+                        navController.navigate(Screen.Orders.route)
+                    },
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
             }
+
             item {
-                Box(
-                    modifier = Modifier
-                        .padding(
-                            bottom = 10.dp,
-                            start = 10.dp,
-                            end = 10.dp
-                        )
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    SectionHead(
-                        title = "Reservations",
-                        icon = Icons.Default.Restaurant,
-                        modifier = Modifier,
-                        onClick = {
-                            navController.navigate(Screen.Reservations.route)
-                        }
-                    )
-                }
+                SectionHead(
+                    title = "Reservations",
+                    icon = Icons.Default.Restaurant,
+                    onClick = {
+                        navController.navigate(Screen.Reservations.route)
+                    },
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
             }
+
             item {
-                Box(
-                    modifier = Modifier
-                        .padding(
-                            bottom = 10.dp,
-                            start = 10.dp,
-                            end = 10.dp
-                        )
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    SectionHead(
-                        title = "Privacy Policy",
-                        icon = Icons.Default.Lock,
-                    )
-                }
+                SectionHead(
+                    title = "Privacy Policy",
+                    icon = Icons.Default.Lock,
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
             }
+
             item {
-                Box(
-                    modifier = Modifier
-                        .padding(
-                            bottom = 10.dp,
-                            start = 10.dp,
-                            end = 10.dp
-                        )
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    SectionHead(
-                        title = "Settings",
-                        icon = Icons.Default.Settings,
-                    )
-                }
+                SectionHead(
+                    title = "Settings",
+                    icon = Icons.Default.Settings,
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
             }
+
             item {
-                Box(
-                    modifier = Modifier
-                        .padding(
-                            bottom = 10.dp,
-                            start = 10.dp,
-                            end = 10.dp
-                        )
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    SectionHead(
-                        title = "Logout",
-                        icon = Icons.AutoMirrored.Filled.Login,
-                        onClick = {
-                            showLogoutDialog = true
-                        }
-                    )
-                }
+                SectionHead(
+                    title = "Logout",
+                    icon = Icons.AutoMirrored.Filled.Login,
+                    onClick = {
+                        showLogoutDialog = true
+                    },
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
             }
+
             item {
-                Box(
-                    modifier = Modifier
-                        .padding(
-                            bottom = 10.dp,
-                            start = 10.dp,
-                            end = 10.dp
-                        )
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    SectionHead(
-                        title = "Delete Account",
-                        icon = Icons.Default.DeleteForever,
-                        onClick = {
-                            showDeleteAccountDialog = true
-                        }
-                    )
-                }
+                SectionHead(
+                    title = "Delete Account",
+                    icon = Icons.Default.DeleteForever,
+                    onClick = {
+                        showDeleteAccountDialog = true
+                    },
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
             }
         }
     }
@@ -492,14 +411,10 @@ fun SectionHead(
 ) {
     Card(
         modifier = modifier
-            .width(300.dp)
-            .height(50.dp),
+            .fillMaxWidth()
+            .wrapContentHeight(),
         colors = CardDefaults.cardColors(
-            if (isSystemInDarkTheme()) {
-                Color.Black
-            } else {
-                MaterialTheme.colorScheme.tertiaryContainer
-            }
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)
         ),
         shape = CircleShape,
         onClick = {
@@ -507,31 +422,25 @@ fun SectionHead(
         }
     ) {
         Box(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
                 textAlign = TextAlign.Center,
-                color = if (isSystemInDarkTheme()) {
-                    Color.White
-                } else {
-                    Color.Black
-                }
+                color = MaterialTheme.colorScheme.primary,
             )
+
             Box(
                 modifier = Modifier
                     .align(Alignment.CenterStart)
-                    .padding(start = 10.dp)
                     .size(36.dp)
                     .clip(CircleShape)
                     .background(
-                        if (isSystemInDarkTheme()) {
-                            MaterialTheme.colorScheme.primary.copy(0.2f)
-                        } else {
-                            MaterialTheme.colorScheme.primaryContainer.copy(0.2f)
-                        }
+                        MaterialTheme.colorScheme.primary.copy(0.2f)
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -540,15 +449,13 @@ fun SectionHead(
                     contentDescription = "Logo",
                     modifier = Modifier
                         .size(24.dp),
-                    tint = if (isSystemInDarkTheme()) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.primaryContainer
-                    }
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
         }
     }
+
+    Spacer(Modifier.padding(bottom = 10.dp))
 }
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)

@@ -1,6 +1,8 @@
 package com.riramzy.littlelemon.ui.screens.profile
 
+import android.content.Context
 import android.content.res.Configuration
+import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -35,7 +37,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -45,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
@@ -52,26 +54,35 @@ import com.riramzy.littlelemon.R
 import com.riramzy.littlelemon.ui.components.LemonInputField
 import com.riramzy.littlelemon.ui.components.LemonNavigationBar
 import com.riramzy.littlelemon.ui.components.YellowLemonButton
+import com.riramzy.littlelemon.ui.screens.auth.UserVm
 import com.riramzy.littlelemon.ui.theme.LittleLemonTheme
-import com.riramzy.littlelemon.ui.viewmodel.UserVm
 import com.riramzy.littlelemon.utils.Screen
+import java.io.File
+import java.io.FileOutputStream
 
 @Composable
 fun ProfileDetailsScreen(
     navController: NavController,
     userVm: UserVm = hiltViewModel()
 ) {
+    val username by userVm.username.collectAsStateWithLifecycle()
+    val firstName by userVm.firstName.collectAsStateWithLifecycle()
+    val lastName by userVm.lastName.collectAsStateWithLifecycle()
+    val email by userVm.email.collectAsStateWithLifecycle()
+    val profilePicture by userVm.profilePicture.collectAsStateWithLifecycle()
+
     ProfileDetailsScreenContent(
         navController = navController,
-        getProfilePicture = userVm.getProfilePicture(),
+        getProfilePicture = profilePicture,
         saveProfilePicture = userVm::saveProfilePicture,
         editUsername = userVm::editUsername,
         editFirstName = userVm::editFirstName,
         editLastName = userVm::editLastName,
-        getUsername = userVm.getUsername(),
-        getFirstName = userVm.getFirstName(),
-        getLastName = userVm.getLastName(),
-        getEmail = userVm.getEmail()
+        editEmail = userVm::editEmail,
+        getUsername = username,
+        getFirstName = firstName,
+        getLastName = lastName,
+        getEmail = email
     )
 }
 
@@ -83,39 +94,48 @@ fun ProfileDetailsScreenContent(
     editUsername: (String) -> Unit,
     editFirstName: (String) -> Unit,
     editLastName: (String) -> Unit,
+    editEmail: (String) -> Unit,
     getUsername: String?,
     getFirstName: String?,
     getLastName: String?,
     getEmail: String?,
 
 ) {
-    var username by remember { mutableStateOf(getUsername) }
-    var tempUsername: String? by remember { mutableStateOf(getUsername) }
-    var firstName by remember { mutableStateOf(getFirstName) }
-    var tempFirstName by remember { mutableStateOf(getFirstName) }
-    var lastName by remember { mutableStateOf(getLastName) }
-    var tempLastName by remember { mutableStateOf(getLastName) }
+    var username by remember(getUsername) { mutableStateOf(getUsername) }
+    var tempUsername: String? by remember(getUsername) { mutableStateOf(getUsername) }
+    var firstName by remember(getFirstName) { mutableStateOf(getFirstName) }
+    var tempFirstName by remember(getFirstName) { mutableStateOf(getFirstName) }
+    var lastName by remember(getLastName) { mutableStateOf(getLastName) }
+    var tempLastName by remember(getLastName) { mutableStateOf(getLastName) }
+    var email by remember(getEmail) { mutableStateOf(getEmail) }
+    var tempEmail: String? by remember(getEmail) { mutableStateOf(getEmail) }
 
 
     fun saveNewInfo() {
         editUsername(tempUsername!!)
         editFirstName(tempFirstName!!)
         editLastName(tempLastName!!)
+        editEmail(tempEmail!!)
     }
 
-    val context = LocalContext.current
+    val context: Context = LocalContext.current
 
     var showSaveDialog by remember { mutableStateOf(false) }
 
-    var selectedImageUri by remember {
+    var selectedImageUri by remember(getProfilePicture) {
         mutableStateOf(getProfilePicture?.toUri())
     }
 
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
-            selectedImageUri = uri
-            saveProfilePicture(uri.toString())
+            uri?.let {
+                val localUri = saveImageLocally(context, it)
+                if (localUri != null) {
+                    selectedImageUri = localUri
+                    saveProfilePicture(localUri.toString())
+                }
+            }
         }
     )
 
@@ -207,11 +227,7 @@ fun ProfileDetailsScreenContent(
             )
         },
         floatingActionButtonPosition = FabPosition.Center,
-        containerColor = if (isSystemInDarkTheme()) {
-            MaterialTheme.colorScheme.background
-        } else {
-            Color.White
-        },
+        containerColor = MaterialTheme.colorScheme.surfaceContainer
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -261,11 +277,7 @@ fun ProfileDetailsScreenContent(
                                 .clip(CircleShape)
                                 .size(24.dp)
                                 .background(
-                                    if (isSystemInDarkTheme()) {
-                                        MaterialTheme.colorScheme.primary
-                                    } else {
-                                        MaterialTheme.colorScheme.primaryContainer
-                                    }
+                                    MaterialTheme.colorScheme.primary
                                 )
 
                         ) {
@@ -275,11 +287,7 @@ fun ProfileDetailsScreenContent(
                                     .size(24.dp)
                                     .padding(4.dp),
                                 contentDescription = "Edit",
-                                tint = if (isSystemInDarkTheme()) {
-                                    Color.Black
-                                } else {
-                                    Color.White
-                                },
+                                tint = MaterialTheme.colorScheme.surfaceContainer
                             )
                         }
                     }
@@ -292,6 +300,7 @@ fun ProfileDetailsScreenContent(
                     style = MaterialTheme.typography.titleLarge,
                     fontSize = 26.sp,
                     fontWeight = FontWeight.Black,
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(
@@ -353,7 +362,10 @@ fun ProfileDetailsScreenContent(
 
                     LemonInputField(
                         requiredText = "Email",
-                        value = getEmail ?: "",
+                        value = tempEmail ?: email.toString(),
+                        onValueChange = { newEmail ->
+                            tempEmail = newEmail
+                        },
                         modifier = Modifier
                             .padding(
                                 bottom = 20.dp,
@@ -364,6 +376,30 @@ fun ProfileDetailsScreenContent(
                 }
             }
         }
+    }
+}
+
+fun saveImageLocally(context: Context, uri: Uri): Uri? {
+    return try {
+        val inputStream = context.contentResolver.openInputStream(uri) ?: return null
+
+        context.filesDir.listFiles()?.forEach { file ->
+            if (file.name.startsWith("profile_pic_")) {
+                file.delete()
+            }
+        }
+
+        val destFile = File(context.filesDir, "profile_pic_${System.currentTimeMillis()}.jpg")
+        FileOutputStream(destFile).use { output ->
+            inputStream.use { input ->
+                input.copyTo(output)
+            }
+        }
+
+        Uri.fromFile(destFile)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
     }
 }
 
@@ -378,6 +414,7 @@ fun ProfileDetailsScreenPreview() {
             editUsername = {},
             editFirstName = {},
             editLastName = {},
+            editEmail = {},
             getUsername = null,
             getFirstName = null,
             getLastName = null,
@@ -397,6 +434,7 @@ fun ProfileDetailsScreenDarkPreview() {
             editUsername = {},
             editFirstName = {},
             editLastName = {},
+            editEmail = {},
             getUsername = null,
             getFirstName = null,
             getLastName = null,
