@@ -8,6 +8,7 @@ import com.riramzy.littlelemon.data.local.orders.LocalOrdersDao
 import com.riramzy.littlelemon.data.local.reservations.LocalReservationsDao
 import com.riramzy.littlelemon.data.local.search.LocalSearchDao
 import com.riramzy.littlelemon.data.preferences.UserPreferences
+import com.riramzy.littlelemon.data.remote.MenuApiService
 import com.riramzy.littlelemon.data.repos.CartRepo
 import com.riramzy.littlelemon.data.repos.MenuRepo
 import com.riramzy.littlelemon.data.repos.OrdersRepo
@@ -25,8 +26,8 @@ import javax.inject.Singleton
 object ReposModule {
     @Singleton
     @Provides
-    fun provideMenuRepo(menuDao: LocalMenuDao): MenuRepo {
-        return MenuRepo(menuDao)
+    fun provideMenuRepo(menuDao: LocalMenuDao, apiService: MenuApiService): MenuRepo {
+        return MenuRepo(menuDao, apiService)
     }
 
     @Singleton

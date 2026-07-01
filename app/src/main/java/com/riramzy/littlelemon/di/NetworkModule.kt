@@ -27,11 +27,16 @@ abstract class NetworkModule {
         fun provideHttpClient(): HttpClient {
             return HttpClient(Android) {
                 install(ContentNegotiation) {
-                    json(Json {
+                    val jsonConfig = Json {
                         prettyPrint = true
                         isLenient = true
                         ignoreUnknownKeys = true
-                    })
+                    }
+                    json(jsonConfig)
+                    register(
+                        io.ktor.http.ContentType.Text.Plain,
+                        io.ktor.serialization.kotlinx.KotlinxSerializationConverter(jsonConfig)
+                    )
                 }
             }
         }

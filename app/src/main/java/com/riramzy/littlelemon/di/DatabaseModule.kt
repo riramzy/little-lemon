@@ -28,7 +28,9 @@ object DatabaseModule {
             context,
             LocalDatabase::class.java,
             Constants.DATABASE_NAME
-        ).build()
+        )
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     @Singleton
