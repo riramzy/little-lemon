@@ -8,15 +8,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -49,7 +46,8 @@ fun LemonOrderCard(
 ) {
     Card(
         modifier = modifier
-            .height(350.dp),
+            .wrapContentHeight()
+            .fillMaxWidth(),
         shape = RoundedCornerShape(25.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isSystemInDarkTheme()) {
@@ -67,29 +65,25 @@ fun LemonOrderCard(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(10.dp),
+                .padding(15.dp)
+                .wrapContentHeight(),
             verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            //Headline and status pill
             Row(
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .padding(bottom = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
                     "Order #$orderId".uppercase(),
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.W900,
-                    modifier = Modifier.padding(start = 10.dp)
+                    fontWeight = FontWeight.Black,
                 )
+
                 Card(
-                    modifier = modifier
-                        .height(25.dp)
-                        .width(100.dp)
-                        .fillMaxHeight(),
                     shape = RoundedCornerShape(100.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = if (isSystemInDarkTheme()) {
@@ -105,39 +99,34 @@ fun LemonOrderCard(
                         }
                     )
                 ) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Confirmed".uppercase(),
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontSize = 14.sp,
-                        )
-                    }
+                    Text(
+                        text = "Confirmed".uppercase(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontSize = 14.sp,
+                        modifier = Modifier.padding(6.dp)
+                    )
                 }
             }
-            //Order items and their details
-            LazyColumn(
+
+            Column(
                 modifier = Modifier
-                    .height(150.dp)
-                    //.width(334.dp)
+                    .heightIn(min = 150.dp)
+                    .padding(bottom = 10.dp)
             ) {
-                items(ordersItem) { orderItem ->
+                ordersItem.forEach { orderItem ->
                     OrderItemDetails(
                         modifier = Modifier.padding(
                             vertical = 3.dp,
-                            horizontal = 15.dp
                         ),
                         orderItem = orderItem
                     )
                 }
             }
-            //Order payment summary
+
             Card(
-                modifier = modifier
+                modifier = Modifier
                     .fillMaxWidth()
-                    .height(90.dp),
+                    .wrapContentHeight(),
                 shape = RoundedCornerShape(18.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = if (isSystemInDarkTheme()) {
@@ -153,63 +142,58 @@ fun LemonOrderCard(
                     }
                 )
             ) {
-                LazyColumn(
+                Column(
                     modifier = Modifier
-                        .fillMaxSize()
                         .padding(15.dp),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    item {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "Payment type",
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                            Text(
-                                text = paymentType,
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                        }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Payment type",
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                        Text(
+                            text = paymentType,
+                            style = MaterialTheme.typography.titleSmall
+                        )
                     }
-                    item {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "Shipping",
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                            Text(
-                                text = "5$",
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                        }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Shipping",
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                        Text(
+                            text = "$5.00",
+                            style = MaterialTheme.typography.titleSmall
+                        )
                     }
-                    item {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "Total",
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                            Text(
-                                text = "$totalPrice$",
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                        }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Total",
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                        Text(
+                            text = "$$totalPrice",
+                            style = MaterialTheme.typography.titleSmall
+                        )
                     }
                 }
             }
@@ -222,28 +206,24 @@ fun OrderItemDetails(
     modifier: Modifier = Modifier,
     orderItem: LocalOrderItem,
 ) {
-    Card(
+    Box(
         modifier = modifier
-            .height(45.dp),
-            //.width(334.dp),
-        shape = RoundedCornerShape(25.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSystemInDarkTheme()) {
-                Color.Black
+            .height(45.dp)
+            .fillMaxWidth()
+            .background(
+                shape = RoundedCornerShape(25.dp),
+                color = if (isSystemInDarkTheme()) {
+                    Color.Black
+                } else {
+                    Color.White
+                }
+            ),
+        contentAlignment = Alignment.Center
 
-            } else {
-                Color.White
-            },
-            contentColor = if (isSystemInDarkTheme()) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.primary
-            }
-        )
     ) {
         Row(
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -258,18 +238,20 @@ fun OrderItemDetails(
                         .size(32.dp)
                         .clip(CircleShape),
                     contentScale = ContentScale.Crop,
-                    contentDescription = "Item Image"
+                    contentDescription = null
                 )
+
                 Text(
-                    "${orderItem.quantity}x ${orderItem.title}",
+                    text = "${orderItem.quantity}x ${orderItem.title}",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Black,
                     modifier = Modifier
                         .padding(start = 10.dp)
                 )
             }
+
             Text(
-                "${orderItem.quantity*orderItem.price}$" ,
+                text = "$${"%.2f".format(orderItem.quantity * orderItem.price)}",
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Black,
                 modifier = Modifier

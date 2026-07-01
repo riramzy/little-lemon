@@ -22,8 +22,15 @@ interface LocalOrdersDao {
     suspend fun insertOrderWithItems(items: List<LocalOrderItem>)
 
     @Transaction
+    suspend fun placeOrderTransaction(order: LocalOrder, items: List<LocalOrderItem>) {
+        val orderId = insertOrder(order).toInt()
+        val mappedItems = items.map { it.copy(orderId = orderId) }
+        insertOrderWithItems(mappedItems)
+    }
+
+    @Transaction
     @Query("SELECT * FROM orders WHERE id = :orderId")
-    suspend fun getOrderWithItems(orderId: Int): LocalOrderWithItems
+    suspend fun getOrderWithItems(orderId: Int): LocalOrderWithItems?
 
     @Transaction
     @Query("SELECT * FROM orders")

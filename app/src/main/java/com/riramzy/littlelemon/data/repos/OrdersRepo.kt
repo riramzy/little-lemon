@@ -23,7 +23,7 @@ class OrdersRepo(private val dao: LocalOrdersDao) {
     }
 
     // 4️⃣ Get a single order with its items
-    suspend fun getOrderWithItems(orderId: Int): LocalOrderWithItems {
+    suspend fun getOrderWithItems(orderId: Int): LocalOrderWithItems? {
         return dao.getOrderWithItems(orderId)
     }
 
@@ -35,6 +35,11 @@ class OrdersRepo(private val dao: LocalOrdersDao) {
     // 6️⃣ Insert multiple order items
     suspend fun insertOrderWithItems(items: List<LocalOrderItem>) {
         dao.insertOrderWithItems(items)
+    }
+
+    // 6.5️⃣ Place order and items atomically in a single transaction
+    suspend fun placeOrderTransaction(order: LocalOrder, items: List<LocalOrderItem>) {
+        dao.placeOrderTransaction(order, items)
     }
 
     // 7️⃣ Clear all orders
