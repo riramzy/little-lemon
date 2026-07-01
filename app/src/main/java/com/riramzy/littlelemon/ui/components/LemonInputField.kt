@@ -23,6 +23,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -55,16 +56,7 @@ fun LemonInputField(
 
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = if (isSystemInDarkTheme()) {
-                MaterialTheme.colorScheme.onTertiary
-            } else {
-                MaterialTheme.colorScheme.tertiaryContainer
-            },
-            contentColor = if (isSystemInDarkTheme()) {
-                Color.White
-            } else {
-                Color.Black
-            }
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f),
         ),
         modifier = modifier
             .fillMaxWidth()
@@ -81,18 +73,23 @@ fun LemonInputField(
                 text = requiredText,
                 style = MaterialTheme.typography.labelLarge,
                 color = when {
-                    isReadOnly -> if (isSystemInDarkTheme())
-                        Color.White.copy(alpha = 0.3f)
-                    else
-                        Color.Black.copy(alpha = 0.3f)
-                    isClicked -> if (isSystemInDarkTheme())
-                        Color.White.copy(alpha = 0.3f)
-                    else
-                        Color.Black.copy(alpha = 0.3f)
-                    else -> if (isSystemInDarkTheme())
-                        Color.White
-                    else
-                        Color.Black
+                    isReadOnly -> if (isSystemInDarkTheme()) {
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                    } else {
+                        MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.3f)
+                    }
+
+                    isClicked -> if (isSystemInDarkTheme()) {
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                    } else {
+                        MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.3f)
+                    }
+
+                    else -> if (isSystemInDarkTheme()) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    }
                 },
                 modifier = Modifier
                     .padding(start = 15.dp)
@@ -114,14 +111,14 @@ fun LemonInputField(
                 },
                 singleLine = !isMultiline,
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    color = if (isSystemInDarkTheme()) Color.White else Color.Black,
+                    color = if (isSystemInDarkTheme()) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    },
                 ),
                 cursorBrush = SolidColor(
-                    if (isSystemInDarkTheme()) {
-                        Color.White
-                    } else {
-                        Color.Black
-                    }
+                    MaterialTheme.colorScheme.primary
                 ),
                 readOnly = isReadOnly,
                 visualTransformation = visualTransformation,
@@ -138,8 +135,7 @@ fun LemonInputField(
                             )
                             .fillMaxWidth()
                             .background(
-                                if (isSystemInDarkTheme()) MaterialTheme.colorScheme.onTertiary
-                                else MaterialTheme.colorScheme.tertiaryContainer,
+                                Color.Transparent,
                                 shape = RoundedCornerShape(8.dp)
                             )
                             .padding(horizontal = 12.dp, vertical = 4.dp),
@@ -150,15 +146,17 @@ fun LemonInputField(
                                 text = "Enter",
                                 style = MaterialTheme.typography.bodyMedium.copy(
                                     color = if (isClicked) {
-                                        if (isSystemInDarkTheme())
-                                            Color.White
-                                        else
-                                            Color.Black
+                                        if (isSystemInDarkTheme()) {
+                                            MaterialTheme.colorScheme.primary
+                                        } else {
+                                            MaterialTheme.colorScheme.onPrimaryContainer
+                                        }
                                     } else {
-                                        if (isSystemInDarkTheme())
-                                            Color.White.copy(alpha = 0.5f)
-                                        else
-                                            Color.Black.copy(alpha = 0.5f)
+                                        if (isSystemInDarkTheme()) {
+                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                                        } else {
+                                            MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.5f)
+                                        }
                                     },
                                 )
                             )
@@ -181,7 +179,7 @@ fun LemonInputField(
                     Icon(
                         imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
                         contentDescription = "Hide Password",
-                        tint = if (isSystemInDarkTheme()) Color.White else Color.Black,
+                        tint = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimaryContainer,
                     )
                 }
             }
@@ -200,16 +198,7 @@ fun LemonSubInputField(
 
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = if (isSystemInDarkTheme()) {
-                MaterialTheme.colorScheme.onTertiary
-            } else {
-                MaterialTheme.colorScheme.tertiaryContainer
-            },
-            contentColor = if (isSystemInDarkTheme()) {
-                Color.White
-            } else {
-                Color.Black
-            }
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)
         ),
         modifier = modifier
             .heightIn(min = 45.dp)
@@ -230,10 +219,14 @@ fun LemonSubInputField(
                 },
                 singleLine = true,
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    color = if (isSystemInDarkTheme()) Color.White else Color.Black,
+                    color = if (isSystemInDarkTheme()) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    },
                 ),
                 cursorBrush = SolidColor(
-                    if (isSystemInDarkTheme()) Color.White else Color.Black
+                    MaterialTheme.colorScheme.primary
                 ),
                 decorationBox = { innerTextField ->
                     Box(
@@ -241,8 +234,7 @@ fun LemonSubInputField(
                             .heightIn(min = 45.dp)
                             .fillMaxWidth()
                             .background(
-                                if (isSystemInDarkTheme()) MaterialTheme.colorScheme.onTertiary
-                                else MaterialTheme.colorScheme.tertiaryContainer,
+                                Color.Transparent,
                                 shape = RoundedCornerShape(8.dp)
                             )
                             .padding(horizontal = 6.dp, vertical = 0.dp),
@@ -253,15 +245,9 @@ fun LemonSubInputField(
                                 text = requiredText,
                                 style = MaterialTheme.typography.bodyMedium.copy(
                                     color = if (isClicked) {
-                                        if (isSystemInDarkTheme())
-                                            Color.White
-                                        else
-                                            Color.Black
+                                        MaterialTheme.colorScheme.onPrimaryContainer
                                     } else {
-                                        if (isSystemInDarkTheme())
-                                            Color.White.copy(alpha = 0.5f)
-                                        else
-                                            Color.Black.copy(alpha = 0.5f)
+                                        MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.5f)
                                     },
                                 )
                             )
@@ -283,28 +269,29 @@ fun LemonSubInputField(
 @Composable
 fun LemonInputFieldPreviewLemon() {
     LittleLemonTheme {
-        Column(
-            modifier = Modifier,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-            LemonInputField(
-                requiredText = "Ramzy",
-                value = "Lemon\nGreek\nLemon",
-                onValueChange = {},
-                isMultiline = true
-            )
-            LemonInputField(
-                requiredText = "Ramzy",
-                value = "",
-                onValueChange = {},
-                isPasswordField = true
-            )
-            LemonSubInputField(
-                requiredText = "Ramzy"
-            )
+        Surface {
+            Column(
+                modifier = Modifier.padding(15.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                LemonInputField(
+                    requiredText = "Ramzy",
+                    value = "Lemon\nGreek\nLemon",
+                    onValueChange = {},
+                    isMultiline = true
+                )
+                LemonInputField(
+                    requiredText = "Ramzy",
+                    value = "",
+                    onValueChange = {},
+                    isPasswordField = true
+                )
+                LemonSubInputField(
+                    requiredText = "Ramzy"
+                )
+            }
         }
-
     }
 }
 
@@ -312,25 +299,28 @@ fun LemonInputFieldPreviewLemon() {
 @Composable
 fun LemonInputFieldDarkPreviewLemon() {
     LittleLemonTheme {
-        Column(
-            modifier = Modifier,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-            LemonInputField(
-                requiredText = "Ramzy",
-                value = "",
-                onValueChange = {}
-            )
-            LemonInputField(
-                requiredText = "Ramzy",
-                value = "",
-                onValueChange = {},
-                isPasswordField = true
-            )
-            LemonSubInputField(
-                requiredText = "Ramzy"
-            )
+        Surface {
+            Column(
+                modifier = Modifier.padding(15.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                LemonInputField(
+                    requiredText = "Ramzy",
+                    value = "Lemon\nGreek\nLemon",
+                    onValueChange = {},
+                    isMultiline = true
+                )
+                LemonInputField(
+                    requiredText = "Ramzy",
+                    value = "",
+                    onValueChange = {},
+                    isPasswordField = true
+                )
+                LemonSubInputField(
+                    requiredText = "Ramzy"
+                )
+            }
         }
     }
 }

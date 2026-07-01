@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -40,12 +41,12 @@ fun ItemCard(
                 .height(150.dp),
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.background,
-                contentColor = MaterialTheme.colorScheme.onBackground
+                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                contentColor = MaterialTheme.colorScheme.onSurface
             ),
             border = BorderStroke(
                 0.5.dp,
-                MaterialTheme.colorScheme.onBackground
+                MaterialTheme.colorScheme.onSurface
             ),
             onClick = { onItemClicked() }
         ) {
@@ -81,12 +82,12 @@ fun ItemCard(
                 .height(130.dp),
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.background,
-                contentColor = MaterialTheme.colorScheme.onBackground
+                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                contentColor = MaterialTheme.colorScheme.onSurface
             ),
             border = BorderStroke(
                 0.5.dp,
-                MaterialTheme.colorScheme.onBackground
+                MaterialTheme.colorScheme.onSurface
             ),
             onClick = { onItemClicked() }
         ) {
@@ -120,20 +121,26 @@ fun ItemCard(
 @Composable
 fun ItemCardPreview() {
     LittleLemonTheme {
-        ItemCard(
-            itemText = "Greek Salad",
-            itemImage = ""
-        )
+        Surface {
+            ItemCard(
+                itemText = "Greek Salad",
+                itemImage = "R.drawable.greek_salad",
+                modifier = Modifier.padding(10.dp)
+            )
+        }
     }
 }
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = false)
 @Composable
 fun ItemCardDarkPreview() {
     LittleLemonTheme {
-        ItemCard(
-            itemText = "Greek Salad",
-            itemImage = "R.drawable.greek_salad"
-        )
+        Surface {
+            ItemCard(
+                itemText = "Greek Salad",
+                itemImage = "R.drawable.greek_salad",
+                modifier = Modifier.padding(10.dp)
+            )
+        }
     }
 }
