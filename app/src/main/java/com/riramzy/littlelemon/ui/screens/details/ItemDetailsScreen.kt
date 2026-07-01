@@ -2,8 +2,10 @@ package com.riramzy.littlelemon.ui.screens.details
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
@@ -27,6 +30,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -34,16 +38,15 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -53,11 +56,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.riramzy.littlelemon.R
 import com.riramzy.littlelemon.data.local.cart.LocalCartItem
 import com.riramzy.littlelemon.data.local.menu.LocalMenuItem
-import com.riramzy.littlelemon.data.model.toCartItems
 import com.riramzy.littlelemon.ui.components.LemonNavigationBar
 import com.riramzy.littlelemon.ui.components.LemonSnackbarHost
 import com.riramzy.littlelemon.ui.components.TopAppBar
@@ -75,8 +78,8 @@ fun ItemDetailsScreen(
     detailsVm: DetailsVm = hiltViewModel(),
     cartVm: CartVm = hiltViewModel()
 ) {
-    val item by detailsVm.menuItem.collectAsState()
-    val cartItems by cartVm.cartItems.collectAsState()
+    val item by detailsVm.menuItem.collectAsStateWithLifecycle()
+    val cartItems by cartVm.cartItems.collectAsStateWithLifecycle()
     val existingCartItem = cartItems.firstOrNull { it.id == itemId }
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -93,7 +96,6 @@ fun ItemDetailsScreen(
         snackbarHostState = snackbarHostState,
         scope = scope,
         addToCart = cartVm::addToCart,
-        updateQuantity = cartVm::updateQuantity,
         removeFromCart = cartVm::removeFromCart,
     )
 }
@@ -106,13 +108,15 @@ fun ItemDetailsScreenContent(
     snackbarHostState: SnackbarHostState,
     scope: CoroutineScope,
     addToCart: (LocalCartItem) -> Unit,
-    updateQuantity: (Int, Int) -> Unit,
     removeFromCart: (Int) -> Unit
 ) {
-    val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsState(null)
+    val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsStateWithLifecycle(
+        null
+    )
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
 
     var itemQty by remember { mutableIntStateOf(1) }
+    val selectedAddOns = remember { mutableStateListOf<Pair<String, Double>>() }
 
     Scaffold(
         topBar = {
@@ -131,11 +135,23 @@ fun ItemDetailsScreenContent(
                 onActionText = "Add",
                 onActionClicked = {
                     item?.let { product ->
-                        if (existingCartItem == null) {
-                            addToCart(product.toCartItems().copy(quantity = itemQty))
-                        } else {
-                            updateQuantity(product.id, existingCartItem.quantity + itemQty)
-                        }
+                        val addOnsPrice = selectedAddOns.sumOf { it.second }
+                        val finalPrice = product.price + addOnsPrice
+                        val addOnsString =
+                            selectedAddOns.joinToString(separator = ", ") { it.first }
+                        val finalQty =
+                            if (existingCartItem == null) itemQty else existingCartItem.quantity + itemQty
+
+                        addToCart(
+                            LocalCartItem(
+                                id = product.id,
+                                title = product.title,
+                                price = finalPrice,
+                                image = product.image,
+                                quantity = finalQty,
+                                selectedAddOns = addOnsString
+                            )
+                        )
                         scope.launch {
                             val result = snackbarHostState.showSnackbar(
                                 message = "${product.title} added ($itemQty)",
@@ -147,10 +163,7 @@ fun ItemDetailsScreenContent(
                                 if (existingCartItem == null) {
                                     removeFromCart(product.id)
                                 } else {
-                                    updateQuantity(
-                                        product.id,
-                                        existingCartItem.quantity - itemQty
-                                    )
+                                    addToCart(existingCartItem)
                                 }
                             }
                         }
@@ -178,11 +191,7 @@ fun ItemDetailsScreenContent(
             )
         },
         floatingActionButtonPosition = FabPosition.Center,
-        containerColor = if (isSystemInDarkTheme()) {
-            MaterialTheme.colorScheme.background
-        } else {
-            Color.White
-        },
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         modifier = Modifier
             .statusBarsPadding()
     ) { innerPadding ->
@@ -205,6 +214,7 @@ fun ItemDetailsScreenContent(
                     item = item
                 )
             }
+
             item {
                 DeliveryDetails(
                     modifier = Modifier
@@ -214,14 +224,30 @@ fun ItemDetailsScreenContent(
                         )
                 )
             }
+
             item {
                 AddOnsSelection(
                     modifier = Modifier
                         .padding(
                             horizontal = 15.dp,
-                        )
+                        ),
+                    addOns = listOf(
+                        Pair("Feta", 1.00),
+                        Pair("Parmesan", 1.00),
+                        Pair("Dressing", 1.00)
+                    ),
+                    selectedAddOns = selectedAddOns,
+                    onToggleAddOn = { addOn ->
+                        val index = selectedAddOns.indexOfFirst { it.first == addOn.first }
+                        if (index != -1) {
+                            selectedAddOns.removeAt(index)
+                        } else {
+                            selectedAddOns.add(addOn)
+                        }
+                    }
                 )
             }
+
             item {
                 ItemNumberPicker(
                     quantity = itemQty,
@@ -243,16 +269,7 @@ fun ItemDetails(
             .fillMaxWidth()
             .wrapContentHeight(),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSystemInDarkTheme()) {
-                MaterialTheme.colorScheme.onPrimary
-            } else {
-                MaterialTheme.colorScheme.primaryContainer
-            },
-            contentColor = if (isSystemInDarkTheme()) {
-                MaterialTheme.colorScheme.onSecondaryContainer
-            } else {
-                MaterialTheme.colorScheme.onPrimaryContainer
-            }
+            containerColor = MaterialTheme.colorScheme.primary,
         ),
         shape = RoundedCornerShape(25.dp)
     ) {
@@ -268,6 +285,7 @@ fun ItemDetails(
                 ),
             contentScale = ContentScale.Crop,
         )
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -282,27 +300,20 @@ fun ItemDetails(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = item?.title ?: "Greek Salad",
+                text = item?.title ?: "",
                 style = MaterialTheme.typography.titleLarge,
                 fontSize = 25.sp,
-                color = if (isSystemInDarkTheme()) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                }
+                color = MaterialTheme.colorScheme.onPrimary
             )
 
             Text(
-                text = item?.price.toString(),
+                text = item?.let { "$${String.format("%.2f", it.price)}" } ?: "",
                 style = MaterialTheme.typography.titleLarge,
                 fontSize = 25.sp,
-                color = if (isSystemInDarkTheme()) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                }
+                color = MaterialTheme.colorScheme.onPrimary
             )
         }
+
         Text(
             text = item?.description ?: "The famous greek salad of crispy lettuce, peppers, olives and our",
             style = MaterialTheme.typography.labelSmall,
@@ -314,11 +325,7 @@ fun ItemDetails(
                 ),
             maxLines = 3,
             overflow = TextOverflow.Ellipsis,
-            color = if (isSystemInDarkTheme()) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.onPrimaryContainer
-            }
+            color = MaterialTheme.colorScheme.onPrimary
         )
     }
 }
@@ -337,20 +344,36 @@ fun DeliveryDetails(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
-            Icon(
-                painter = painterResource(id = R.drawable.delivery_icon),
-                contentDescription = "Delivery",
-                modifier = Modifier.size(50.dp),
-            )
+            Box(
+                modifier = Modifier
+                    .background(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.delivery_icon),
+                    contentDescription = "Delivery",
+                    modifier = Modifier
+                        .padding(6.dp)
+                        .size(35.dp),
+                    tint = MaterialTheme.colorScheme.surfaceContainer
+                )
+            }
+
             Text(
                 text = "Delivery time:",
                 style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(start = 10.dp)
             )
+
             Text(
                 text = "30 minutes",
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(start = 10.dp)
             )
         }
@@ -359,7 +382,10 @@ fun DeliveryDetails(
 
 @Composable
 fun AddOnsSelection(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    addOns: List<Pair<String, Double>> = emptyList(),
+    selectedAddOns: List<Pair<String, Double>> = emptyList(),
+    onToggleAddOn: (Pair<String, Double>) -> Unit = {}
 ) {
     Column(
         modifier = modifier
@@ -369,83 +395,44 @@ fun AddOnsSelection(
         Text(
             text = "Add Ons",
             style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurface,
         )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Feta",
-                style = MaterialTheme.typography.labelSmall,
-                modifier = Modifier.padding(start = 10.dp)
-            )
+
+        addOns.forEach { addOn ->
+            val isSelected = selectedAddOns.any { it.first == addOn.first }
+
             Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onToggleAddOn(addOn) }
+                    .padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "$1.00",
+                    text = addOn.first,
                     style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(start = 10.dp)
                 )
-                RadioButton(
-                    selected = false,
-                    onClick = { /*TODO*/ }
-                )
-            }
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Parmesan",
-                style = MaterialTheme.typography.labelSmall,
-                modifier = Modifier.padding(start = 10.dp)
-            )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = "$1.00",
-                    style = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier.padding(start = 10.dp)
-                )
-                RadioButton(
-                    selected = false,
-                    onClick = { /*TODO*/ }
-                )
-            }
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Dressing",
-                style = MaterialTheme.typography.labelSmall,
-                modifier = Modifier.padding(start = 10.dp)
-            )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = "$1.00",
-                    style = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier.padding(start = 10.dp)
-                )
-                RadioButton(
-                    selected = false,
-                    onClick = { /*TODO*/ }
-                )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "$${"%.2f".format(addOn.second)}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(start = 10.dp)
+                    )
+
+                    RadioButton(
+                        selected = isSelected,
+                        onClick = { onToggleAddOn(addOn) },
+                        colors = RadioButtonDefaults.colors(MaterialTheme.colorScheme.onSurface),
+                    )
+                }
             }
         }
     }
@@ -474,17 +461,14 @@ fun ItemNumberPicker(
                 imageVector = Icons.Default.AddCircle,
                 contentDescription = "Add",
                 modifier = Modifier.size(25.dp),
-                tint = if (isSystemInDarkTheme()) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.primaryContainer
-                }
+                tint = MaterialTheme.colorScheme.primary,
             )
         }
 
         Text(
             text = quantity.toString(),
             style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface,
             fontSize = 25.sp
         )
 
@@ -497,11 +481,7 @@ fun ItemNumberPicker(
                 imageVector = Icons.Outlined.RemoveCircle,
                 contentDescription = "Minus",
                 modifier = Modifier.size(25.dp),
-                tint = if (isSystemInDarkTheme()) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.primaryContainer
-                }
+                tint = MaterialTheme.colorScheme.primary,
             )
         }
     }
@@ -531,9 +511,6 @@ fun ItemDetailsScreenPreview() {
             snackbarHostState = remember { SnackbarHostState() },
             scope = rememberCoroutineScope(),
             addToCart = { },
-            updateQuantity = {
-                _, _ ->
-            },
             removeFromCart = { }
         )
     }
@@ -563,9 +540,6 @@ fun ItemDetailsScreenDarkPreview() {
             snackbarHostState = remember { SnackbarHostState() },
             scope = rememberCoroutineScope(),
             addToCart = { },
-            updateQuantity = {
-                    _, _ ->
-            },
             removeFromCart = { }
         )
     }
