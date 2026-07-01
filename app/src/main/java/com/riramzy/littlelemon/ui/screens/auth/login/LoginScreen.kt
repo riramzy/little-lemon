@@ -30,9 +30,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -103,11 +103,7 @@ fun LoginScreenContent(
             .imePadding()
             .fillMaxSize()
             .background(
-                if (isSystemInDarkTheme()) {
-                    MaterialTheme.colorScheme.onSecondary
-                } else {
-                    MaterialTheme.colorScheme.secondaryContainer
-                }
+                MaterialTheme.colorScheme.primary
             ),
     ) {
         Column(
@@ -121,7 +117,13 @@ fun LoginScreenContent(
                 modifier = Modifier
                     .width(200.dp)
                     .height(60.dp),
-                colors = CardDefaults.cardColors(Color.White),
+                colors = CardDefaults.cardColors(
+                    if (isSystemInDarkTheme()) {
+                        MaterialTheme.colorScheme.onPrimaryContainer.copy(0.3f)
+                    } else {
+                        MaterialTheme.colorScheme.surface.copy(0.5f)
+                    }
+                ),
                 shape = RoundedCornerShape(100.dp)
             ) {
                 Image(
@@ -135,29 +137,26 @@ fun LoginScreenContent(
             Text(
                 text = "Little Lemon",
                 style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(top = 20.dp),
-                color = Color.White
+                color = MaterialTheme.colorScheme.onPrimary
             )
 
             Text(
-                text = "Welcome back!",
+                text = "Register now!",
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.White.copy(alpha = 0.8f)
+                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
             )
         }
+
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(3f),
             colors = CardDefaults.cardColors(
-                if (isSystemInDarkTheme()) {
-                    Color.Black
-                } else {
-                    Color.White
-                }
+                MaterialTheme.colorScheme.surfaceContainer
             ),
             shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
-
         ) {
             Column(
                 modifier = Modifier
@@ -201,11 +200,7 @@ fun LoginScreenContent(
                 Text(
                     text = "Forgot password?",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = if (isSystemInDarkTheme()) {
-                        Color.White.copy(alpha = 0.4f)
-                    } else {
-                        Color.Black.copy(alpha = 0.4f)
-                    },
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     modifier = Modifier
                         .padding(top = 14.dp)
                         .fillMaxWidth(),
@@ -218,6 +213,8 @@ fun LoginScreenContent(
                         .padding(top = 24.dp)
                         .fillMaxWidth(),
                     enabled = !isLoading,
+                    color = MaterialTheme.colorScheme.primary,
+                    textColor = MaterialTheme.colorScheme.onPrimary,
                     onClick = {
                         if (!isLoading) {
                             if (email.isBlank() || password.isBlank()) {
@@ -232,11 +229,7 @@ fun LoginScreenContent(
                 Text(
                     text = "Don't have an account? Sign Up",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = if (isSystemInDarkTheme()) {
-                        Color.White.copy(alpha = 0.4f)
-                    } else {
-                        Color.Black.copy(alpha = 0.4f)
-                    },
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     modifier = Modifier
                         .padding(top = 24.dp)
                         .fillMaxWidth()
