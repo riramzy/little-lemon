@@ -23,5 +23,6 @@ data class LocalOrderItem(
     @ColumnInfo(name = "title") val title: String,
     @ColumnInfo(name = "price") val price: Double,
     @ColumnInfo(name = "image") val image: String,
-    @ColumnInfo(name = "quantity") val quantity: Int
+    @ColumnInfo(name = "quantity") val quantity: Int,
+    @ColumnInfo(name = "selected_addons") val selectedAddOns: String = ""
 )

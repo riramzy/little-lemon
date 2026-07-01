@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -158,6 +157,7 @@ fun LemonOrderCard(
                             text = "Payment type",
                             style = MaterialTheme.typography.titleSmall
                         )
+
                         Text(
                             text = paymentType,
                             style = MaterialTheme.typography.titleSmall
@@ -174,6 +174,7 @@ fun LemonOrderCard(
                             text = "Shipping",
                             style = MaterialTheme.typography.titleSmall
                         )
+
                         Text(
                             text = "$5.00",
                             style = MaterialTheme.typography.titleSmall
@@ -190,6 +191,7 @@ fun LemonOrderCard(
                             text = "Total",
                             style = MaterialTheme.typography.titleSmall
                         )
+
                         Text(
                             text = "$$totalPrice",
                             style = MaterialTheme.typography.titleSmall
@@ -208,7 +210,7 @@ fun OrderItemDetails(
 ) {
     Box(
         modifier = modifier
-            .height(45.dp)
+            .wrapContentHeight()
             .fillMaxWidth()
             .background(
                 shape = RoundedCornerShape(25.dp),
@@ -223,7 +225,8 @@ fun OrderItemDetails(
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -241,13 +244,26 @@ fun OrderItemDetails(
                     contentDescription = null
                 )
 
-                Text(
-                    text = "${orderItem.quantity}x ${orderItem.title}",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Black,
+                Column(
                     modifier = Modifier
-                        .padding(start = 10.dp)
-                )
+                        .padding(start = 10.dp),
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "${orderItem.quantity}x ${orderItem.title}",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Black
+                    )
+
+                    if (orderItem.selectedAddOns.isNotEmpty()) {
+                        Text(
+                            text = orderItem.selectedAddOns,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        )
+                    }
+                }
             }
 
             Text(

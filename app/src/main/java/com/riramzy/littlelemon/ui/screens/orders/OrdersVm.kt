@@ -48,7 +48,8 @@ class OrdersVm @Inject constructor(
                         title = cartItem.title,
                         price = cartItem.price,
                         image = cartItem.image,
-                        quantity = cartItem.quantity
+                        quantity = cartItem.quantity,
+                        selectedAddOns = cartItem.selectedAddOns
                     )
                 }
                 ordersRepo.placeOrderTransaction(order, orderItems)
